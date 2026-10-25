@@ -26,10 +26,16 @@ descriptors in three dimensions:
 |--------|------|-----------------|
 | `L3(A_u)` | Volume | Total inclusion volume |
 | `L2(A_u)` | Half surface area | Specific surface (inclusion-matrix interface area / 2) |
+| `L1(A_u)` | Integrated mean curvature / π | Curvature of the inclusion boundary (not measured numerically here) |
 | `L0(A_u)` | Euler characteristic | Topology: #components - #tunnels + #cavities |
 
 `L0` is the most information-rich: positive values indicate a disconnected (island) morphology;
 negative values indicate a tunnel- or percolation-dominated topology.
+
+`L1` is theoretically predicted by the GKF (see formula below) but not currently estimated
+numerically in this project. Computing `L1` from voxel data requires either a careful Crofton
+estimator on the cubical complex or a smooth surface integral of mean curvature, both of which
+carry resolution-dependent bias that has not been characterised here.
 
 ## The Gaussian Kinematic Formula
 
@@ -40,7 +46,16 @@ the Adler-Taylor formula gives
 E[ L_i(A_u) ] = sum_{j=0}^{3-i} C(i,j) * rho^j * L_{i+j}(M) * M_j^gamma(D_u)
 ```
 
-For `i=0` (Euler characteristic) this expands to
+The four LKC expectations on a 3D cube of side `a` are:
+
+```
+E[L3(A_u)] = a^3 * M0
+E[L2(A_u)] = 2*rho*a^3 * M1 + 3*a^2 * M0
+E[L1(A_u)] = rho^2*a^3 * M2 + 3*rho*a^2 * M1 + 3*a * M0
+E[L0(A_u)] = rho^3*a^3 * M3 + 3*rho^2*a^2 * M2 + 3*rho*a * M1 + M0
+```
+
+The `L0` formula in full:
 
 ```math
 E[ L0(A_u) ] = rho^3 * a^3 * M3 + 3 * rho^2 * a^2 * M2 + 3 * rho * a * M1 + M0
@@ -75,8 +90,15 @@ M3 = (u^2 - 1) * phi(u)                             [Gaussian curvature density]
 The upper zero-crossing of `E[L0(A_u)]` as a function of `u` corresponds to a transition from
 positive Euler characteristic (disconnected inclusions dominate) to negative (tunnels and
 percolation dominate). The volume fraction at this crossing, `phi_c+`, is the maximum
-disconnected inclusion volume fraction consistent with the Adler expectation. For a scalar
-Gaussian field: `phi_c+ ≈ 0.16` (threshold `kappa_c+ ≈ 0.60`).
+disconnected inclusion volume fraction consistent with the Adler expectation.
+
+Two distinct values arise:
+
+- **Infinite-domain (bulk) limit** — only the volume term `rho^3*a^3*M3` survives as
+  `a/lc → ∞`. For Gaussian fields `M3 = 0` at `u = 1`, giving `phi_c+ → 16%`.
+- **Finite-domain result** — boundary terms (`3a^2*M2`, `3a*M1`, `M0`) shift the
+  zero-crossing. For `n=100`, `lc=8.0` the finite-domain result is `phi_c+ ≈ 22%`
+  (`kappa_c+ ≈ 0.78`). The `find_percolation_threshold` function returns this value.
 
 ## Using the library
 

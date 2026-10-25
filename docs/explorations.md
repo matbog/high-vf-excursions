@@ -12,10 +12,14 @@ closed-form predictions for `E[L0]`, `E[L2]`, `E[L3]`.
 - Measured `L0`, `L2`, `L3` track the Adler predictions across the full threshold range
   (`kappa` in [-2.5, 2.5]) to within single-realisation noise. The MC mean converges to the
   theoretical curve with standard deviation consistent with finite-domain fluctuations.
-- The upper zero-crossing of `E[L0]` occurs at `kappa_c+ ≈ 0.60`, corresponding to
-  `phi_c+ ≈ 0.16`. Above this volume fraction the excursion set is statistically percolating.
+- The upper zero-crossing of `E[L0]` occurs at `kappa_c+ ≈ 0.78`, corresponding to
+  `phi_c+ ≈ 0.22` for this bounded domain (n=100, lc=8.0). Above this volume fraction the
+  excursion set is statistically percolating.
+- The infinite-domain (bulk density) limit gives `phi_c+ → 16%` (where `M3 = 0` at `u = 1`),
+  but boundary contributions to `E[L0]` shift the finite-domain zero-crossing upward; the 16%
+  figure is the thermodynamic limit as `a/lc → ∞`.
 - This is the **hard ceiling** for a scalar Gaussian field: no amount of parameter tuning
-  moves `phi_c+` above 16% within this model class.
+  moves `phi_c+` significantly above 22% (finite domain) within this model class.
 
 ![Threshold sweep — measured vs Adler theory](../experiments/01_gaussian_baseline/results/threshold_sweep.png)
 *Single realisation: measured L0, L2, L3, phi vs Adler predictions across threshold range.*
@@ -39,9 +43,12 @@ increasing the volume fraction retained above any fixed threshold.
 **Findings:**
 - `E[L0]` matches the Worsley `M_j` formula for all tested `v`. The MC mean lies on the
   theoretical curve; residuals are consistent with sampling noise.
-- `phi_c+` increases as `v` decreases: Gaussian (~16%), `v=30` (~18%), `v=10` (~22%),
-  `v=5` (~28%), `v=3` (~35–38%). The gain is substantial but bounded: the heaviest practical
-  tail (`v=3`) falls well short of the 50% self-dual percolation limit.
+- `phi_c+` increases as `v` decreases (finite-domain Adler criterion on n=80, lc=8.0):
+  Gaussian (~22%), `v=30` (~23%), `v=10` (~24.5%), `v=5` (~26.5%), `v=3` (~29%).
+  The infinite-domain bulk limits (where `M3^{t_v} = 0`) are lower:
+  Gaussian 16%, `v=3` ≈ 25%, but the finite-domain boundary terms raise the crossing.
+  The gain from heavier tails is real but modest; `v=3` reaches ~29% vs the 50%
+  self-dual percolation limit.
 - The percolation diagram (Figure `percolation_diagram.png`) shows `phi_c+` as a continuous
   function of `v`, recovering the Gaussian limit as `v -> inf`.
 
@@ -68,16 +75,28 @@ structure but was not independently validated here.
 The excluded phase is a thin matrix film along winner-tie surfaces; its thickness is controlled
 by `delta`.
 
-**Parameters:** `n=64`, `lc=5.0`, `q` in {2, 4, 8, 16}, `phi_target` in {0.30, 0.50, 0.70, 0.80, 0.90}, 5 realisations per configuration, `seed=1729`.
+**Parameters:** `n=64`, `lc=5.0` (voxel units, `dx=1`), `q` in {2, 4, 8, 16},
+`phi_target` in {0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.85, 0.90}, 5 realisations per
+configuration, `seed=1729`.
 
-**Findings:**
-- `q=4`: spanning (face-to-face percolation) occurs at `phi ≈ 50%`. Four winner cells are not
-  enough to prevent a connected path across the domain.
-- `q=8`: spanning begins at `phi ≈ 70–80%`. The transition is sharp.
-- `q=16`: no spanning through `phi=90%`. At 90% VF, the largest same-winner component
-  occupies on average ~1.4% of the retained phase — the morphology is highly fragmented.
-- `q=32` (pilot, 3 realisations at `n=96`): no spanning through 85%, largest component ~0.6%.
-- The Adler Euler prediction (using the polyhedral GMF formulae from `theory/gaussian_minkowski_functionals.md`) is consistent with measured Euler characteristic at all validated parameter values.
+**Spanning metric:** "Spanning" means a single winner-type cluster (all voxels of type `i`
+in the excursion set that are face-connected) forms a path from one domain face to the
+opposite. This is the relevant metric for the disconnected-inclusion claim: the inclusion
+phase is morphologically disconnected if no individual winner type spans.
+
+**Findings (5 realisations; per-winner spanning frequency):**
+- `q=4`: 100% spanning at `phi=0.50`. Four winner types are not enough to prevent a
+  connected path; some spanning already appears at `phi=0.40` (2/5 realisations).
+- `q=8`: transition at `phi ≈ 0.70–0.80` (4/5 at 0.70, 5/5 at 0.80). Below `phi=0.60`
+  spanning is rare (≤1/5).
+- `q=16`: no spanning through `phi=0.80` (0/5). Rare spanning at `phi=0.85–0.90` (1/5),
+  consistent with a percolation threshold just above 80% for this domain size.
+- **Per-winner Euler vs theory:** the measured per-winner Euler sum agrees with the GMF
+  prediction at low `phi` (`q=8` and `q=16` agree to ~5% at `phi ≤ 0.40`). At higher `phi`,
+  the measured Euler turns sharply negative while the theory predicts continued positive values.
+  This divergence reflects sub-voxel matrix films at high retention: the thin film between
+  different winner types is not fully resolved at `dx=1`, creating spurious inter-winner tunnels
+  in the voxel complex that the GMF formula does not account for.
 
 **What this tells us:** Increasing `q` is a systematic lever for raising the disconnected VF
 ceiling, with no fundamental barrier identified below 90%. The model remains within the GKF

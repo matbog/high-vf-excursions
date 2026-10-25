@@ -74,24 +74,28 @@ def gaussian_m3(u: Array, sigma: float = 1.0) -> Array:
 def expected_lkcs_gaussian(
     grid: GridSpec, lc: float, kappas: Array, sigma: float = 1.0
 ) -> dict[str, Array]:
-    """Expected L0, L2, L3 and phi for a Gaussian RF on a 3D cube.
+    """Expected L0, L1, L2, L3 and phi for a Gaussian RF on a 3D cube.
 
-    Returns dict with keys 'L0', 'L2', 'L3', 'phi'.
-    L1 is not returned (formula in student_t_derivation.md eq. 2b but not
-    validated experimentally in this project).
+    Convention (Adler-Taylor / Roubin System 2.17):
+      L0 = Euler characteristic
+      L1 = integrated mean curvature / pi  (theoretically exact; not measured numerically)
+      L2 = half surface area
+      L3 = volume
+
+    Returns dict with keys 'L0', 'L1', 'L2', 'L3', 'phi'.
     """
     kappas = np.asarray(kappas, dtype=float)
     a = grid.length
     rho = _rho(lc, sigma)
-    lam2 = lambda2(lc, sigma)
     M0 = gaussian_m0(kappas, sigma)
     M1 = gaussian_m1(kappas, sigma)
     M2 = gaussian_m2(kappas, sigma)
     M3 = gaussian_m3(kappas, sigma)
     L0 = rho ** 3 * a ** 3 * M3 + 3.0 * rho ** 2 * a ** 2 * M2 + 3.0 * rho * a * M1 + M0
-    L2 = np.sqrt(lam2 / np.pi) * a ** 3 * M1 + 3.0 * a ** 2 * M0
+    L1 = rho ** 2 * a ** 3 * M2 + 3.0 * rho * a ** 2 * M1 + 3.0 * a * M0
+    L2 = 2.0 * rho * a ** 3 * M1 + 3.0 * a ** 2 * M0
     L3 = a ** 3 * M0
-    return {"L0": L0, "L2": L2, "L3": L3, "phi": M0}
+    return {"L0": L0, "L1": L1, "L2": L2, "L3": L3, "phi": M0}
 
 
 # =============================================================================

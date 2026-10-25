@@ -51,12 +51,14 @@ def run_single_sweep() -> None:
 
     thresholds = np.linspace(-2.5, 2.5, 25)
     rows = []
-    m_L0, m_L2, m_L3, m_phi = [], [], [], []
+    m_L0, m_L1, m_L2, m_L3, m_phi = [], [], [], [], []
 
+    print("  computing threshold sweep (L1 via marching-cubes + mean curvature)...")
     for kappa in thresholds:
         phase = field >= kappa
-        m = measures.measure_all(phase, grid)
+        m = measures.measure_all(phase, grid, compute_l1=True)
         m_L0.append(m["euler"])
+        m_L1.append(m["l1"])
         m_L2.append(m["half_surface"])
         m_L3.append(m["volume"])
         m_phi.append(m["vf"])
@@ -65,20 +67,25 @@ def run_single_sweep() -> None:
 
     with (RESULTS / "threshold_sweep.csv").open("w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["kappa", "measured_L0", "measured_L2", "measured_L3", "measured_phi",
-                    "theory_L0", "theory_L2", "theory_L3", "theory_phi"])
+        w.writerow(["kappa", "measured_L0", "measured_L1", "measured_L2", "measured_L3", "measured_phi",
+                    "theory_L0", "theory_L1", "theory_L2", "theory_L3", "theory_phi"])
         for i, kappa in enumerate(thresholds):
-            w.writerow([kappa, m_L0[i], m_L2[i], m_L3[i], m_phi[i],
-                        theory["L0"][i], theory["L2"][i], theory["L3"][i], theory["phi"][i]])
+            w.writerow([kappa, m_L0[i], m_L1[i], m_L2[i], m_L3[i], m_phi[i],
+                        theory["L0"][i], theory["L1"][i], theory["L2"][i], theory["L3"][i], theory["phi"][i]])
 
-    fig, axes = plt.subplots(2, 2, figsize=(12, 9), constrained_layout=True)
+    fig, axes = plt.subplots(2, 3, figsize=(16, 9), constrained_layout=True)
     panels = [
         (axes[0, 0], "Volume fraction", m_phi, theory["phi"]),
         (axes[0, 1], "L3 volume", m_L3, theory["L3"]),
-        (axes[1, 0], "L2 = half surface area", m_L2, theory["L2"]),
-        (axes[1, 1], "L0 = Euler characteristic", m_L0, theory["L0"]),
+        (axes[0, 2], "L0 = Euler characteristic", m_L0, theory["L0"]),
+        (axes[1, 0], "L1 = integrated mean curvature / π\n(mesh estimate, O(dx) bias)", m_L1, theory["L1"]),
+        (axes[1, 1], "L2 = half surface area", m_L2, theory["L2"]),
+        (axes[1, 2], None, None, None),   # blank panel
     ]
     for ax, title, measured, expected in panels:
+        if title is None:
+            ax.axis("off")
+            continue
         ax.plot(thresholds, measured, "o", ms=4, label="measured")
         ax.plot(thresholds, expected, "-", lw=2, label="Adler theory")
         ax.set_xlabel("threshold κ")

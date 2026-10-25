@@ -18,7 +18,7 @@ GKF. The central question at each step is: how much of that analytical control s
 | # | Model | Max disconnected VF | Adler link |
 |---|-------|---------------------|------------|
 | 01 | Gaussian RF (scalar) | ~16% | Full — exact closed-form M_j, Monte Carlo validated |
-| 02 | Student-t_v fields (v >= 3) | ~35–45% (v=3) | Full — Worsley M_j formulae, Monte Carlo validated |
+| 02 | Student-t_v fields (v >= 3) | ~29% (v=3) | Full — Worsley M_j formulae, Monte Carlo validated |
 | 03 | Margin tessellation (q competitors) | 85–90%+ | Partial — M_j derived and numerically validated; formal stratified-tube proof pending |
 | 04 | Coalescing Gaussian-space lobes | 93%+ | Partial — M_j before ball contact; inclusion-exclusion terms after contact unresolved |
 

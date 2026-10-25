@@ -34,13 +34,14 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).parents[2]))
 from src import adler, excursions, fields, measures
 from src.fields import GridSpec
+from src.measures import measure_percolation_per_winner
 
 RESULTS = Path(__file__).parent / "results"
 RESULTS.mkdir(exist_ok=True)
 
 SEED = 1729
 N = 64
-LENGTH = 100.0
+LENGTH = float(N)   # dx=1 so lc is in voxel units, matching the original archive
 LC = 5.0
 Q_VALUES = [2, 4, 8, 16]
 TARGET_PHIS = [0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.85, 0.90]
@@ -81,6 +82,16 @@ def run_sweep() -> list[Row]:
                 phase, winners = excursions.margin_excursion(fs, delta)
                 m = measures.measure_all(phase, grid)
                 theory_euler = adler.margin_expected_euler(grid, LC, q, delta)
+                # Per-winner Euler sum: GKF predicts the sum of per-type Euler values.
+                # Different winner types are disjoint in value space (for delta > 0),
+                # so the theory Euler is additive. Using total-phase Euler would include
+                # inter-winner connections that arise only from finite voxel resolution.
+                euler_per_winner = sum(
+                    int(measures.measure_euler(phase & (winners == label)))
+                    for label in range(q)
+                )
+                # Per-winner spanning: does any single winner type form a spanning cluster?
+                spans_winner = measure_percolation_per_winner(phase, winners, q)
                 rows.append(Row(
                     realization=realization + 1,
                     q=q,
@@ -88,10 +99,10 @@ def run_sweep() -> list[Row]:
                     delta=delta,
                     theory_phi=theory_phi,
                     measured_phi=m["vf"],
-                    euler=int(m["euler"]),
+                    euler=euler_per_winner,
                     n_components=0,   # heavy: skip full component count here
                     largest_fraction_phase=0.0,
-                    spans_any=m["percolates_any"],
+                    spans_any=spans_winner,
                     theory_euler=theory_euler,
                 ))
                 print(f"  r={realization+1} q={q:2d} phi={phi:.2f} "
@@ -132,7 +143,7 @@ def save_and_plot(rows: list[Row]) -> None:
 
     axes[0].set_xlabel("volume fraction φ")
     axes[0].set_ylabel("spanning frequency")
-    axes[0].set_title("Percolation vs volume fraction")
+    axes[0].set_title("Per-winner spanning frequency vs φ")
     axes[0].legend(fontsize=8)
     axes[0].grid(alpha=0.3)
     axes[1].set_xlabel("volume fraction φ")
