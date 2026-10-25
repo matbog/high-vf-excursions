@@ -1,0 +1,13 @@
+name: rf_explo
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - numpy>=2.0
+  - scipy>=1.13
+  - matplotlib>=3.9
+  - scikit-image>=0.24
+  - pip
+  - pip:
+      - pyvista>=0.44
+      - vtk>=9.3
