@@ -1,92 +1,79 @@
-# Random Field Morphology: Exploring the Gaussian Kinematic Formula at High Volume Fractions
+# high-vf-excursions
 
-The Adler-Taylor Gaussian kinematic formula (GKF) gives closed-form expectations for
-the Lipschitz-Killing curvatures (LKCs) of excursion sets of smooth Gaussian-related
-random fields. For materials modelling, this means a direct analytical link between
-field parameters (correlation length, threshold) and morphological descriptors (volume
-fraction, surface area, Euler characteristic). The Roubin-Colliat framework exploits
-this link to calibrate microstructure models to experimental data.
+Excursion sets of Gaussian-related random fields as microstructure models, with analytical
+morphological descriptors through the Gaussian Kinematic Formula (GKF).
 
-This project investigates how far the disconnected inclusion volume fraction can be
-pushed while keeping the GKF tractable. A scalar Gaussian field tops out at ~16%
-disconnected volume fraction in 3D. We explore a progression of models — Student-t
-fields, winner-competition margin tessellations, and Gaussian-space ball unions —
-each achieving higher volume fractions at the cost of increasing analytic complexity.
+A scalar Gaussian random field in 3D tops out at roughly 16% disconnected inclusion volume
+fraction — the threshold at which the Euler characteristic of the excursion set crosses zero.
+This repository investigates a progression of model extensions (Student-t fields, margin
+tessellations, coalescing Gaussian-space lobes) that push the disconnected volume fraction
+ceiling to 90%+, and tracks what happens to the analytical Adler-Taylor link at each step.
+Each model is parameterised by (correlation length, threshold, model-specific parameters) and
+produces a binary microstructure whose expected morphological descriptors — Euler characteristic,
+surface area, volume fraction — are predicted by closed or semi-closed formulae derived from the
+GKF. The central question at each step is: how much of that analytical control survives?
 
 ## Experiment progression
 
 | # | Model | Max disconnected VF | Adler link |
-|---|---|---|---|
-| 01 | Gaussian RF (scalar) | ~16% | **Full** — exact closed-form M_j, MC validated |
-| 02 | Student-t_ν fields (ν ≥ 3) | ~35–45% (ν=3) | **Full** — Worsley M_j formulas, MC validated |
-| 03 | Margin tessellation (q competitors) | 85–90%+ | **Partial** — M_j formulas derived & numerically validated, formal stratified-tube proof pending |
-| 04 | Coalescing Gaussian-space lobes | 93%+ | **Partial** — M_j before ball contact; inclusion-exclusion terms after contact unresolved |
+|---|-------|---------------------|------------|
+| 01 | Gaussian RF (scalar) | ~16% | Full — exact closed-form M_j, Monte Carlo validated |
+| 02 | Student-t_v fields (v >= 3) | ~35–45% (v=3) | Full — Worsley M_j formulae, Monte Carlo validated |
+| 03 | Margin tessellation (q competitors) | 85–90%+ | Partial — M_j derived and numerically validated; formal stratified-tube proof pending |
+| 04 | Coalescing Gaussian-space lobes | 93%+ | Partial — M_j before ball contact; inclusion-exclusion terms after contact unresolved |
 
-An additional exploration (oscillatory covariance / Bochner boundary) is in
-`explorations/oscillatory_bochner/` — a separate direction, not yet connected to the
-high-VF story.
+For background on the GKF and library usage see [docs/framework.md](docs/framework.md).  
+For a precise account of what is and is not analytically known see [docs/limits.md](docs/limits.md).  
+For a concise research narrative see [docs/explorations.md](docs/explorations.md).
 
-## Setup
+## Quick start
 
 ```bash
 mamba env create -f environment.yml
 mamba activate rf_explo
-```
 
-## Running experiments
-
-Each experiment is self-contained:
-
-```bash
 cd experiments/01_gaussian_baseline
 mamba run -n rf_explo python run.py
-
-cd experiments/02_student_t
-mamba run -n rf_explo python run.py
-
-cd experiments/03_margin_tessellation
-mamba run -n rf_explo python run.py
-
-cd experiments/04_coalescing_lobes
-mamba run -n rf_explo python run.py
+# outputs written to experiments/01_gaussian_baseline/results/
 ```
 
-All scripts use fixed seeds and write output to their own `results/` subfolder.
-See each experiment's README.md for details on parameters, expected runtime, and outputs.
+Each experiment writes figures and CSV files to its own `results/` subfolder. See the
+experiment's `README.md` for parameters, expected runtime, and key findings.
 
 ## Repository layout
 
 ```
-src/                        Shared Python library
-  fields.py                   RF generation (Gaussian, Student-t, vector fields)
-  excursions.py               Excursion set construction (threshold, margin, lobes)
-  measures.py                 LKC/Minkowski measurement (Euler, surface area, percolation)
-  adler.py                    Adler formula implementations for all field families
-  io.py                       ParaView VTI/VTP export
+src/
+  fields.py          RF generation: Gaussian (FFT), Student-t (Worsley), margin stack, vector field
+  excursions.py      Excursion set construction: threshold, margin phase, lobe distances
+  measures.py        LKC measurement: Euler characteristic, surface area (marching cubes), percolation
+  adler.py           Adler-Taylor formulae: Gaussian, Student-t, margin tessellation M_j
+  io.py              ParaView export: VTI (scalar/binary fields), VTP (surface mesh)
 
 experiments/
-  01_gaussian_baseline/       Gaussian RF — full Adler validation baseline
-  02_student_t/               Student-t fields — heavier tails, higher VF ceiling
-  03_margin_tessellation/     Winner-competition model — 90%+ disconnected VF
-  04_coalescing_lobes/        Gaussian-space ball union — controlled lobe merging
+  01_gaussian_baseline/   Scalar Gaussian RF — full Adler validation baseline
+  02_student_t/           Student-t fields — heavier tails, higher VF ceiling
+  03_margin_tessellation/ Winner-competition model — disconnected VF to 90%+
+  04_coalescing_lobes/    Gaussian-space ball union — controlled lobe merging and contact
 
 explorations/
-  oscillatory_bochner/        Complex covariance / Bochner boundary (future direction)
+  oscillatory_bochner/    Oscillatory covariance and Bochner boundary (ongoing, separate direction)
 
 theory/
-  student_t_derivation.md     Derivation of t_nu Minkowski functionals
-  gaussian_minkowski_functionals.md   GMF formulas for the margin tessellation
-  paper_directions.md         Research roadmap and open problems
+  student_t_derivation.md            Derivation of t_v Minkowski functionals (Worsley 1994 route)
+  gaussian_minkowski_functionals.md  GMF formulae for the margin tessellation hitting set
+  paper_directions.md                Research roadmap and open problems
 
-references/                   Reference PDFs
-adler_high_vf_exploration/    Historical research scripts and logs (archived)
+references/            Reference PDFs
+adler_high_vf_exploration/   Archived research scripts and logs from the exploratory phase
 ```
 
 ## References
 
 - Adler, R.J. & Taylor, J.E. (2007). *Random Fields and Geometry*. Springer.
-- Worsley, K.J. (1994). Local maxima and the expected Euler characteristic of excursion
-  sets of χ², F and t fields. *Advances in Applied Probability* 26(1), 13–42.
-- Roubin, E. & Colliat, J.-B. (2016). Critical probability of percolation over bounded
-  region in N-dimensional Euclidean space. *J. Stat. Mech.* P033306.
-- Roubin, E. (2013). *Meso-scale FE and morphological modelling of heterogeneous media* (PhD).
+- Worsley, K.J. (1994). Local maxima and the expected Euler characteristic of excursion sets
+  of chi-squared, F and t fields. *Advances in Applied Probability* 26(1), 13–42.
+- Roubin, E. & Colliat, J.-B. (2016). Critical probability of percolation over bounded region
+  in N-dimensional Euclidean space. *Journal of Statistical Mechanics* P033306.
+- Roubin, E. (2013). *Meso-scale FE and morphological modelling of heterogeneous media*. PhD
+  thesis, ENS Cachan.
