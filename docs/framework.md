@@ -96,7 +96,7 @@ $$
 \end{aligned}
 $$
 
-**The Roubin-Colliat percolation criterion:**
+**The percolation criterion:**
 
 The upper zero-crossing of $\mathbb{E}[L_0(A_u)]$ as a function of $u$
 corresponds to a transition from positive Euler characteristic
