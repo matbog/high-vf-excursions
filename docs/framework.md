@@ -98,18 +98,23 @@ $$
 
 **The Roubin-Colliat percolation criterion:**
 
-The upper zero-crossing of `E[L0(A_u)]` as a function of `u` corresponds to a transition from
-positive Euler characteristic (disconnected inclusions dominate) to negative (tunnels and
-percolation dominate). The volume fraction at this crossing, `phi_c+`, is the maximum
-disconnected inclusion volume fraction consistent with the Adler expectation.
+The upper zero-crossing of $\mathbb{E}[L_0(A_u)]$ as a function of $u$
+corresponds to a transition from positive Euler characteristic
+(disconnected inclusions dominate) to negative (tunnels and percolation
+dominate). The volume fraction at this crossing, $\varphi_c^+$, is the
+maximum disconnected inclusion volume fraction consistent with the Adler
+expectation.
 
 Two distinct values arise:
 
-- **Infinite-domain (bulk) limit** — only the volume term `rho^3*a^3*M3` survives as
-  `a/lc → ∞`. For Gaussian fields `M3 = 0` at `u = 1`, giving `phi_c+ → 16%`.
-- **Finite-domain result** — boundary terms (`3a^2*M2`, `3a*M1`, `M0`) shift the
-  zero-crossing. For `n=100`, `lc=8.0` the finite-domain result is `phi_c+ ≈ 22%`
-  (`kappa_c+ ≈ 0.78`). The `find_percolation_threshold` function returns this value.
+- **Infinite-domain (bulk) limit** — only the volume term
+  $\rho^3 a^3 \mathcal M_3$ survives as $a/l_c \to \infty$. For Gaussian
+  fields $\mathcal M_3 = 0$ at $u = 1$, giving $\varphi_c^+ \to 16\%$.
+- **Finite-domain result** — boundary terms ($3 a^2 \mathcal M_2$,
+  $3 a \mathcal M_1$, $\mathcal M_0$) shift the zero-crossing. For
+  $N = 100$, $l_c = 8.0$ the finite-domain result is
+  $\varphi_c^+ \approx 22\%$ ($\kappa_c^+ \approx 0.78$). The
+  `find_percolation_threshold` function returns this value.
 
 ## Using the library
 
@@ -166,15 +171,19 @@ for kappa in thresholds:
 
 ## What the Adler link gives you
 
-1. **Closed-form calibration.** Given a target volume fraction and Euler density, the system
-   `(phi_target, chi_target) = (M0(u), E[L0]/a^3)` can be inverted numerically to find `(lc, u)`
-   without running any simulations. This is the primary use in materials modelling.
+1. **Closed-form calibration.** Given a target volume fraction and Euler
+   density, the system
+   $(\varphi_{\text{target}}, \chi_{\text{target}}) = (\mathcal M_0(u), \mathbb{E}[L_0]/a^3)$
+   can be inverted numerically to find $(l_c, u)$ without running any
+   simulations. This is the primary use in materials modelling.
 
-2. **No simulation budget for expectation.** The expected LKCs are available instantly for any
-   parameter set. Simulation is only needed to quantify realisation-to-realisation variance or
-   to explore models where the analytic formula does not yet hold.
+2. **No simulation budget for expectation.** The expected LKCs are
+   available instantly for any parameter set. Simulation is only needed
+   to quantify realisation-to-realisation variance or to explore models
+   where the analytic formula does not yet hold.
 
-3. **Limits: expectation only.** The formula gives `E[L_i]`. A single realisation will differ.
-   Variance decreases with domain size (ergodicity), but for small domains or near topological
-   transitions the fluctuations can be large. See [limits.md](limits.md) for a precise account
-   of where the formula holds and where it does not.
+3. **Limits: expectation only.** The formula gives $\mathbb{E}[L_i]$. A
+   single realisation will differ. Variance decreases with domain size
+   (ergodicity), but for small domains or near topological transitions
+   the fluctuations can be large. See [limits.md](limits.md) for a
+   precise account of where the formula holds and where it does not.

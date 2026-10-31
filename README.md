@@ -19,9 +19,9 @@ numerical checks that convinced us the formulas work.
 
 ![margin tessellation at q=16, φ=0.70](experiments/04_margin_tessellation/paraview/q16_phi70/display_margin_tess_RF_thresh.png)
 
-*Margin tessellation at `q = 16`, `φ = 0.70` — 16 competing Gaussian
-fields with a non-zero winner-vs-runner-up margin. The matrix film is
-sub-voxel in places; individual winner cells are coloured.*
+*Margin tessellation at $q = 16$, $\varphi = 0.70$ — 16 competing
+Gaussian fields with a non-zero winner-vs-runner-up margin. The matrix
+film is sub-voxel in places; individual winner cells are coloured.*
 
 ## The story in one page
 
@@ -59,23 +59,23 @@ The first two give us the standard tools and tell us one simple negative
 result: the marginal distribution almost doesn't matter for the
 disconnected-phase VF ceiling. The ceiling is set by the spatial
 correlation. The last two are the small novel pieces here: both reach
-VFs far above the Gaussian ceiling, both come with closed-form `M_j`
-(the lobes case only before contact), both validated numerically to a
-few percent on `N^3 >= 128^3` grids.
+VFs far above the Gaussian ceiling, both come with closed-form
+$\mathcal M_j$ (the lobes case only before contact), both validated
+numerically to a few percent on $N^3 \geq 128^3$ grids.
 
 ## Disconnected-phase VF ceiling at a glance
 
-The upper `E[L_0] = 0` crossing on a 100³ grid at `lc = 8` (lc = 5 for
-exp04), per model family:
+The upper $\mathbb{E}[L_0] = 0$ crossing on a $100^3$ grid at $l_c = 8$
+($l_c = 5$ for exp 04), per model family:
 
-| Family | `φ_c⁺` (finite domain) | Adler link |
+| Family | $\varphi_c^+$ (finite domain) | Adler link |
 |--------|------------------------|------------|
-| Gaussian (scalar)         | ~22% | Full closed-form |
-| Student-$t_\nu$ (ν = 3)   | ~21% | Full closed-form (Worsley 1994) |
-| Chi² (k = 1)              | ~37–51% (lc-dependent) | Full closed-form (Worsley 1994) |
-| Margin tessellation (q = 16) | 85–90% | Closed-form `M_j`, informal proof |
-| Coalescing lobes          | ~55% at `r/r_c = 1` | Closed-form before contact only |
-| Multiscale margin union   | up to ~85% composite | Independent-union approximation |
+| Gaussian (scalar)                 | ~22% | Full closed-form |
+| Student-$t_\nu$ ($\nu = 3$)       | ~21% | Full closed-form (Worsley 1994) |
+| $\chi^2$ ($k = 1$)                | ~37–51% ($l_c$-dependent) | Full closed-form (Worsley 1994) |
+| Margin tessellation ($q = 16$)    | 85–90% | Closed-form $\mathcal M_j$, informal proof |
+| Coalescing lobes                  | ~55% at $r/r_c = 1$ | Closed-form before contact only |
+| Multiscale margin union           | up to ~85% composite | Independent-union approximation |
 
 "Finite domain" matters: the bulk-limit numbers are lower
 (e.g. 16% Gaussian) because boundary terms shift the crossing. For the
@@ -92,64 +92,67 @@ and the current numerical results.
 ![Gaussian RF at κ ≈ 0](experiments/01_gaussian_baseline/results/lc_07/display_Gauss_RF_thresh.png)
 
 The ground truth. Scalar Gaussian field, Gaussian covariance, exact
-closed-form `M_j`, MC comparison across `L_0..L_3` at three correlation
-lengths. Every other experiment is compared to this.
+closed-form $\mathcal M_j$, MC comparison across $L_0 \ldots L_3$ at
+three correlation lengths. Every other experiment is compared to this.
 
-### 02 — Chi² field
+### 02 — $\chi^2$ field
 
-![Chi²(k=1) excursion](experiments/02_chi2/results/lc_07/display_chi2-1_RF_thresh.png)
+![χ²(k=1) excursion](experiments/02_chi2/results/lc_07/display_chi2-1_RF_thresh.png)
 
-`X = Σ_i f_i²`. For `k = 1` the excursion set is just the two-tail
-Gaussian `{|Z| ≥ √u}`, so the volume fraction doubles. `E[L_0] = 0` lands
-at ~32% bulk, ~37–51% finite-domain. Higher `k` interpolates back toward
-Gaussian. `M_j` closed-form (Worsley 1994).
+$X = \sum_i f_i^2$. For $k = 1$ the excursion set is just the two-tail
+Gaussian $\{\lvert Z\rvert \geq \sqrt{u}\}$, so the volume fraction
+doubles. $\mathbb{E}[L_0] = 0$ lands at ~32% bulk, ~37–51% finite-domain.
+Higher $k$ interpolates back toward Gaussian. $\mathcal M_j$ closed-form
+(Worsley 1994).
 
 ### 03 — Student-$t_\nu$ field
 
 ![Student-t_3 at κ=0.5](experiments/03_student_t/results/t_3/display_student_t3_RF_thresh.png)
 
-Worsley field `T_ν = Z_0 / √(χ²_ν / ν)`. Polynomial tails barely move
-`φ_c⁺` — it drops *slightly* with ν (from 21.8% at ν → ∞ to 21.1% at
-ν = 3). The marginal distribution is not the lever. Our main contribution
-here was fixing a wrong `M_j` formula that circulated in an earlier
-version — the correct cone-geometry derivation is in
+Worsley field $T_\nu = Z_0 / \sqrt{\chi^2_\nu / \nu}$. Polynomial tails
+barely move $\varphi_c^+$ — it drops *slightly* with $\nu$ (from 21.8%
+at $\nu \to \infty$ to 21.1% at $\nu = 3$). The marginal distribution is
+not the lever. Our main contribution here was fixing a wrong
+$\mathcal M_j$ formula that circulated in an earlier version — the
+correct cone-geometry derivation is in
 [`theory/student_t_derivation.md`](theory/student_t_derivation.md).
 
 ### 04 — Margin tessellation
 
 ![q=16 margin tessellation at φ=0.70](experiments/04_margin_tessellation/paraview/q16_phi70/display_margin_tess_RF_thresh.png)
 
-`q` competing i.i.d. Gaussian fields; include a voxel iff the winner's
-lead over the runner-up exceeds a margin `δ`. The matrix film sits where
-two or more fields are nearly tied. Reaches VFs of 85–90% with every
-individual winner cell topologically disconnected from the rest. Closed-
-form `M_j^γ(D_δ)` derived from the polyhedral chamber geometry and
-validated against MC to <2% on all four LKCs at `N = 256`.
+$q$ competing i.i.d. Gaussian fields; include a voxel iff the winner's
+lead over the runner-up exceeds a margin $\delta$. The matrix film sits
+where two or more fields are nearly tied. Reaches VFs of 85–90% with
+every individual winner cell topologically disconnected from the rest.
+Closed-form $\mathcal M_j^\gamma(D_\delta)$ derived from the polyhedral
+chamber geometry and validated against MC to <2% on all four LKCs at
+$N = 256$.
 
 **Plain-English take.** Imagine four referees scoring every voxel. Only
 include the voxel if the highest score beats the second-highest by at
-least `δ`. The result tiles space into "winner cells" separated by a thin
-matrix film wherever two fields are tied. Push `q` up and the cells get
-smaller; push `δ` down and the film thins; both knobs give you high VFs
-of mutually disconnected inclusions.
+least $\delta$. The result tiles space into "winner cells" separated by a
+thin matrix film wherever two fields are tied. Push $q$ up and the cells
+get smaller; push $\delta$ down and the film thins; both knobs give you
+high VFs of mutually disconnected inclusions.
 
 ### 05 — Coalescing lobes
 
 ![coalescing lobes at r/r_c = 0.98](experiments/05_coalescing_lobes/paraview/rrc0p98/display_coalescing_lobes_RF_thresh.png)
 
-Vector Gaussian field `G: M → ℝ³`. Fix four centres at the vertices of a
-tetrahedron in Gaussian value space; include a voxel iff its Gaussian-
-space image lies within `r` of any centre. Single morphology parameter
-`r/r_c` sweeps from disjoint droplets (`r/r_c = 0.5`), to touching
-(`r/r_c = 1`), to merged bicontinuous (`r/r_c > 1`). Closed-form `M_j`
-*before contact* via single-ball tube probability + additivity; after
-contact the Gaussian-weighted ball-intersection volumes are an open
-analytic problem.
+Vector Gaussian field $G: M \to \mathbb{R}^3$. Fix four centres at the
+vertices of a tetrahedron in Gaussian value space; include a voxel iff
+its Gaussian-space image lies within $r$ of any centre. Single morphology
+parameter $r/r_c$ sweeps from disjoint droplets ($r/r_c = 0.5$), to
+touching ($r/r_c = 1$), to merged bicontinuous ($r/r_c > 1$). Closed-form
+$\mathcal M_j$ *before contact* via single-ball tube probability +
+additivity; after contact the Gaussian-weighted ball-intersection volumes
+are an open analytic problem.
 
 **Plain-English take.** Imagine every voxel is mapped to a 3D point by a
 smooth random field. Place four target points. A voxel is "in" if its
-point lands close to any target. As you grow the capture radius `r`, the
-four droplets inflate until they touch (at `r = r_c`), then merge into a
+point lands close to any target. As you grow the capture radius $r$, the
+four droplets inflate until they touch (at $r = r_c$), then merge into a
 richly connected lobe network. One scalar knob, qualitatively different
 morphologies at either end.
 
@@ -160,7 +163,7 @@ morphologies at either end.
 Combines three margin tessellations at different correlation lengths
 (coarse / fine / sand) into a single composite. Deferred prototype: the
 exact union-GMF is unknown in closed form, so we use the independent-
-union approximation of Roubin (2013). The experiment is primarily a
+union approximation of Bogdan (2015). The experiment is primarily a
 granulometry demo — "can we hit a prescribed VF-per-phase mix inside the
 margin model?" — rather than a GKF validation.
 
@@ -185,8 +188,8 @@ parameters, runtimes, and what to look at.
 - [`docs/limits.md`](docs/limits.md) — what the Adler link does and does
   not give for each family.
 - [`docs/measurement_conventions.md`](docs/measurement_conventions.md) —
-  how we estimate `L_0..L_3` from voxels; which estimator we use for what
-  and why.
+  how we estimate $L_0 \ldots L_3$ from voxels; which estimator we use
+  for what and why.
 - [`theory/README.md`](theory/README.md) — umbrella note; derivations in
   the siblings.
 
@@ -230,3 +233,7 @@ it is `.gitignore`d.
   *J. Stat. Mech.* P033306.
 - Roubin, E. (2013). *Meso-scale FE and morphological modelling of
   heterogeneous media*. PhD thesis, ENS Cachan.
+- Bogdan, M. (2015). *Morphological multiscale modeling of cementitious
+  materials — Application to effective diffusive properties prediction.*
+  PhD thesis, ENS Cachan.
+  [tel-01346484](https://theses.hal.science/tel-01346484v1).

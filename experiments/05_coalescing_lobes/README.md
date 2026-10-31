@@ -77,9 +77,9 @@ Full note:
 
 ## What it runs
 
-- `N = 100`, `LENGTH = 100`, `LC = 10`, `RHO = 1.5`, 4 realizations.
-- `r/r_c` sweep from 0.45 to 1.60.
-- `MC_SAMPLES = 2 × 10⁶` for Gaussian-space `M_0` cross-check.
+- $N = 100$, `LENGTH = 100`, `LC = 10`, `RHO = 1.5`, 4 realizations.
+- $r/r_c$ sweep from 0.45 to 1.60.
+- `MC_SAMPLES = 2 × 10⁶` for Gaussian-space $\mathcal M_0$ cross-check.
 
 ```bash
 mamba run -n rf_explo python run.py
@@ -91,9 +91,9 @@ Runtime ≈ 15–25 min.
 
 | File | Contents |
 |---|---|
-| `results/coalescing_lobes_sweep.csv` | `r/r_c`, measured `φ`, measured `L_0..L_3`, GKF theory (pre-contact), spanning |
+| `results/coalescing_lobes_sweep.csv` | $r/r_c$, measured $\varphi$, measured $L_0 \ldots L_3$, GKF theory (pre-contact), spanning |
 | `results/coalescing_lobes_slices.png` | winner-coloured central slices per realization × radius |
-| `results/coalescing_lobes_diagnostics.png` | 4-panel: volume, `L_0` vs theory, lobe coalescence, percolation |
+| `results/coalescing_lobes_diagnostics.png` | 4-panel: volume, $L_0$ vs theory, lobe coalescence, percolation |
 | `results/coalescing_lobes_lkcs.png` | all 4 LKCs measured vs GKF theory (pre-contact validation) |
 
 ![all 4 LKCs vs GKF theory, pre-contact](results/coalescing_lobes_lkcs.png)
@@ -102,31 +102,32 @@ Runtime ≈ 15–25 min.
 
 ![winner-coloured slices per r/r_c](results/coalescing_lobes_slices.png)
 
-## Key numerical results (N = 100, 4 realizations)
+## Key numerical results ($N = 100$, 4 realizations)
 
 Measured/theory ratios, pre-contact:
 
-| `r/r_c` | `L_0` | `L_1` | `L_2` (Crofton) | `L_2` (MC field) |
+| $r/r_c$ | $L_0$ | $L_1$ | $L_2$ (Crofton) | $L_2$ (MC field) |
 |---------|-------|-------|-----------------|------------------|
 | 0.45 | 0.961 | 0.937 | 0.955 | 0.905 |
 | 0.65 | 0.935 | 0.948 | 0.978 | 0.945 |
 | 0.85 | 0.974 | 0.950 | 0.979 | 0.954 |
 | 0.98 | 1.067 | 0.955 | 0.981 | 0.958 |
 
-`L_0` noise is large near its zero-crossing (0.98). Crofton `L_2` is the
-cleanest estimator, consistently 0.96–0.98. These numbers are comparable
-to exp04 at the same `N`; they will tighten at `N = 200` as in exp04.
+$L_0$ noise is large near its zero-crossing ($r/r_c = 0.98$). Crofton
+$L_2$ is the cleanest estimator, consistently 0.96–0.98. These numbers
+are comparable to exp 04 at the same $N$; they will tighten at $N = 200$
+as in exp 04.
 
-Post-contact (`r/r_c > 1`): no theory curve. Empirically `L_0` passes
-smoothly through zero near `r/r_c = 1` and settles at modest negative
-values with 26-connectivity. The pilot "L_0 drops to −3000" result was a
-6-connectivity thin-film artifact — see
+Post-contact ($r/r_c > 1$): no theory curve. Empirically $L_0$ passes
+smoothly through zero near $r/r_c = 1$ and settles at modest negative
+values with 26-connectivity. The pilot "$L_0$ drops to $-3000$" result
+was a 6-connectivity thin-film artifact — see
 [`docs/measurement_conventions.md`](../../docs/measurement_conventions.md).
 
 ## Open
 
-1. Derive `M_j` for two Gaussian-weighted intersecting balls in $\mathbb{R}^3$
-   (post-contact lobes).
+1. Derive $\mathcal M_j$ for two Gaussian-weighted intersecting balls in
+   $\mathbb{R}^3$ (post-contact lobes).
 2. Explain why spatial percolation precedes value-space contact
-   (`r/r_c ≈ 0.85` empirically vs 1 analytically).
-3. Confirm convergence at `N ≥ 200`.
+   ($r/r_c \approx 0.85$ empirically vs $1$ analytically).
+3. Confirm convergence at $N \geq 200$.

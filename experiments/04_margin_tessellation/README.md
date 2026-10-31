@@ -16,21 +16,22 @@ $$
 A_\delta = \bigl\{\, x : \max_i G_i(x) - \mathrm{second\!-\!max}_i\,G_i(x) \geq \delta \,\bigr\}.
 $$
 
-The hitting set in $\mathbb{R}^q$ is a disjoint union of `q` unbounded
+The hitting set in $\mathbb{R}^q$ is a disjoint union of $q$ unbounded
 polyhedral "winner" chambers; the matrix film is where two or more fields
-are tied. Larger `q` → more, smaller winner cells. Larger `δ` → thicker
-film, smaller `φ`.
+are tied. Larger $q$ → more, smaller winner cells. Larger $\delta$ →
+thicker film, smaller $\varphi$.
 
-Different winner labels are mutually separated by the film by construction,
-but a *single* winner can still span. The relevant percolation check is
-per-winner spanning, not spanning of the union.
+Different winner labels are mutually separated by the film by
+construction, but a *single* winner can still span. The relevant
+percolation check is per-winner spanning, not spanning of the union.
 
 ## Adler link status
 
-Closed-form `M_j^γ(D_δ)` for `j = 0..3`, numerically validated to <2% at
-`N = 256` across `q ∈ {2, 4, 8, 16}` on all four LKCs. A formal
-stratified-tube proof is not written up — the `q = 2` identities and the
-`N = 256` convergence are the current evidence.
+Closed-form $\mathcal M_j^\gamma(D_\delta)$ for $j = 0 \ldots 3$,
+numerically validated to <2% at $N = 256$ across $q \in \{2, 4, 8, 16\}$
+on all four LKCs. A formal stratified-tube proof is not written up — the
+$q = 2$ identities and the $N = 256$ convergence are the current
+evidence.
 
 ## The $\mathcal M_j$ (inline)
 
@@ -70,27 +71,28 @@ Full derivation (chamber stratification + normal-cone integration):
 ## What it runs
 
 - `N_VALUES = [64, 128, 256]`, `N_MAIN = 128`, `LENGTH = 64`, `LC = 5`.
-- `Q_VALUES = [2, 4, 8, 16]`, 10 target VFs in `[0.30, 0.90]`.
-- 5 realizations per `(N, q, φ)`.
-- Per-winner `L_0..L_3` + per-winner spanning.
+- `Q_VALUES = [2, 4, 8, 16]`, 10 target VFs in $[0.30, 0.90]$.
+- 5 realizations per $(N, q, \varphi)$.
+- Per-winner $L_0 \ldots L_3$ + per-winner spanning.
 
 ```bash
 mamba run -n rf_explo python run.py
 ```
 
 Runtime ≈ 2.5 h for the full three-resolution convergence; ≈ 30 min at
-`N = 128` only (edit `N_VALUES`).
+$N = 128$ only (edit `N_VALUES`).
 
 ## Estimator choices
 
 See [`docs/measurement_conventions.md`](../../docs/measurement_conventions.md).
 Short version:
 
-- `L_0`: 26-connectivity (thin films sub-voxel at high `q`, high `φ`).
-- `L_1`: dihedral sum on marching cubes of the *smooth signed margin field*
-  `s_i(x) = G_i(x) − max_{j≠i} G_j(x) − δ`.
-- `L_2`: Crofton with analytic domain-face term (primary); MC on the signed
-  field (`l2_field` column) for comparison.
+- $L_0$: 26-connectivity (thin films sub-voxel at high $q$, high
+  $\varphi$).
+- $L_1$: dihedral sum on marching cubes of the *smooth signed margin
+  field* $s_i(x) = G_i(x) - \max_{j \neq i} G_j(x) - \delta$.
+- $L_2$: Crofton with analytic domain-face term (primary); MC on the
+  signed field (`l2_field` column) for comparison.
 
 Field generation uses `gstools` through `src.fields.simulate_random_field`.
 
@@ -98,11 +100,11 @@ Field generation uses `gstools` through `src.fields.simulate_random_field`.
 
 | File | Contents |
 |---|---|
-| `results/margin_sweep.csv` | per-row `(N, q, φ)` measurements and theory |
-| `results/margin_sweep.png` | spanning frequency + `L_0 ± std` vs theory, `N = 128` |
-| `results/margin_main.png` | 4×5 grid: per-`q` LKC error bars + slices, `N = 128` |
-| `results/margin_euler_ratio.png` | measured/theory % deviation vs `φ`, `N = 128` |
-| `results/margin_convergence.png` | % deviation vs `N`, φ-averaged, per `q` |
+| `results/margin_sweep.csv` | per-row $(N, q, \varphi)$ measurements and theory |
+| `results/margin_sweep.png` | spanning frequency + $L_0 \pm \mathrm{std}$ vs theory, $N = 128$ |
+| `results/margin_main.png` | 4×5 grid: per-$q$ LKC error bars + slices, $N = 128$ |
+| `results/margin_euler_ratio.png` | measured/theory % deviation vs $\varphi$, $N = 128$ |
+| `results/margin_convergence.png` | % deviation vs $N$, $\varphi$-averaged, per $q$ |
 
 ![margin tessellation: LKCs vs theory](results/margin_main.png)
 
@@ -110,25 +112,25 @@ Field generation uses `gstools` through `src.fields.simulate_random_field`.
 
 ![convergence vs N](results/margin_convergence.png)
 
-## Key numerical results (N = 256)
+## Key numerical results ($N = 256$)
 
 Measured/theory ratios:
 
-| LKC | q=2 | q=4 | q=8 | q=16 |
+| LKC | $q=2$ | $q=4$ | $q=8$ | $q=16$ |
 |-----|-----|-----|-----|------|
-| `L_0` (26-conn)      | 0.957 | 0.973 | 0.985 | 0.983 |
-| `L_1` (signed field) | 0.995 | 1.004 | 1.002 | 0.992 |
-| `L_2` (Crofton)      | 0.999 | 0.996 | 0.987 | 0.981 |
-| `L_3`                | 1.00  | 1.00  | 1.00  | 1.00  |
+| $L_0$ (26-conn)      | 0.957 | 0.973 | 0.985 | 0.983 |
+| $L_1$ (signed field) | 0.995 | 1.004 | 1.002 | 0.992 |
+| $L_2$ (Crofton)      | 0.999 | 0.996 | 0.987 | 0.981 |
+| $L_3$                | 1.00  | 1.00  | 1.00  | 1.00  |
 
-Convergence from `N = 64 → 128 → 256` is monotonic across all LKCs.
-L1/L2 scale roughly O(1/N²), matching the expected marching-cubes mesh
-amplitude bias.
+Convergence from $N = 64 \to 128 \to 256$ is monotonic across all LKCs.
+$L_1$/$L_2$ scale roughly $\mathcal O(1/N^2)$, matching the expected
+marching-cubes mesh amplitude bias.
 
 ## Film thickness
 
-At `φ = 0.90, q = 16`: `δ ≈ 0.059` physical units, i.e. `0.59` voxels at
-`N = 128`. The film is sub-voxel at the highest `φ` values, so individual
-winner cells can fragment into spurious extra components — this is a
-discretization limit (see `margin_convergence.png` for the fix at `N = 256`),
-not a formula failure.
+At $\varphi = 0.90$, $q = 16$: $\delta \approx 0.059$ physical units,
+i.e. $0.59$ voxels at $N = 128$. The film is sub-voxel at the highest
+$\varphi$ values, so individual winner cells can fragment into spurious
+extra components — this is a discretization limit (see
+`margin_convergence.png` for the fix at $N = 256$), not a formula failure.
