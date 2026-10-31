@@ -8,26 +8,27 @@ disjoint droplets to a merged bicontinuous phase.
 
 ## The model
 
-Let `G(x) = (G_1(x), G_2(x), G_3(x))` be a vector of three i.i.d. smooth
-Gaussian RFs mapping each voxel to a point in $\mathbb{R}^3$. Fix `K = 4`
-centres `c_a` at the vertices of a regular tetrahedron of radius `ρ` in
-Gaussian value space. Include a voxel iff its Gaussian-space point is
-within `r` of any centre:
+Let $G(x) = \bigl(G_1(x), G_2(x), G_3(x)\bigr)$ be a vector of three
+i.i.d. smooth Gaussian RFs mapping each voxel to a point in
+$\mathbb{R}^3$. Fix $K = 4$ centres $c_a$ at the vertices of a regular
+tetrahedron of radius $\rho$ in Gaussian value space. Include a voxel
+iff its Gaussian-space point is within $r$ of any centre:
 
-```
-A_r = { x : min_a ||G(x) − c_a|| ≤ r }     =    G^{−1}(D_r)
-D_r = ⋃_a B(c_a, r)
-```
+$$
+A_r = \bigl\{\, x : \min_a \lVert G(x) - c_a \rVert \leq r \,\bigr\}
+    \;=\; G^{-1}(D_r), \qquad
+D_r = \bigcup_a B(c_a, r).
+$$
 
 Two adjacent Gaussian-space balls first touch at the contact radius
 
-```
-r_c = ρ · √(2/3)
-```
+$$
+r_c = \rho \sqrt{2/3}
+$$
 
-(from the tetrahedron pair-distance `ρ·√(8/3)`). The ratio `r/r_c` is a
-single morphology control: below 1 the balls are disjoint; above 1 they
-overlap and the lobe structure merges.
+(from the tetrahedron pair-distance $\rho\sqrt{8/3}$). The ratio $r/r_c$
+is a single morphology control: below 1 the balls are disjoint; above 1
+they overlap and the lobe structure merges.
 
 ## Adler link status
 
@@ -38,32 +39,37 @@ additivity. Validated to <5% at `N = 100` across `r/r_c ∈ {0.45, 0.65,
 **After contact (`r ≥ r_c`):** open. The required Gaussian-weighted
 ball-intersection volumes in $\mathbb{R}^3$ have not been derived.
 
-## `M_j` for a single ball (inline)
+## $\mathcal M_j$ for a single ball (inline)
 
-For a ball `B(c, r)` in $\mathbb{R}^3$ with standard Gaussian measure, the
-tube `T_s(B(c,r)) = B(c, r+s)` and the tube probability is
+For a ball $B(c, r)$ in $\mathbb{R}^3$ with standard Gaussian measure, the
+tube $T_s(B(c,r)) = B(c, r+s)$ and the tube probability is
 
-```
-μ_γ(T_s) = P(||Z − c|| ≤ r + s) = F((r+s)²)
-```
+$$
+\mu_\gamma(T_s) = \mathbb{P}\!\left(\lVert Z - c\rVert \leq r + s\right)
+                = F\!\left((r+s)^2\right),
+$$
 
-where `F = ncx²(df=3, nc=||c||²).cdf`. Expanding in `s` around `s = 0`,
-the four `M_j` are
+where $F$ is the CDF of a non-central $\chi^2$ with $\mathrm{df}=3$ and
+non-centrality $\lVert c\rVert^2$. Expanding in $s$ around $s = 0$, the
+four $\mathcal M_j$ are
 
-```
-M_0(c, r) = F(r²)
-M_1(c, r) = 2r · f(r²)
-M_2(c, r) = 2 · f(r²) + 4r² · f'(r²)
-M_3(c, r) = 12r · f'(r²) + 8r³ · f''(r²)
-```
+$$
+\begin{aligned}
+\mathcal M_0(c, r) &= F(r^2), \\[2pt]
+\mathcal M_1(c, r) &= 2r\, f(r^2), \\[2pt]
+\mathcal M_2(c, r) &= 2\, f(r^2) + 4r^2 f'(r^2), \\[2pt]
+\mathcal M_3(c, r) &= 12r\, f'(r^2) + 8r^3 f''(r^2),
+\end{aligned}
+$$
 
-with `f` the non-central $\chi^2(3, ||c||^2)$ PDF and `f', f''` its first
-two derivatives in `x = r²`. For the ball union before contact,
-additivity gives
+with $f$ the non-central $\chi^2(3, \lVert c\rVert^2)$ PDF and $f', f''$
+its first two derivatives in $x = r^2$. For the ball union before
+contact, additivity gives
 
-```
-M_j^γ(D_r) = Σ_a M_j^γ(B(c_a, r))        (r < r_c)
-```
+$$
+\mathcal M_j^\gamma(D_r) = \sum_a \mathcal M_j^\gamma\bigl(B(c_a, r)\bigr),
+\qquad r < r_c.
+$$
 
 Implemented in `src/adler.py: ball_lkcs` and `expected_lkcs_lobes_disjoint`.
 Full note:

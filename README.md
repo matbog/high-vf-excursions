@@ -27,15 +27,18 @@ sub-voxel in places; individual winner cells are coloured.*
 
 The Adler–Taylor GKF (Adler & Taylor 2007; Taylor 2006) gives a
 closed-form expectation for every Lipschitz–Killing curvature of the
-excursion set of a Gaussian-related field. For a cube of side `a` and a
-scalar hitting set `D`,
+excursion set of a Gaussian-related field. For a cube of side $a$ and a
+scalar hitting set $D$,
 
-```
-E[L_i(f^{-1}(D))] = Σ_j C(i, j) · ρ^j · L_{i+j}(cube) · M_j^γ(D)
-```
+$$
+\mathbb{E}\!\left[L_i\bigl(f^{-1}(D)\bigr)\right]
+= \sum_{j=0}^{N-i} \binom{i+j}{j}\,
+  \rho^{j}\, L_{i+j}(\text{cube})\, \mathcal M_j^{\gamma}(D),
+$$
 
-with `ρ = √(λ_2 / 2π)`, `λ_2 = -C''(0)`. The spatial side (`ρ`, the cube
-LKCs) and the value-space side (`M_j^γ(D)`) are completely separate.
+with $\rho = \sqrt{\lambda_2 / 2\pi}$ and $\lambda_2 = -C''(0)$. The
+spatial side ($\rho$, the cube LKCs) and the value-space side
+($\mathcal M_j^{\gamma}(D)$) are completely separate.
 Change the hitting set, change the morphology; the spatial side is
 unchanged. This is what makes the GKF a *morphology generator*: pick a
 hitting set, pay the price of computing its Gaussian Minkowski
@@ -45,12 +48,12 @@ moments of the resulting random microstructure.
 We work through four hitting-set families, roughly in order of how far
 each strays from the standard GKF territory:
 
-- **Scalar half-line** `[u, ∞)` — the Gaussian baseline.
-- **Scalar `[u, ∞)` under non-Gaussian marginal** — chi² and
+- **Scalar half-line** $[u, \infty)$ — the Gaussian baseline.
+- **Scalar $[u, \infty)$ under non-Gaussian marginal** — chi² and
   Student-$t_\nu$ fields, both already in the literature (Worsley 1994).
-- **Polyhedral winner chamber** `{z_{(q)} - z_{(q-1)} ≥ δ}` — the
-  margin tessellation.
-- **Union of balls** `⋃_a B(c_a, r)` — coalescing lobes.
+- **Polyhedral winner chamber** $\{z_{(q)} - z_{(q-1)} \geq \delta\}$ —
+  the margin tessellation.
+- **Union of balls** $\bigcup_a B(c_a, r)$ — coalescing lobes.
 
 The first two give us the standard tools and tell us one simple negative
 result: the marginal distribution almost doesn't matter for the

@@ -11,20 +11,21 @@ Worsley (1994, eq. 3) for the `M_j`.
 
 ## What's non-Gaussian here
 
-For `k = 1`, `χ²(1) = Z²`, so `{X ≥ u}` is the two-tail Gaussian excursion
-`{|Z| ≥ √u}` — the volume fraction at any threshold is twice the one-sided
-Gaussian value. This moves the `E[L_0] = 0` crossing from the Gaussian 16%
-to roughly 32% in the bulk limit, and higher still in a finite domain.
-Larger `k` interpolates back toward the Gaussian ceiling.
+For $k = 1$, $\chi^2(1) = Z^2$, so $\{X \geq u\}$ is the two-tail Gaussian
+excursion $\{\lvert Z\rvert \geq \sqrt{u}\}$ — the volume fraction at any
+threshold is twice the one-sided Gaussian value. This moves the
+$\mathbb{E}[L_0] = 0$ crossing from the Gaussian 16% to roughly 32% in
+the bulk limit, and higher still in a finite domain. Larger $k$
+interpolates back toward the Gaussian ceiling.
 
-Bulk `φ_c⁺` (where `M_3(u) = 0`):
+Bulk $\varphi_c^+$ (where $\mathcal M_3(u) = 0$):
 
-| k | κ_c | φ_c⁺ (bulk) |
+| $k$ | $\kappa_c$ | $\varphi_c^+$ (bulk) |
 |---|-----|-------------|
 | 1 | 1   | 31.7% |
 | 2 | 3   | 22.3% |
 | 4 | 6   | 19.9% |
-| → ∞ | — | 15.9% (Gaussian) |
+| $\to \infty$ | — | 15.9% (Gaussian) |
 
 Our 100³ box amplifies these numbers via the boundary terms —
 `phi_c_vs_k.png` plots the finite-domain `φ_c⁺` across `k = 1..20` for

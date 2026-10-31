@@ -8,81 +8,93 @@ value a single point is likely to take — and its covariance function `C(r) = C
 which controls spatial smoothness and correlation length. In this project the covariance is
 always Gaussian: `C(r) = sigma^2 * exp(-r^2 / lc^2)`, with correlation length `lc`.
 
-The **excursion set** at threshold `u` is the binary field
+The **excursion set** at threshold $u$ is the binary field
 
-```
-A_u = { x in M : f(x) >= u }
-```
+$$
+A_u = \{\, x \in M : f(x) \geq u \,\}.
+$$
 
-This partitions the domain into an inclusion phase `A_u` and a matrix phase `M \ A_u`.
-Varying `u` sweeps volume fraction continuously: high `u` gives sparse inclusions; low `u`
-gives a dense, percolating phase. The two-parameter family `(lc, u)` covers a wide range of
+This partitions the domain into an inclusion phase $A_u$ and a matrix
+phase $M \setminus A_u$. Varying $u$ sweeps volume fraction continuously:
+high $u$ gives sparse inclusions; low $u$ gives a dense, percolating
+phase. The two-parameter family $(l_c, u)$ covers a wide range of
 microstructure morphologies within a single generative model.
 
-The **Lipschitz-Killing curvatures** (LKCs) of `A_u` are the standard scalar morphological
-descriptors in three dimensions:
+The **Lipschitz-Killing curvatures** (LKCs) of $A_u$ are the standard
+scalar morphological descriptors in three dimensions:
 
 | Symbol | Name | Physical meaning |
 |--------|------|-----------------|
-| `L3(A_u)` | Volume | Total inclusion volume |
-| `L2(A_u)` | Half surface area | Specific surface (inclusion-matrix interface area / 2) |
-| `L1(A_u)` | Integrated mean curvature / π | Mean curvature integral over the boundary |
-| `L0(A_u)` | Euler characteristic | Topology: #components - #tunnels + #cavities |
+| $L_3(A_u)$ | Volume | Total inclusion volume |
+| $L_2(A_u)$ | Half surface area | Specific surface (inclusion-matrix interface area / 2) |
+| $L_1(A_u)$ | Integrated mean curvature $/\,\pi$ | Mean curvature integral over the boundary |
+| $L_0(A_u)$ | Euler characteristic | Topology: #components - #tunnels + #cavities |
 
-`L0` is the most information-rich: positive values indicate a disconnected (island) morphology;
-negative values indicate a tunnel- or percolation-dominated topology.
+$L_0$ is the most information-rich: positive values indicate a
+disconnected (island) morphology; negative values indicate a tunnel- or
+percolation-dominated topology.
 
 All four LKCs are estimated numerically from voxel realizations; see
-[measurement_conventions.md](measurement_conventions.md) for the estimators used (6- vs 26-
-connectivity Euler, marching-cubes vs Crofton surface, dihedral `L1`) and their known biases.
+[measurement_conventions.md](measurement_conventions.md) for the
+estimators used (6- vs 26-connectivity Euler, marching-cubes vs Crofton
+surface, dihedral $L_1$) and their known biases.
 
 ## The Gaussian Kinematic Formula
 
-For a smooth, stationary, isotropic Gaussian-related random field on a 3D cube of side `a`,
-the Adler-Taylor formula gives
+For a smooth, stationary, isotropic Gaussian-related random field on a 3D
+cube of side $a$, the Adler-Taylor formula gives
 
-```math
-E[ L_i(A_u) ] = sum_{j=0}^{3-i} C(i,j) * rho^j * L_{i+j}(M) * M_j^gamma(D_u)
-```
+$$
+\mathbb{E}[L_i(A_u)]
+= \sum_{j=0}^{3-i} \binom{i+j}{j}\, \rho^{j}\, L_{i+j}(M)\,
+    \mathcal M_j^{\gamma}(D_u).
+$$
 
-The four LKC expectations on a 3D cube of side `a` are:
+The four LKC expectations on a 3D cube of side $a$ are
 
-```
-E[L3(A_u)] = a^3 * M0
-E[L2(A_u)] = 2*rho*a^3 * M1 + 3*a^2 * M0
-E[L1(A_u)] = rho^2*a^3 * M2 + 3*rho*a^2 * M1 + 3*a * M0
-E[L0(A_u)] = rho^3*a^3 * M3 + 3*rho^2*a^2 * M2 + 3*rho*a * M1 + M0
-```
-
-The `L0` formula in full:
-
-```math
-E[ L0(A_u) ] = rho^3 * a^3 * M3 + 3 * rho^2 * a^2 * M2 + 3 * rho * a * M1 + M0
-```
+$$
+\begin{aligned}
+\mathbb{E}[L_3(A_u)] &= a^3\, \mathcal M_0, \\[2pt]
+\mathbb{E}[L_2(A_u)] &= 2\rho a^3\, \mathcal M_1 + 3 a^2\, \mathcal M_0, \\[2pt]
+\mathbb{E}[L_1(A_u)] &= 2\rho^2 a^3\, \mathcal M_2
+    + \tfrac{3\pi}{2}\rho a^2\, \mathcal M_1 + 3 a\, \mathcal M_0, \\[2pt]
+\mathbb{E}[L_0(A_u)] &= \rho^3 a^3\, \mathcal M_3 + 3\rho^2 a^2\, \mathcal M_2
+    + 3\rho a\, \mathcal M_1 + \mathcal M_0.
+\end{aligned}
+$$
 
 **Terms:**
 
-- `rho = sqrt(lambda2 / 2*pi)` where `lambda2 = -C''(0) = 2*sigma^2 / lc^2` is the second
-  spectral moment of the covariance. `rho` encodes spatial regularity and scale.
-- `a^3`, `3a^2`, `3a`, `1` are the domain LKCs of a cube of side `a` (volume, surface, edge, vertex).
-- `M_j^gamma(D_u)` are the **Gaussian Minkowski functionals** of the hitting set
-  `D_u = { z in R : z >= u }` — the region of value space that maps to the inclusion phase.
+- $\rho = \sqrt{\lambda_2 / 2\pi}$ where
+  $\lambda_2 = -C''(0) = 2\sigma^2 / l_c^2$ is the second spectral moment
+  of the covariance. $\rho$ encodes spatial regularity and scale.
+- $a^3$, $3a^2$, $3a$, $1$ are the domain LKCs of a cube of side $a$
+  (volume, surface, edge, vertex).
+- $\mathcal M_j^{\gamma}(D_u)$ are the **Gaussian Minkowski functionals**
+  of the hitting set $D_u = \{\, z \in \mathbb{R} : z \geq u \,\}$ — the
+  region of value space that maps to the inclusion phase.
 
 **The central structural insight:**
 
-The spatial geometry (encoded in `rho` and the domain LKCs) is completely separated from the
-value-space geometry (encoded in `M_j`). When the marginal distribution changes — Gaussian to
-Student-t, or scalar to vector — only `M_j` changes. The spatial side is identical as long as
-the covariance structure is unchanged.
+The spatial geometry (encoded in $\rho$ and the domain LKCs) is
+completely separated from the value-space geometry (encoded in
+$\mathcal M_j$). When the marginal distribution changes — Gaussian to
+Student-$t$, or scalar to vector — only $\mathcal M_j$ changes. The
+spatial side is identical as long as the covariance structure is
+unchanged.
 
-**Gaussian M_j (exact closed form):**
+**Gaussian $\mathcal M_j$ (exact closed form):**
 
-```
-M0 = P(Z >= u) = (1/2) erfc(u / sqrt(2))          [volume fraction]
-M1 = phi(u) = (1/sqrt(2*pi)) exp(-u^2/2)           [boundary density]
-M2 = u * phi(u)                                     [mean curvature density]
-M3 = (u^2 - 1) * phi(u)                             [Gaussian curvature density]
-```
+$$
+\begin{aligned}
+\mathcal M_0 &= \mathbb{P}(Z \geq u) = \tfrac{1}{2}\,\mathrm{erfc}(u/\sqrt{2})
+    &&\text{(volume fraction)} \\[2pt]
+\mathcal M_1 &= \varphi(u) = (2\pi)^{-1/2} e^{-u^2/2}
+    &&\text{(boundary density)} \\[2pt]
+\mathcal M_2 &= u\, \varphi(u) &&\text{(mean curvature density)} \\[2pt]
+\mathcal M_3 &= (u^2 - 1)\, \varphi(u) &&\text{(Gaussian curvature density)}
+\end{aligned}
+$$
 
 **The Roubin-Colliat percolation criterion:**
 

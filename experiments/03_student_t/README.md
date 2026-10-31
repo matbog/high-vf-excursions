@@ -15,25 +15,30 @@ previous-wrong-formulas story are in
 
 ## What's non-Gaussian here
 
-The Worsley field `T_ν(x) = Z_0(x) / √(χ²_ν(x)/ν)` has a spatially varying
-denominator with the same correlation length as `Z_0`. Marginal is `t_ν`;
-Adler GKF applies with ν-dependent `M_j`.
+The Worsley field $T_\nu(x) = Z_0(x) / \sqrt{\chi^2_\nu(x)/\nu}$ has a
+spatially varying denominator with the same correlation length as $Z_0$.
+Marginal is $t_\nu$; Adler GKF applies with $\nu$-dependent
+$\mathcal M_j$.
 
-The cone-geometry `M_j` (not the PDF derivatives — see the derivation note
-for why the latter is wrong):
+The cone-geometry $\mathcal M_j$ (not the PDF derivatives — see the
+derivation note for why the latter is wrong), with
+$c_\nu(u) = (2\pi)^{-1/2}\bigl(1 + u^2/\nu\bigr)^{-(\nu-1)/2}$ and
+$A_\nu = \sqrt{2/\nu}\,\Gamma((\nu+1)/2)/\Gamma(\nu/2)$:
 
-| `M_j` | Formula |
-|-------|---------|
-| `M_0(u)` | `t.sf(u, df=ν)` |
-| `M_1(u)` | `c_ν(u) = (1/√2π)·(1 + u²/ν)^(-(ν-1)/2)` |
-| `M_2(u)` | `A_ν · u · c_ν(u)`, `A_ν = √(2/ν)·Γ((ν+1)/2)/Γ(ν/2)` |
-| `M_3(u)` | `((ν-1)/ν · u² − 1) · c_ν(u)` |
+$$
+\begin{aligned}
+\mathcal M_0(u) &= \mathbb{P}(T_\nu \geq u), \\[2pt]
+\mathcal M_1(u) &= c_\nu(u), \\[2pt]
+\mathcal M_2(u) &= A_\nu\, u\, c_\nu(u), \\[2pt]
+\mathcal M_3(u) &= \left(\tfrac{\nu-1}{\nu}\, u^2 - 1\right) c_\nu(u).
+\end{aligned}
+$$
 
-Finite-domain `φ_c⁺` on our 100³ box at `lc = 8`:
+Finite-domain $\varphi_c^+$ on our 100³ box at $l_c = 8$:
 
-| ν | u_c = √(ν/(ν−1)) | φ_c⁺ (finite domain) |
+| $\nu$ | $u_c = \sqrt{\nu/(\nu-1)}$ | $\varphi_c^+$ (finite domain) |
 |---|------------------|----------------------|
-| ∞ (Gaussian) | 1.000 | 21.81% |
+| $\infty$ (Gaussian) | 1.000 | 21.81% |
 | 10 | 1.054 | 21.68% |
 | 5  | 1.118 | 21.48% |
 | 3  | 1.225 | 21.09% |

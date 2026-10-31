@@ -8,12 +8,13 @@ keeping the Adler link intact.
 
 ## The model
 
-Let `G = (G_1, …, G_q)` be `q` i.i.d. smooth Gaussian RFs. Include a
-voxel `x` iff the winner's lead over the runner-up exceeds a margin `δ`:
+Let $G = (G_1, \ldots, G_q)$ be $q$ i.i.d. smooth Gaussian RFs. Include a
+voxel $x$ iff the winner's lead over the runner-up exceeds a margin
+$\delta$:
 
-```
-A_δ = { x : max_i G_i(x) − second-max_i G_i(x) ≥ δ }
-```
+$$
+A_\delta = \bigl\{\, x : \max_i G_i(x) - \mathrm{second\!-\!max}_i\,G_i(x) \geq \delta \,\bigr\}.
+$$
 
 The hitting set in $\mathbb{R}^q$ is a disjoint union of `q` unbounded
 polyhedral "winner" chambers; the matrix film is where two or more fields
@@ -31,30 +32,37 @@ Closed-form `M_j^γ(D_δ)` for `j = 0..3`, numerically validated to <2% at
 stratified-tube proof is not written up — the `q = 2` identities and the
 `N = 256` convergence are the current evidence.
 
-## The `M_j` (inline)
+## The $\mathcal M_j$ (inline)
 
-Set `a = δ/√2`. The codimension-`k` stratum measures:
+Set $a = \delta/\sqrt{2}$. The codimension-$k$ stratum measures are
 
-```
-S_k(q, δ) = q · C(q−1, k) · √(k+1)
-          · ∫ φ(t+δ) · φ(t)^k · Φ(t)^(q−1−k) dt,     1 ≤ k ≤ min(3, q−1)
-```
+$$
+S_k(q,\delta) = q \binom{q-1}{k} \sqrt{k+1}
+\int_{-\infty}^{\infty}
+\varphi(t+\delta)\,\varphi(t)^{k}\,\Phi(t)^{q-1-k}\,dt,
+\qquad 1 \leq k \leq \min(3, q-1).
+$$
 
 Then
 
-```
-M_0(q, δ) = q · ∫ φ(t) · Φ(t−δ)^(q−1) dt
-M_1(q, δ) = S_1                                            = −√2 · ∂M_0/∂δ
-M_2(q, δ) = a · S_1 + (π/3) · S_2
-M_3(q, δ) = (a² − 1) · S_1 + (4a/√3) · S_2
-           + 2 · (3·arccos(1/3) − π) · S_3
-```
+$$
+\begin{aligned}
+\mathcal M_0(q,\delta) &= q \int_{-\infty}^{\infty}
+    \varphi(t)\,\Phi(t-\delta)^{q-1}\,dt, \\[2pt]
+\mathcal M_1(q,\delta) &= S_1 \;=\; -\sqrt{2}\,\frac{\partial \mathcal M_0}{\partial \delta}, \\[2pt]
+\mathcal M_2(q,\delta) &= a\, S_1 + \frac{\pi}{3}\, S_2, \\[2pt]
+\mathcal M_3(q,\delta) &= (a^{2}-1)\, S_1
+    + \frac{4a}{\sqrt{3}}\, S_2
+    + 2\!\left(3\arccos\!\tfrac{1}{3} - \pi\right)\! S_3.
+\end{aligned}
+$$
 
-The constants are the normal-cone angles: `π/3` for a wedge of two active
-facets, `3·arccos(1/3) − π` for the equilateral spherical triangle of
-three active facets. For `q = 2` the formulas reduce exactly to twice the
-Gaussian `M_j` at `δ/√2` — a check the code runs on every launch (also
-checks `M_1 = −√2 · ∂M_0/∂δ`).
+The constants are the normal-cone angles: $\pi/3$ for a wedge of two
+active facets, $3\arccos(1/3) - \pi$ for the equilateral spherical
+triangle of three active facets. For $q = 2$ the formulas reduce exactly
+to twice the Gaussian $\mathcal M_j$ at $\delta/\sqrt{2}$ — a check the
+code runs on every launch (also checks
+$\mathcal M_1 = -\sqrt{2}\,\partial \mathcal M_0/\partial \delta$).
 
 Full derivation (chamber stratification + normal-cone integration):
 [`theory/gaussian_minkowski_functionals.md`](../../theory/gaussian_minkowski_functionals.md).
