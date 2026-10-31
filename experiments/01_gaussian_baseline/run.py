@@ -1,21 +1,18 @@
 """Experiment 01: Gaussian random field baseline with full Adler validation.
 
-Demonstrates the complete Adler-Taylor machinery for a scalar Gaussian RF
-with Gaussian covariance. The Adler formula gives exact closed-form predictions
-for E[L0], E[L2], E[L3] as functions of threshold kappa. This experiment
-validates those predictions against single-realisation and Monte Carlo measurements.
+Runs for lc in LCS.  VTK files go to results/lc_XX/; combined figures
+go to results/.
 
 Run:
     mamba run -n rf_explo python run.py
 
-Outputs (all in results/):
-    threshold_sweep.png/.csv  — single realisation vs Adler theory
-    mc_gaussian.png/.csv      — Monte Carlo mean +/- std vs Adler theory
-    random_field.vti          — ParaView scalar field
-    excursion.vti             — ParaView binary excursion (kappa=1.0)
-    excursion_surface.vtp     — ParaView surface mesh
-
-Seeds: SEED=42 (single realisation), SEED_MC=10 (Monte Carlo).
+Outputs:
+    results/mc_gaussian.png         — 3-row x 5-col, LKC error bars vs theory + mid-plane slices
+    results/percolation.png         — percolation probability P(kappa) + phi(kappa) per lc
+    results/lc_XX/threshold_sweep.csv
+    results/lc_XX/random_field.vti
+    results/lc_XX/excursion.vti     — binary excursion at KAPPA_VTI
+    results/lc_XX/excursion_surface.vtp
 """
 
 from __future__ import annotations
@@ -24,6 +21,7 @@ import csv
 import sys
 from pathlib import Path
 
+import matplotlib.gridspec as mgridspec
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -31,131 +29,278 @@ sys.path.insert(0, str(Path(__file__).parents[2]))
 from src import adler, fields, io, measures
 from src.fields import GridSpec
 
-RESULTS = Path(__file__).parent / "results"
-RESULTS.mkdir(exist_ok=True)
+BASE_RESULTS  = Path(__file__).parent / "results"
+BASE_RESULTS.mkdir(exist_ok=True)
 
-SEED = 42
-SEED_MC = 10
-N_RUNS_MC = 50
-N = 100
-LENGTH = 100.0
-LC = 8.0
-KAPPA_VTI = 1.0
+SEED_BASE      = 42
+N_REALIZATIONS = 10
+N              = 100
+LENGTH         = 100.0
+LCS            = [4, 7, 12]
+KAPPA_VTI      = 0.5           # κ ≈ 31% VF — disconnected inclusions
+THRESHOLDS     = np.linspace(-2.5, 2.5, 25)
 
+KAPPA_VIS  = [-1.5, 0.0, 1.5]
+VIS_COLORS = ["#d62728", "#2ca02c", "#9467bd"]
+LC_COLORS  = ["#4e79a7", "#f28e2b", "#59a14f"]   # one per lc in LCS order
 
-def run_single_sweep() -> None:
-    print("Single-realisation threshold sweep...")
-    grid = GridSpec(n=N, length=LENGTH)
-    rng = np.random.default_rng(SEED)
-    field = fields.generate_gaussian_rf(grid, LC, rng)
+C_THEORY = "#ff6e7c"
+C_NUM    = "#3a8cb4"
 
-    thresholds = np.linspace(-2.5, 2.5, 25)
-    rows = []
-    m_L0, m_L1, m_L2, m_L3, m_phi = [], [], [], [], []
-
-    print("  computing threshold sweep (L1 via marching-cubes + mean curvature)...")
-    for kappa in thresholds:
-        phase = field >= kappa
-        m = measures.measure_all(phase, grid, compute_l1=True)
-        m_L0.append(m["euler"])
-        m_L1.append(m["l1"])
-        m_L2.append(m["half_surface"])
-        m_L3.append(m["volume"])
-        m_phi.append(m["vf"])
-
-    theory = adler.expected_lkcs_gaussian(grid, LC, thresholds)
-
-    with (RESULTS / "threshold_sweep.csv").open("w", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["kappa", "measured_L0", "measured_L1", "measured_L2", "measured_L3", "measured_phi",
-                    "theory_L0", "theory_L1", "theory_L2", "theory_L3", "theory_phi"])
-        for i, kappa in enumerate(thresholds):
-            w.writerow([kappa, m_L0[i], m_L1[i], m_L2[i], m_L3[i], m_phi[i],
-                        theory["L0"][i], theory["L1"][i], theory["L2"][i], theory["L3"][i], theory["phi"][i]])
-
-    fig, axes = plt.subplots(2, 3, figsize=(16, 9), constrained_layout=True)
-    panels = [
-        (axes[0, 0], "Volume fraction", m_phi, theory["phi"]),
-        (axes[0, 1], "L3 volume", m_L3, theory["L3"]),
-        (axes[0, 2], "L0 = Euler characteristic", m_L0, theory["L0"]),
-        (axes[1, 0], "L1 = integrated mean curvature / π\n(mesh estimate, O(dx) bias)", m_L1, theory["L1"]),
-        (axes[1, 1], "L2 = half surface area", m_L2, theory["L2"]),
-        (axes[1, 2], None, None, None),   # blank panel
-    ]
-    for ax, title, measured, expected in panels:
-        if title is None:
-            ax.axis("off")
-            continue
-        ax.plot(thresholds, measured, "o", ms=4, label="measured")
-        ax.plot(thresholds, expected, "-", lw=2, label="Adler theory")
-        ax.set_xlabel("threshold κ")
-        ax.set_title(title)
-        ax.legend(fontsize=8)
-        ax.grid(alpha=0.3)
-    fig.suptitle(f"Gaussian RF — single realisation  (n={N}, lc={LC}, seed={SEED})")
-    fig.savefig(RESULTS / "threshold_sweep.png", dpi=180)
-    plt.close(fig)
-    print(f"  saved threshold_sweep.png/.csv")
-
-    phase = field >= KAPPA_VTI
-    io.save_vti(RESULTS / "random_field.vti", field, grid, "random_field")
-    io.save_vti(RESULTS / "excursion.vti", phase.astype(np.uint8), grid, "excursion")
-    io.save_vtp(RESULTS / "excursion_surface.vtp", phase, grid)
-    print(f"  saved VTI/VTP files (kappa={KAPPA_VTI})")
+COL_TITLES = [
+    "L0 — Euler characteristic",
+    "L1 — integrated mean curvature / π\n(binary-surface bias)",
+    "L2 — half surface area",
+    "L3 — volume fraction φ",
+]
+COL_KEYS = ["L0", "L1", "L2", "phi"]
 
 
-def run_monte_carlo() -> None:
-    print(f"Monte Carlo ({N_RUNS_MC} runs)...")
-    grid = GridSpec(n=N, length=LENGTH)
-    thresholds = np.linspace(-2.0, 2.0, 17)
-    L0_all = np.zeros((N_RUNS_MC, len(thresholds)))
-    L2_all = np.zeros_like(L0_all)
-    phi_all = np.zeros_like(L0_all)
+def _style_ax(ax: plt.Axes) -> None:
+    ax.grid(alpha=0.25, lw=0.5)
+    ax.set_xlabel("threshold κ", fontsize=9)
 
-    for r in range(N_RUNS_MC):
-        rng = np.random.default_rng(SEED_MC + r)
-        field = fields.generate_gaussian_rf(grid, LC, rng)
-        for j, kappa in enumerate(thresholds):
-            m = measures.measure_all(field >= kappa, grid)
-            L0_all[r, j] = m["euler"]
-            L2_all[r, j] = m["half_surface"]
-            phi_all[r, j] = m["vf"]
-        print(f"  run {r + 1}/{N_RUNS_MC}", end="\r")
 
+def run_one(lc: float) -> dict:
+    """Run N_REALIZATIONS for one lc; return dict of arrays, theory and field slice."""
+    results = BASE_RESULTS / f"lc_{lc:02.0f}"
+    results.mkdir(exist_ok=True)
+
+    grid   = GridSpec(n=N, length=LENGTH)
+    theory = adler.expected_lkcs_gaussian(grid, lc, THRESHOLDS)
+
+    L0_all   = np.zeros((N_REALIZATIONS, len(THRESHOLDS)))
+    L1_all   = np.zeros_like(L0_all)
+    L2_all   = np.zeros_like(L0_all)
+    phi_all  = np.zeros_like(L0_all)
+    perc_all = np.zeros((N_REALIZATIONS, len(THRESHOLDS)), dtype=bool)
+    field_slice = None
+
+    print(f"  lc={lc}  running {N_REALIZATIONS} realisations...")
+    for r in range(N_REALIZATIONS):
+        rng   = np.random.default_rng(SEED_BASE + r)
+        field = fields.generate_gaussian_rf(grid, lc, rng)
+        print(f"    realisation {r + 1}/{N_REALIZATIONS}", end="\r")
+        for j, kappa in enumerate(THRESHOLDS):
+            phase = field >= kappa
+            m = measures.measure_all(phase, grid, compute_l1=True)
+            L0_all[r, j]   = m["euler"]
+            L1_all[r, j]   = m["l1"]
+            L2_all[r, j]   = m["half_surface"]
+            phi_all[r, j]  = m["vf"]
+            perc_all[r, j] = m["percolates_any"]
+        if r == 0:
+            field_slice = field[:, :, N // 2]
+            phase_vti   = field >= KAPPA_VTI
+            io.save_vti(results / "random_field.vti",      field,                      grid, "random_field")
+            io.save_vti(results / "excursion.vti",         phase_vti.astype(np.uint8), grid, "excursion")
+            io.save_vtp(results / "excursion_surface.vtp", phase_vti, grid)
     print()
-    theory = adler.expected_lkcs_gaussian(grid, LC, thresholds)
 
-    with (RESULTS / "mc_gaussian.csv").open("w", newline="") as f:
+    with (results / "threshold_sweep.csv").open("w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["kappa", "L0_mean", "L0_std", "L2_mean", "L2_std", "phi_mean", "phi_std",
-                    "theory_L0", "theory_L2", "theory_phi"])
-        for j, kappa in enumerate(thresholds):
-            w.writerow([kappa,
-                        L0_all[:, j].mean(), L0_all[:, j].std(ddof=1),
-                        L2_all[:, j].mean(), L2_all[:, j].std(ddof=1),
-                        phi_all[:, j].mean(), phi_all[:, j].std(ddof=1),
-                        theory["L0"][j], theory["L2"][j], theory["phi"][j]])
+        w.writerow([
+            "kappa",
+            "L0_mean", "L0_std", "L1_mean", "L1_std",
+            "L2_mean", "L2_std", "phi_mean", "phi_std",
+            "perc_prob",
+            "theory_L0", "theory_L1", "theory_L2", "theory_phi",
+        ])
+        for j, kappa in enumerate(THRESHOLDS):
+            w.writerow([
+                kappa,
+                L0_all[:, j].mean(),  L0_all[:, j].std(ddof=1),
+                L1_all[:, j].mean(),  L1_all[:, j].std(ddof=1),
+                L2_all[:, j].mean(),  L2_all[:, j].std(ddof=1),
+                phi_all[:, j].mean(), phi_all[:, j].std(ddof=1),
+                perc_all[:, j].mean(),
+                theory["L0"][j], theory["L1"][j], theory["L2"][j], theory["phi"][j],
+            ])
 
-    fig, axes = plt.subplots(1, 3, figsize=(14, 5), constrained_layout=True)
-    for ax, key, label, t_key in [
-        (axes[0], L0_all, "L0 Euler characteristic", "L0"),
-        (axes[1], L2_all, "L2 half surface area", "L2"),
-        (axes[2], phi_all, "Volume fraction", "phi"),
-    ]:
-        ax.errorbar(thresholds, key.mean(0), yerr=key.std(0, ddof=1),
-                    fmt="o", capsize=3, ms=4, label=f"MC mean ± std (n={N_RUNS_MC})")
-        ax.plot(thresholds, theory[t_key], "-", lw=2, label="Adler theory")
-        ax.set_xlabel("threshold κ")
-        ax.set_title(label)
-        ax.legend(fontsize=8)
-        ax.grid(alpha=0.3)
-    fig.suptitle(f"Gaussian RF — Monte Carlo validation  (n={N}, lc={LC})")
-    fig.savefig(RESULTS / "mc_gaussian.png", dpi=180)
+    print(f"  lc={lc}  VTK + CSV saved to {results}/")
+    return {
+        "lc": lc, "theory": theory, "field_slice": field_slice,
+        "L0": L0_all, "L1": L1_all, "L2": L2_all, "phi": phi_all,
+        "perc": perc_all,
+    }
+
+
+def _interp_half_crossing(x: np.ndarray, p: np.ndarray) -> float | None:
+    """Return x where percolation probability p drops through 0.5 (linear interp)."""
+    for i in range(len(p) - 1):
+        if p[i] >= 0.5 >= p[i + 1]:
+            t = (p[i] - 0.5) / (p[i] - p[i + 1])
+            return float(x[i] + t * (x[i + 1] - x[i]))
+    return None
+
+
+def make_percolation_figure(all_data: list[dict], fname: str) -> None:
+    """φ (top) and L0 (bottom) vs κ with shared x-axis.
+
+    Vertical dashed lines at κ_c (upper E[L0]=0 crossing, Roubin & Colliat 2016)
+    span both panels; φ_c is annotated on the top panel.
+    """
+    grid = GridSpec(n=N, length=LENGTH)
+    fig, (ax_phi, ax_L0) = plt.subplots(
+        2, 1, figsize=(9, 7), sharex=True, constrained_layout=True
+    )
+
+    for data, color in zip(all_data, LC_COLORS):
+        lc     = data["lc"]
+        phi_mu = data["phi"].mean(0)
+        phi_sd = data["phi"].std(0, ddof=1)
+        L0_mu  = data["L0"].mean(0)
+        L0_sd  = data["L0"].std(0, ddof=1)
+        t_phi  = data["theory"]["phi"]
+        t_L0   = data["theory"]["L0"]
+
+        kp_hi, phi_hi = adler.find_percolation_threshold(grid, lc, u_search=(0.5,  5.0))
+        kp_lo, phi_lo = adler.find_percolation_threshold(grid, lc, u_search=(-2.5, -0.1))
+
+        # Volume fraction (top)
+        ax_phi.fill_between(THRESHOLDS, phi_mu - phi_sd, phi_mu + phi_sd,
+                            color=color, alpha=0.15, lw=0)
+        ax_phi.plot(THRESHOLDS, phi_mu, color=color, lw=1.5, alpha=0.8)
+        ax_phi.plot(THRESHOLDS, t_phi,  color=color, lw=2.0, ls="--",
+                    label=f"lc = {lc}")
+
+        # Euler characteristic (bottom)
+        ax_L0.fill_between(THRESHOLDS, L0_mu - L0_sd, L0_mu + L0_sd,
+                           color=color, alpha=0.15, lw=0)
+        ax_L0.plot(THRESHOLDS, L0_mu, color=color, lw=1.5, alpha=0.8)
+        ax_L0.plot(THRESHOLDS, t_L0,  color=color, lw=2.0, ls="--",
+                   label=f"lc = {lc}")
+
+        # Upper crossing: κ_c+, φ_c (disconnected inclusions onset)
+        if np.isfinite(kp_hi):
+            ax_phi.axvline(kp_hi, color=color, lw=1.2, ls="--", alpha=0.75)
+            ax_L0.axvline(kp_hi, color=color, lw=1.2, ls="--", alpha=0.75)
+            if np.isfinite(phi_hi):
+                ax_phi.annotate(
+                    f"φ_c = {phi_hi:.3f}",
+                    xy=(kp_hi, phi_hi), xytext=(kp_hi + 0.12, phi_hi + 0.03),
+                    fontsize=7.5, color=color,
+                    arrowprops=dict(arrowstyle="-", color=color, lw=0.8),
+                )
+
+        # Lower crossing: κ_c−, φ = 1−φ_c (matrix becomes disconnected)
+        if np.isfinite(kp_lo):
+            ax_phi.axvline(kp_lo, color=color, lw=1.2, ls=":", alpha=0.75)
+            ax_L0.axvline(kp_lo, color=color, lw=1.2, ls=":", alpha=0.75)
+            if np.isfinite(phi_lo):
+                ax_phi.annotate(
+                    f"1−φ_c = {phi_lo:.3f}",
+                    xy=(kp_lo, phi_lo), xytext=(kp_lo - 0.12, phi_lo - 0.07),
+                    fontsize=7.5, color=color, ha="right",
+                    arrowprops=dict(arrowstyle="-", color=color, lw=0.8),
+                )
+
+    ax_L0.axhline(0, color="0.3", lw=1.0, ls="--", label="E[L₀] = 0")
+
+    ax_phi.set_ylabel("volume fraction φ", fontsize=10)
+    ax_phi.set_title("L3 — volume fraction  (solid = MC mean ± std,  dashed = Adler theory)",
+                     fontsize=10)
+    ax_phi.legend(fontsize=8)
+    ax_phi.grid(alpha=0.25, lw=0.5)
+
+    ax_L0.set_xlabel("threshold κ", fontsize=10)
+    ax_L0.set_ylabel("Euler characteristic L0", fontsize=10)
+    ax_L0.set_title("L0 — Euler characteristic\n"
+                    "(-- = upper κ_c,  ··· = lower κ_c,  both where E[L₀] = 0)",
+                    fontsize=10)
+    ax_L0.legend(fontsize=8)
+    ax_L0.grid(alpha=0.25, lw=0.5)
+
+    fig.suptitle(
+        f"Gaussian RF — volume fraction & Euler characteristic  "
+        f"(n={N}, {N_REALIZATIONS} realisations)",
+        fontsize=13,
+    )
+    fig.savefig(BASE_RESULTS / fname, dpi=180)
     plt.close(fig)
-    print("  saved mc_gaussian.png/.csv")
+    print(f"  saved results/{fname}")
+
+
+def make_figure(all_data: list[dict], fname: str) -> None:
+    n_rows = len(all_data)
+    fig    = plt.figure(figsize=(21, 4 * n_rows))
+    outer  = mgridspec.GridSpec(
+        n_rows, 5, figure=fig,
+        width_ratios=[1, 1, 1, 1, 1.1],
+        left=0.06, right=0.985, top=0.91, bottom=0.08,
+        wspace=0.38, hspace=0.42,
+    )
+
+    for row, data in enumerate(all_data):
+        lc          = data["lc"]
+        theory      = data["theory"]
+        arrs        = [data["L0"], data["L1"], data["L2"], data["phi"]]
+        field_slice = data["field_slice"]
+        first_row   = (row == 0)
+
+        for col, (arr, key, title) in enumerate(zip(arrs, COL_KEYS, COL_TITLES)):
+            ax = fig.add_subplot(outer[row, col])
+            mu, sd = arr.mean(0), arr.std(0, ddof=1)
+
+            for kv, vc in zip(KAPPA_VIS, VIS_COLORS):
+                ax.axvline(kv, color=vc, lw=1.2, ls=":", alpha=0.85, zorder=0)
+
+            ax.errorbar(THRESHOLDS, mu, yerr=sd,
+                        fmt="o", color=C_NUM, ecolor=C_NUM, capsize=3, ms=3, lw=1.0,
+                        label=f"Numerical experiment (n={N_REALIZATIONS})" if first_row and col == 0 else None)
+            ax.plot(THRESHOLDS, theory[key], color=C_THEORY, lw=2.0,
+                    label="Minkowski Functionals" if first_row and col == 0 else None)
+
+            _style_ax(ax)
+            if first_row:
+                ax.set_title(title, fontsize=10)
+            if col == 0:
+                ax.set_ylabel(f"lc = {lc}", fontsize=11, fontweight="bold")
+            if first_row and col == 0:
+                ax.legend(fontsize=8, loc="best")
+
+        # 5th column: 3 stacked mid-plane slice thumbnails
+        inner = mgridspec.GridSpecFromSubplotSpec(
+            3, 1, subplot_spec=outer[row, 4], hspace=0.30
+        )
+        top_thumb = None
+        for k, (kv, vc) in enumerate(zip(KAPPA_VIS, VIS_COLORS)):
+            ax_img = fig.add_subplot(inner[k])
+            if k == 0:
+                top_thumb = ax_img
+            ax_img.imshow(
+                (field_slice >= kv), cmap="gray_r", origin="lower",
+                interpolation="nearest", vmin=0, vmax=1,
+            )
+            ax_img.set_xticks([])
+            ax_img.set_yticks([])
+            for spine in ax_img.spines.values():
+                spine.set_edgecolor(vc)
+                spine.set_linewidth(2.0)
+            ax_img.set_title(f"κ = {kv:+.1f}", fontsize=8, color=vc,
+                             fontweight="bold", pad=3)
+
+        if first_row and top_thumb is not None:
+            pos = top_thumb.get_position()
+            fig.text(
+                (pos.x0 + pos.x1) / 2, pos.y1 + 0.012,
+                "mid-plane slice  (realisation 1)",
+                ha="center", va="bottom", fontsize=8, color="0.45",
+            )
+
+    fig.suptitle(
+        f"Gaussian RF — Monte Carlo validation  (n={N}, {N_REALIZATIONS} realisations)",
+        fontsize=13,
+    )
+    fig.savefig(BASE_RESULTS / fname, dpi=180)
+    plt.close(fig)
+    print(f"  saved results/{fname}")
 
 
 if __name__ == "__main__":
-    run_single_sweep()
-    run_monte_carlo()
-    print("Done. Results in experiments/01_gaussian_baseline/results/")
+    all_data = []
+    for lc in LCS:
+        all_data.append(run_one(lc))
+    make_figure(all_data, "mc_gaussian.png")
+    make_percolation_figure(all_data, "percolation.png")
+    print("Done.")

@@ -43,9 +43,8 @@ for `v = 3, 5, 10, 30` and Gaussian (`v -> inf`).
 **Inverse calibration for both families** is fully operational: given `(phi_target, L0_target)`,
 solve for `(lc, u)` or `(lc, v, u)` via `scipy.optimize`.
 
-**Caveat on `L2` for Student-t.** The `L2` (surface area) formula for `t_v` follows the same
-Adler structure with `t_v` M_j, but this has not been independently validated in this project.
-Use the Gaussian `L2` formula as an approximation, or treat `L2` as measured-only for `t_v`.
+All four `L_i` for `t_v` are derived from the cone-geometry `M_j^{(t)}` (see
+`theory/student_t_derivation.md` §5) and validated against MC in `experiments/03_student_t/`.
 
 ## Partial link: margin tessellation
 
@@ -95,11 +94,11 @@ targets `c_a`. The GKF applies, but the `M_j` depend on the geometry of the ball
 M_j^gamma(D_r) = sum_a M_j^gamma(B(c_a, r))
 ```
 
-For a single ball `B(c, r)` in `R^d`, `M_0^gamma(B(c,r)) = P(||Z - c|| <= r)` where
-`Z ~ N(0, I_d)`. This is the CDF of a noncentral chi-squared distribution with `d` degrees of
-freedom and noncentrality `||c||^2`. The formula exists and is implemented in scipy; it has not
-yet been wired into this codebase. **Volume fraction before contact is currently estimated by
-Gaussian-space Monte Carlo**, which is fast (2 million samples, seconds) and accurate.
+For a single ball `B(c, r)` in `R^d`, `M_0^gamma(B(c,r)) = P(||Z - c|| <= r) =
+F_{nc chi2}((d, ||c||^2), r^2)`. Higher functionals follow by differentiating the tube
+probability in the ball radius; the four `M_j` for a single ball are implemented in
+`src/adler.py: ball_lkcs`. Agreement with Monte Carlo is better than 5% on all four LKCs
+at `N = 100` for `r/r_c <= 0.95` (see `experiments/05_coalescing_lobes/`).
 
 **After contact (`r >= r_c`):** Ball intersections `B(c_a, r) ∩ B(c_b, r)` contribute through
 inclusion-exclusion. The required quantities are Gaussian-weighted volumes of spherical lens
@@ -116,20 +115,18 @@ no analytic Euler prediction in the post-contact regime.
 
 | Quantity | Before contact | After contact |
 |----------|---------------|---------------|
-| Volume fraction | MC (fast, accurate) | MC |
-| `M1` (surface density) | Not implemented | Not implemented |
-| `M2, M3` | Not implemented | Not implemented |
-| `E[L0]` | Not available | Not available |
+| `M0..M3` | Closed-form, validated < 5% | Not implemented |
+| `E[L0..L3]` | Closed-form, validated < 5% | Not available |
 
 ## Summary table
 
 | Model | M0 (vol frac) | M1 | M2, M3 | E[L0] reliable? |
 |-------|---------------|----|---------|-----------------|
 | Gaussian | Exact | Exact | Exact | Yes — MC validated |
-| Student-t (v >= 3) | Exact | Exact | Exact (L2 not validated) | Yes for L0 — MC validated |
+| Student-t (v >= 3) | Exact | Exact | Exact | Yes — MC validated |
 | Margin tessellation | Exact | Exact | Derived, proof pending | Strong numerical conjecture |
-| Coalescing lobes (r < r_c) | MC only | Not implemented | Not implemented | No |
-| Coalescing lobes (r >= r_c) | MC | Not implemented | Not implemented | No |
+| Coalescing lobes (r < r_c) | Exact | Exact | Exact | Yes — MC validated |
+| Coalescing lobes (r >= r_c) | Not implemented | Not implemented | Not implemented | No |
 
 ## What would complete the link for each model
 
@@ -137,9 +134,6 @@ no analytic Euler prediction in the post-contact regime.
 `D_delta`. The geometry is fully worked out; what remains is a careful presentation of the
 tube-radius restriction and normal-cone integration steps.
 
-**Coalescing lobes, before contact:** Implement `M_0^gamma(B(c,r))` via the noncentral chi-squared
-CDF (already in scipy). Extend to `M_1, M_2, M_3` via the standard ball Minkowski functional
-formulae in Gaussian measure.
-
 **Coalescing lobes, after contact:** Derive or numerically evaluate the Gaussian-weighted
 spherical lens volumes in `R^3`. This is the primary open analytic problem for this model.
+The pre-contact case is already closed (`src/adler.py: ball_lkcs`).

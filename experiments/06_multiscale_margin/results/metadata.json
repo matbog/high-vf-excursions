@@ -1,0 +1,72 @@
+{
+  "config": {
+    "n": 128,
+    "length": 64.0,
+    "length_unit": "mm",
+    "padding_length": 24.0,
+    "realizations": 5,
+    "seed": 7301,
+    "target_phis": [
+      0.6,
+      0.7,
+      0.75,
+      0.8,
+      0.85
+    ],
+    "classes": [
+      {
+        "name": "coarse_gravel",
+        "lc": 12.0,
+        "q": 16,
+        "share": 0.4
+      },
+      {
+        "name": "fine_gravel",
+        "lc": 6.0,
+        "q": 16,
+        "share": 0.35
+      },
+      {
+        "name": "sand_proxy",
+        "lc": 2.0,
+        "q": 16,
+        "share": 0.25
+      }
+    ],
+    "reference_class": 1,
+    "save_volumes": true
+  },
+  "spectral": [
+    {
+      "full_n": 225,
+      "lambda2": 0.013888888888888888,
+      "rho": 0.04701579862897969,
+      "forward_difference_variance": 0.013876839535742357
+    },
+    {
+      "full_n": 225,
+      "lambda2": 0.05555555555555555,
+      "rho": 0.09403159725795938,
+      "forward_difference_variance": 0.0553631000774718
+    },
+    {
+      "full_n": 225,
+      "lambda2": 0.5000000000000001,
+      "rho": 0.2820947917738782,
+      "forward_difference_variance": 0.4846954974921938
+    }
+  ],
+  "mode": "simulation",
+  "python": "3.12.13",
+  "numpy": "2.4.3",
+  "scipy": "1.17.1",
+  "skimage": "0.26.0",
+  "generator": "real-white FFT; ensemble-normalized; cropped; Nyquist removed",
+  "source_sha256": {
+    "experiments\\07_multiscale_margin\\run.py": "1f5df594cffe49dfd01ccea4fa3248b19f324811ba206db1a4a389e17ebb3690",
+    "experiments\\07_multiscale_margin\\model.py": "714ecd31efacbf90927b34a4255d2ee9c1d0047f978f7de151074b0cdd450c6b",
+    "src\\adler.py": "051b3aa1d8e9516bdb1e08771b9c36c10e70125c8efc32130f134cbf18fe9e25"
+  },
+  "elapsed_seconds": 216.93417479998607,
+  "completed_realizations": 5
+}

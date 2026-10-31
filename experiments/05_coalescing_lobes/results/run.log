@@ -1,0 +1,43 @@
+Coalescing lobes: n=100, lc=10.0, rho=1.5, r_c=1.224745
+r/r_c sweep: [0.45, 0.65, 0.85, 0.98, 1.02, 1.15, 1.35, 1.6]
+NOTE: GKF L0..L3 theory applies ONLY for r/r_c < 1 (balls disjoint).
+
+Estimating Gaussian-space volume fractions by MC...
+  r=1 r/r_c=0.45 phi=0.055  L0=   382/  384.3  L1=   7099/ 7504.0  L2cr=  34092/35798.9
+  r=1 r/r_c=0.65 phi=0.165  L0=   296/  306.4  L1=   9823/10296.4  L2cr=  70728/72709.7
+  r=1 r/r_c=0.85 phi=0.352  L0=   178/  170.2  L1=  11700/12089.6  L2cr= 115429/118175.8
+  r=1 r/r_c=0.98 phi=0.522  L0=    71/   57.9  L1=  12223/12515.6  L2cr= 146992/149756.1
+  r=1 r/r_c=1.02 phi=0.580  L0=    30/    n/a  L1=  12287/    n/a  L2cr= 156537/    n/a
+  r=1 r/r_c=1.15 phi=0.728  L0=   -79/    n/a  L1=  11881/    n/a  L2cr= 179168/    n/a
+  r=1 r/r_c=1.35 phi=0.846  L0=   -90/    n/a  L1=   9965/    n/a  L2cr= 190354/    n/a
+  r=1 r/r_c=1.60 phi=0.925  L0=   -90/    n/a  L1=   6048/    n/a  L2cr= 193630/    n/a
+  r=2 r/r_c=0.45 phi=0.060  L0=   351/  384.3  L1=   6981/ 7504.0  L2cr=  35434/35798.9
+  r=2 r/r_c=0.65 phi=0.177  L0=   273/  306.4  L1=   9621/10296.4  L2cr=  72567/72709.7
+  r=2 r/r_c=0.85 phi=0.375  L0=   136/  170.2  L1=  10914/12089.6  L2cr= 116116/118175.8
+  r=2 r/r_c=0.98 phi=0.550  L0=    42/   57.9  L1=  11304/12515.6  L2cr= 145990/149756.1
+  r=2 r/r_c=1.02 phi=0.609  L0=    10/    n/a  L1=  11329/    n/a  L2cr= 154933/    n/a
+  r=2 r/r_c=1.15 phi=0.757  L0=   -60/    n/a  L1=  10931/    n/a  L2cr= 176017/    n/a
+  r=2 r/r_c=1.35 phi=0.871  L0=   -81/    n/a  L1=   9340/    n/a  L2cr= 185555/    n/a
+  r=2 r/r_c=1.60 phi=0.943  L0=   -76/    n/a  L1=   5550/    n/a  L2cr= 188325/    n/a
+  r=3 r/r_c=0.45 phi=0.055  L0=   372/  384.3  L1=   7024/ 7504.0  L2cr=  33942/35798.9
+  r=3 r/r_c=0.65 phi=0.168  L0=   292/  306.4  L1=   9896/10296.4  L2cr=  71782/72709.7
+  r=3 r/r_c=0.85 phi=0.365  L0=   184/  170.2  L1=  11683/12089.6  L2cr= 117576/118175.8
+  r=3 r/r_c=0.98 phi=0.541  L0=    83/   57.9  L1=  12231/12515.6  L2cr= 149341/149756.1
+  r=3 r/r_c=1.02 phi=0.600  L0=    38/    n/a  L1=  12290/    n/a  L2cr= 158834/    n/a
+  r=3 r/r_c=1.15 phi=0.748  L0=   -59/    n/a  L1=  12068/    n/a  L2cr= 181098/    n/a
+  r=3 r/r_c=1.35 phi=0.863  L0=   -78/    n/a  L1=  10211/    n/a  L2cr= 190973/    n/a
+  r=3 r/r_c=1.60 phi=0.940  L0=   -75/    n/a  L1=   6116/    n/a  L2cr= 193775/    n/a
+  r=4 r/r_c=0.45 phi=0.053  L0=   372/  384.3  L1=   7023/ 7504.0  L2cr=  33335/35798.9
+  r=4 r/r_c=0.65 phi=0.159  L0=   285/  306.4  L1=   9720/10296.4  L2cr=  69333/72709.7
+  r=4 r/r_c=0.85 phi=0.342  L0=   165/  170.2  L1=  11632/12089.6  L2cr= 113744/118175.8
+  r=4 r/r_c=0.98 phi=0.510  L0=    51/   57.9  L1=  12064/12515.6  L2cr= 145346/149756.1
+  r=4 r/r_c=1.02 phi=0.567  L0=     5/    n/a  L1=  12067/    n/a  L2cr= 154841/    n/a
+  r=4 r/r_c=1.15 phi=0.713  L0=   -71/    n/a  L1=  11809/    n/a  L2cr= 176838/    n/a
+  r=4 r/r_c=1.35 phi=0.839  L0=   -94/    n/a  L1=  10080/    n/a  L2cr= 188866/    n/a
+  r=4 r/r_c=1.60 phi=0.929  L0=   -97/    n/a  L1=   6069/    n/a  L2cr= 192257/    n/a
+
+  saved coalescing_lobes_sweep.csv
+  saved coalescing_lobes_slices.png
+  saved coalescing_lobes_diagnostics.png
+  saved coalescing_lobes_lkcs.png
+Done. Results in experiments/05_coalescing_lobes/results/

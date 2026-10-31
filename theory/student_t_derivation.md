@@ -153,83 +153,65 @@ For large $|u|$: $p_\nu(u) \sim C_\nu |u|^{-(\nu+1)}$ — **polynomial**, much h
 the Gaussian $\exp(-u^2/2\sigma^2)$.  This shifts the volume fraction still present at
 the percolation threshold:
 
-| Field | Tail | Peak disconnected VF (3D) |
-|-------|------|--------------------------|
-| Gaussian | $\exp(-u^2/2)$ | $\approx 16\%$ |
-| $\chi^2(k)$ | $u^{k/2-1}\exp(-u/2)$ | $\approx 30\%$ |
-| $t_\nu$, $\nu=10$ | $u^{-11}$ | $\approx 25\text{–}30\%$ |
-| $t_\nu$, $\nu=3$ | $u^{-4}$ | $\approx 40\text{–}50\%$ (estimate) |
+| Field | Tail | EC-zero phi_c+ (finite domain, lc=8, a=100) |
+|-------|------|----------------------------------------------|
+| Gaussian | $\exp(-u^2/2)$ | $\approx 21.8\%$ |
+| $\chi^2(k=1)$ | $u^{-1/2}\exp(-u/2)$ | $\approx 37\text{–}51\%$ (lc-dependent) |
+| $t_\nu$, $\nu=10$ | $u^{-11}$ | $\approx 21.7\%$ |
+| $t_\nu$, $\nu=3$ | $u^{-4}$ | $\approx 21.1\%$ |
+
+Note: $t_\nu$ ceilings are nearly identical to Gaussian — see Section 7.
 
 ---
 
 ## 5. Minkowski Functionals for the $t_\nu$ Distribution
 
-The Minkowski functionals $\mathcal{M}_j^{(t)}(u)$ of the half-line $D_u = [u, +\infty)$
-under the $t_\nu$ marginal are derived by differentiating the survival function
-$\bar F_\nu(u) = \mathbb{P}(T_\nu \geq u)$ following the tube formula pattern of
-Worsley (1994) and Adler–Taylor (2007, §11.7).
+**Important:** The M_j are NOT obtained by differentiating the survival function. The
+excursion set $\{T_\nu \geq u\}$ is the preimage of a cone in $\mathbb{R}^{\nu+1}$ Gaussian
+space, and the GKF requires the Gaussian Minkowski functionals of that cone — not the
+scalar $t_\nu$ marginal derivatives. (The PDF-derivative approach gives expressions that
+fail the decisive consistency check at $u=0$; see Section 7.)
+
+Define the cone-geometry base function:
+
+$$
+c_\nu(u) = \frac{1}{\sqrt{2\pi}}\left(1 + \frac{u^2}{\nu}\right)^{-(\nu-1)/2}.
+\tag{6e}
+$$
+
+Then:
 
 $$
 \mathcal{M}_0^{(t)}(u) = \bar F_\nu(u) = \mathbb{P}(T_\nu \geq u),
 \tag{6a}
 $$
 
-which equals $\frac{1}{2}I_{1/2,\,\nu/2}\!\left(\frac{u^2}{u^2+\nu}\right)$
-for $u \geq 0$ via the incomplete Beta function ($= 1 - \frac{1}{2}I_{u^2/(u^2+\nu)}(1/2, \nu/2)$
-in SciPy notation: `scipy.stats.t.sf(u, df=nu)`).
-
 $$
-\mathcal{M}_1^{(t)}(u) = p_\nu(u),
+\mathcal{M}_1^{(t)}(u) = c_\nu(u),
 \tag{6b}
 $$
 
 $$
-\mathcal{M}_2^{(t)}(u) = p_\nu(u)\cdot\frac{(\nu+1)\,u}{\nu + u^2},
+\mathcal{M}_2^{(t)}(u) = A_\nu\, u\, c_\nu(u),
+\quad A_\nu = \sqrt{\tfrac{2}{\nu}}\,\frac{\Gamma((\nu+1)/2)}{\Gamma(\nu/2)},
 \tag{6c}
 $$
 
 $$
-\mathcal{M}_3^{(t)}(u) = p_\nu(u)
-\left[\frac{(\nu+1)(\nu+3)\,u^2}{(\nu + u^2)^2} - \frac{(\nu+1)}{\nu + u^2}\right].
+\mathcal{M}_3^{(t)}(u) = \left(\frac{\nu-1}{\nu}\,u^2 - 1\right) c_\nu(u).
 \tag{6d}
-$$
-
-### Derivation sketch
-
-The $j$-th Minkowski functional of $[u,+\infty)$ equals (up to a normalisation constant)
-the $j$-th derivative of the survival function evaluated at $u$, weighted by the tube
-volume:
-
-$$
-\mathcal{M}_j(D_u) = (-1)^j \frac{d^j \bar F}{du^j}\bigg|_{u}
-\quad (j \geq 1).
-$$
-
-So $\mathcal{M}_1 = -\bar F' = p_\nu$ (PDF). For $j=2$:
-
-$$
-\mathcal{M}_2 = -p_\nu'(u).
-$$
-
-Differentiating (5):
-
-$$
-p_\nu'(u) = p_\nu(u)\cdot\frac{-(\nu+1)\,u}{\nu + u^2},
-$$
-
-so $\mathcal{M}_2 = p_\nu(u)\cdot\frac{(\nu+1)\,u}{\nu + u^2}$. Similarly for $\mathcal{M}_3$:
-
-$$
-\mathcal{M}_3 = -p_\nu''(u) = p_\nu(u)
-\left[\frac{(\nu+1)(\nu+3)\,u^2}{(\nu+u^2)^2} - \frac{\nu+1}{\nu+u^2}\right].
 $$
 
 ### Limiting cases
 
-- $\nu \to \infty$: $p_\nu(u) \to \varphi(u)$ (Gaussian PDF), $(\nu+1)/(\nu+u^2) \to 1/\sigma^2$,
-  and all $\mathcal{M}_j^{(t)} \to \mathcal{M}_j^{(\gamma)}$ — recovers (3).
+- $\nu \to \infty$: $c_\nu(u) \to \varphi(u)$, $A_\nu \to 1$, and all
+  $\mathcal{M}_j^{(t)} \to \mathcal{M}_j^{(\gamma)}$ — recovers the Gaussian formulas (3).
+- $u = 0$: $c_\nu(0) = \varphi(0)$ for **all** $\nu$ — consistent with the identity
+  $\{T_\nu \geq 0\} = \{Z_0 \geq 0\}$ (same excursion set for all $\nu$, so all LKCs at
+  $\kappa=0$ must agree across field families).
+- $\mathcal{M}_3(u) = 0$ at $u_c = \sqrt{\nu/(\nu-1)}$ — the bulk EC-zero threshold.
 - $\nu = 1$ (Cauchy): no finite variance, $\lambda_2$ is undefined, Adler formula breaks.
-- **Safe range:** $\nu \in [3, 10]$ — heavy tails, finite $\lambda_2$, closed-form $\mathcal{M}_j$.
+- **Safe range:** $\nu \geq 3$.
 
 ---
 
@@ -272,17 +254,26 @@ The upper root $\Phi_c^+$ (high threshold, meatball regime — disconnected incl
 and lower root $\Phi_c^-$ (sponge regime — connected complement) bound the disconnected
 phase. For a Gaussian, $\Phi_c^+ \approx 15.9\%$ at $\beta \to \infty$.
 
-For a $t_\nu$ field, the same EC curve $\mathbb{E}[L_0(A_u)]$ is rescaled in $u$ by the
-heavier tails. The zero-crossing $\kappa_c^+$ moves to a higher threshold (in standardized
-$u$), but the corresponding $\Phi_c^+ = \bar F_\nu(\kappa_c^+)$ can be significantly higher
-because the $t_\nu$ tail decays slowly:
+For a $t_\nu$ field, $\mathcal{M}_3(u) = 0$ at $u_c = \sqrt{\nu/(\nu-1)}$, which is larger
+than the Gaussian $u_c = 1$ and increases with heavier tails. However, $\Phi_c^+ =
+\bar F_\nu(u_c) = \mathbb{P}(T_\nu \geq \sqrt{\nu/(\nu-1)})$ is slightly **smaller** than
+the Gaussian value, because the heavier tail raises the threshold faster than the CDF
+responds. The two effects nearly cancel:
+
+| $\nu$ | $u_c$ | $\Phi_c^+$ (bulk) | $\Phi_c^+$ (finite domain) |
+|--------|--------|-------------------|---------------------------|
+| $\infty$ (Gaussian) | 1.000 | 15.87% | 21.81% |
+| 10 | 1.054 | 15.83% | 21.68% |
+| 5  | 1.118 | 15.72% | 21.48% |
+| 3  | 1.225 | 15.40% | 21.09% |
+
+**Conclusion:** $t_\nu$ fields do not meaningfully raise the disconnected VF ceiling.
+Marginal tail heaviness is almost irrelevant; the ceiling is controlled by the spatial
+correlation structure ($\rho$, $a/l_c$), not the marginal distribution.
 
 $$
-\Phi_c^+(t_\nu) > \Phi_c^+(\text{Gaussian}).
+\Phi_c^+(t_\nu) \lesssim \Phi_c^+(\text{Gaussian}).
 $$
-
-This is the core mechanism by which $t_\nu$ fields achieve higher disconnected VF
-while preserving the Adler formula structure exactly.
 
 ---
 

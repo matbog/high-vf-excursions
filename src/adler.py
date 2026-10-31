@@ -20,7 +20,7 @@ from math import comb
 import numpy as np
 from scipy import optimize, stats
 from scipy.integrate import quad
-from scipy.special import erfc, ndtr
+from scipy.special import erfc, gamma, ndtr
 
 from .fields import GridSpec
 
@@ -78,7 +78,7 @@ def expected_lkcs_gaussian(
 
     Convention (Adler-Taylor / Roubin System 2.17):
       L0 = Euler characteristic
-      L1 = integrated mean curvature / pi  (theoretically exact; not measured numerically)
+      L1 = integrated mean curvature / pi
       L2 = half surface area
       L3 = volume
 
@@ -92,7 +92,77 @@ def expected_lkcs_gaussian(
     M2 = gaussian_m2(kappas, sigma)
     M3 = gaussian_m3(kappas, sigma)
     L0 = rho ** 3 * a ** 3 * M3 + 3.0 * rho ** 2 * a ** 2 * M2 + 3.0 * rho * a * M1 + M0
-    L1 = rho ** 2 * a ** 3 * M2 + 3.0 * rho * a ** 2 * M1 + 3.0 * a * M0
+    # GKF flag coefficients for L1: [3 choose 2] = 2, [2 choose 1] = pi/2.
+    L1 = 2.0 * rho ** 2 * a ** 3 * M2 + 1.5 * np.pi * rho * a ** 2 * M1 + 3.0 * a * M0
+    L2 = 2.0 * rho * a ** 3 * M1 + 3.0 * a ** 2 * M0
+    L3 = a ** 3 * M0
+    return {"L0": L0, "L1": L1, "L2": L2, "L3": L3, "phi": M0}
+
+
+# =============================================================================
+# Chi-squared hitting set  D_u = [u, +inf) under chi2(k) marginal
+# (Worsley 1994, eq. 3 — same paper as Student-t; chi2 is the simpler case)
+# =============================================================================
+
+def chi2_m0(u: Array, k: float) -> Array:
+    """M0 = P(X_k >= u) = chi2.sf(u, df=k)."""
+    return stats.chi2.sf(np.asarray(u), df=k)
+
+
+def chi2_m1(u: Array, k: float) -> Array:
+    """M1 = 2*sqrt(u) * p_k(u).
+
+    Derived from the tube formula for D_u = {z in R^k: ||z||^2 >= u} under N(0,I_k).
+    The factor 2*sqrt(u) is the Jacobian of the sphere boundary at radius sqrt(u).
+    Verified: for k=1, gives 2*phi(sqrt(u)) = 2 * Gaussian_M1(sqrt(u)) as required
+    by EC({Z^2 >= u}) = 2 * EC({Z >= sqrt(u)}).
+    """
+    u = np.asarray(u)
+    return 2.0 * np.sqrt(u) * stats.chi2.pdf(u, df=k)
+
+
+def chi2_m2(u: Array, k: float) -> Array:
+    """M2 = 2*(u - k + 1) * p_k(u).
+
+    Second-order tube formula coefficient for the exterior ball in R^k.
+    """
+    u = np.asarray(u)
+    return 2.0 * (u - k + 1.0) * stats.chi2.pdf(u, df=k)
+
+
+def chi2_m3(u: Array, k: float) -> Array:
+    """M3 = (2/sqrt(u)) * p_k(u) * [u^2 - (2k-1)*u + (k-1)*(k-2)].
+
+    Third-order tube formula coefficient. Factored form for reference:
+      k=1: u*(u-1),  k=2: u*(u-3),  k=4: (u-1)*(u-6).
+    """
+    u = np.asarray(u)
+    poly = u**2 - (2.0 * k - 1.0) * u + (k - 1.0) * (k - 2.0)
+    return (2.0 / np.sqrt(u)) * stats.chi2.pdf(u, df=k) * poly
+
+
+def expected_lkcs_chi2(
+    grid: GridSpec, lc: float, k: float, kappas: Array, sigma: float = 1.0
+) -> dict[str, Array]:
+    """Expected L0, L1, L2, L3 and phi for a chi2(k) RF on a 3D cube.
+
+    The chi2(k) RF is X(x) = sum_{i=1}^k f_i(x)^2 where f_i are i.i.d. unit-variance
+    Gaussian RFs with correlation length lc.  The spatial factor rho is the same as
+    for the Gaussian components (same covariance structure); only M_j change.
+
+    kappas must be > 0 (chi2 support is [0, +inf)).
+
+    Returns dict with keys 'L0', 'L1', 'L2', 'L3', 'phi'.
+    """
+    kappas = np.asarray(kappas, dtype=float)
+    a = grid.length
+    rho = _rho(lc, sigma)
+    M0 = chi2_m0(kappas, k)
+    M1 = chi2_m1(kappas, k)
+    M2 = chi2_m2(kappas, k)
+    M3 = chi2_m3(kappas, k)
+    L0 = rho ** 3 * a ** 3 * M3 + 3.0 * rho ** 2 * a ** 2 * M2 + 3.0 * rho * a * M1 + M0
+    L1 = 2.0 * rho ** 2 * a ** 3 * M2 + 1.5 * np.pi * rho * a ** 2 * M1 + 3.0 * a * M0
     L2 = 2.0 * rho * a ** 3 * M1 + 3.0 * a ** 2 * M0
     L3 = a ** 3 * M0
     return {"L0": L0, "L1": L1, "L2": L2, "L3": L3, "phi": M0}
@@ -100,8 +170,21 @@ def expected_lkcs_gaussian(
 
 # =============================================================================
 # Student-t hitting set  D_u = [u, +inf) under t_nu marginal
-# (Worsley 1994; derivation in theory/student_t_derivation.md)
+# (Worsley 1994; EC densities from the cone geometry in R^(nu+1))
 # =============================================================================
+
+def _c_nu(u: Array, nu: float) -> Array:
+    """c_nu(u) = (1/sqrt(2*pi)) * (1 + u^2/nu)^(-(nu-1)/2).
+
+    This is the Gaussian kinematic functional base for the t_nu excursion cone
+    in R^(nu+1) — it is NOT the t_nu PDF.  Key property: c_nu(0) = phi(0) for
+    all nu, consistent with {T_nu >= 0} = {Z_0 >= 0} (same excursion set for
+    all nu, so all LKCs at kappa=0 must agree across field families).
+    Limit: c_nu(u) -> phi(u) as nu -> infinity.
+    """
+    u = np.asarray(u)
+    return np.exp(-0.5 * np.log(2.0 * np.pi)) * (1.0 + u ** 2 / nu) ** (-(nu - 1.0) / 2.0)
+
 
 def t_m0(u: Array, nu: float) -> Array:
     """M0 = P(T_nu >= u) = scipy.stats.t.sf(u, df=nu)."""
@@ -109,33 +192,43 @@ def t_m0(u: Array, nu: float) -> Array:
 
 
 def t_m1(u: Array, nu: float) -> Array:
-    """M1 = p_nu(u), the t_nu PDF."""
-    return stats.t.pdf(np.asarray(u), df=nu)
+    """M1 = c_nu(u).
+
+    At u=0: M1 = phi(0) for all nu — matches the Gaussian value because the
+    excursion sets {T_nu >= 0} and {Z >= 0} are identical.
+    """
+    return _c_nu(np.asarray(u), nu)
 
 
 def t_m2(u: Array, nu: float) -> Array:
-    """M2 = p_nu(u) * (nu+1) u / (nu + u^2)."""
+    """M2 = A_nu * u * c_nu(u),  A_nu = sqrt(2/nu) * Gamma((nu+1)/2) / Gamma(nu/2).
+
+    A_nu -> 1 as nu -> inf, recovering Gaussian M2 = u * phi(u).
+    """
     u = np.asarray(u)
-    return stats.t.pdf(u, df=nu) * (nu + 1.0) * u / (nu + u ** 2)
+    A = np.sqrt(2.0 / nu) * gamma((nu + 1.0) / 2.0) / gamma(nu / 2.0)
+    return A * u * _c_nu(u, nu)
 
 
 def t_m3(u: Array, nu: float) -> Array:
-    """M3 = p_nu(u) * [(nu+1)(nu+3) u^2 / (nu+u^2)^2 - (nu+1) / (nu+u^2)]."""
+    """M3 = ((nu-1)/nu * u^2 - 1) * c_nu(u).
+
+    Zero-crossing at u_c = sqrt(nu/(nu-1)), the bulk-limit EC-zero threshold.
+    As nu -> inf: u_c -> 1 and M3 -> (u^2-1)*phi(u) = gaussian_m3(u).
+    """
     u = np.asarray(u)
-    denom = nu + u ** 2
-    return stats.t.pdf(u, df=nu) * (
-        (nu + 1.0) * (nu + 3.0) * u ** 2 / denom ** 2 - (nu + 1.0) / denom
-    )
+    return ((nu - 1.0) / nu * u ** 2 - 1.0) * _c_nu(u, nu)
 
 
 def expected_lkcs_t(
     grid: GridSpec, lc: float, nu: float, kappas: Array, sigma: float = 1.0
 ) -> dict[str, Array]:
-    """Expected L0 and phi for a Worsley t_nu field on a 3D cube.
+    """Expected L0, L1, L2, L3 and phi for a Worsley t_nu field on a 3D cube.
 
-    Returns dict with keys 'L0', 'phi'.
-    (L2 and L3 formulas exist but L2 has not been independently validated
-    in this project — use Gaussian L2 formula as an approximation only.)
+    Same GKF structure as expected_lkcs_gaussian; only the M_j differ.
+    M_j use the cone-geometry functionals (_c_nu family), NOT the t_nu PDF.
+    Key check: at kappa=0, {T_nu>=0}={Z_0>=0} so all LKCs should match the
+    Gaussian values — verified by the fact that M_j(0) = Gaussian M_j(0).
     """
     kappas = np.asarray(kappas, dtype=float)
     a = grid.length
@@ -145,45 +238,54 @@ def expected_lkcs_t(
     M2 = t_m2(kappas, nu)
     M3 = t_m3(kappas, nu)
     L0 = rho ** 3 * a ** 3 * M3 + 3.0 * rho ** 2 * a ** 2 * M2 + 3.0 * rho * a * M1 + M0
-    return {"L0": L0, "phi": M0}
+    L1 = 2.0 * rho ** 2 * a ** 3 * M2 + 1.5 * np.pi * rho * a ** 2 * M1 + 3.0 * a * M0
+    L2 = 2.0 * rho * a ** 3 * M1 + 3.0 * a ** 2 * M0
+    L3 = a ** 3 * M0
+    return {"L0": L0, "L1": L1, "L2": L2, "L3": L3, "phi": M0}
 
 
 def find_percolation_threshold(
     grid: GridSpec,
     lc: float,
     nu: float | None = None,
+    k_chi2: float | None = None,
     sigma: float = 1.0,
     u_search: tuple[float, float] = (0.5, 5.0),
 ) -> tuple[float, float]:
-    """Find kappa_c+ (upper zero-crossing of E[L0]) and the corresponding phi_c+.
+    """Find kappa_c (zero-crossing of E[L0]) and the corresponding phi_c.
 
-    phi_c+ is the maximum achievable disconnected volume fraction according to
-    the Adler EC criterion (Roubin & Colliat 2016).
+    phi_c is the volume fraction at the percolation threshold according to the
+    Adler EC criterion (Roubin & Colliat 2016).
 
     Args:
         grid:     Grid specification (for domain LKCs).
         lc:       Correlation length.
-        nu:       t_nu degrees of freedom, or None for Gaussian.
-        sigma:    Field standard deviation.
+        nu:       t_nu degrees of freedom, or None (mutually exclusive with k_chi2).
+        k_chi2:   chi2(k) degrees of freedom, or None (mutually exclusive with nu).
+        sigma:    Field standard deviation (Gaussian only).
         u_search: (lower, upper) bracket for root search.
 
     Returns:
-        (kappa_c+, phi_c+).  Returns (nan, nan) if no zero-crossing found.
+        (kappa_c, phi_c).  Returns (nan, nan) if no zero-crossing found in bracket.
     """
     def ec(u_scalar: float) -> float:
         u = np.asarray([u_scalar])
-        if nu is None:
-            return float(expected_lkcs_gaussian(grid, lc, u, sigma)["L0"][0])
-        return float(expected_lkcs_t(grid, lc, nu, u, sigma)["L0"][0])
+        if k_chi2 is not None:
+            return float(expected_lkcs_chi2(grid, lc, k_chi2, u)["L0"][0])
+        if nu is not None:
+            return float(expected_lkcs_t(grid, lc, nu, u, sigma)["L0"][0])
+        return float(expected_lkcs_gaussian(grid, lc, u, sigma)["L0"][0])
 
     u_lo, u_hi = u_search
     if ec(u_lo) * ec(u_hi) > 0:
         return float("nan"), float("nan")
     kc = float(optimize.brentq(ec, u_lo, u_hi, xtol=1e-4))
-    if nu is None:
-        phi_c = float(gaussian_m0(np.asarray([kc]), sigma)[0])
-    else:
+    if k_chi2 is not None:
+        phi_c = float(stats.chi2.sf(kc, df=k_chi2))
+    elif nu is not None:
         phi_c = float(stats.t.sf(kc, df=nu))
+    else:
+        phi_c = float(gaussian_m0(np.asarray([kc]), sigma)[0])
     return kc, phi_c
 
 
@@ -257,19 +359,31 @@ def margin_gmfs(q: int, delta: float) -> np.ndarray:
     return np.array([M0, M1, M2, M3], dtype=float)
 
 
+def expected_lkcs_margin(
+    grid: GridSpec, lc: float, q: int, delta: float, sigma: float = 1.0
+) -> dict[str, float]:
+    """Expected L0, L1, L2, L3 and phi for the margin tessellation on a 3D cube.
+
+    Uses the same GKF flag-coefficient formulas as expected_lkcs_gaussian, with the
+    polyhedral hitting-set M_j from margin_gmfs() in place of the Gaussian M_j.
+
+    Returns dict with scalar float keys 'L0', 'L1', 'L2', 'L3', 'phi'.
+    """
+    a = grid.length
+    rho = _rho(lc, sigma)
+    M0, M1, M2, M3 = margin_gmfs(q, delta)
+    L0 = rho ** 3 * a ** 3 * M3 + 3.0 * rho ** 2 * a ** 2 * M2 + 3.0 * rho * a * M1 + M0
+    L1 = 2.0 * rho ** 2 * a ** 3 * M2 + 1.5 * np.pi * rho * a ** 2 * M1 + 3.0 * a * M0
+    L2 = 2.0 * rho * a ** 3 * M1 + 3.0 * a ** 2 * M0
+    L3 = a ** 3 * M0
+    return {"L0": float(L0), "L1": float(L1), "L2": float(L2), "L3": float(L3), "phi": float(M0)}
+
+
 def margin_expected_euler(
     grid: GridSpec, lc: float, q: int, delta: float, sigma: float = 1.0
 ) -> float:
     """Expected Euler characteristic for the margin tessellation on a 3D cube."""
-    a = grid.length
-    rho = _rho(lc, sigma)
-    gmf = margin_gmfs(q, delta)
-    return float(
-        rho ** 3 * a ** 3 * gmf[3]
-        + 3.0 * rho ** 2 * a ** 2 * gmf[2]
-        + 3.0 * rho * a * gmf[1]
-        + gmf[0]
-    )
+    return expected_lkcs_margin(grid, lc, q, delta, sigma)["L0"]
 
 
 def gaussian_margin_vf(q: int, delta: float) -> float:
@@ -290,6 +404,84 @@ def delta_for_vf(q: int, phi: float) -> float:
 # Coalescing lobes: Gaussian-space ball union
 # Volume fraction is estimated by Monte Carlo (no closed-form M_j before contact).
 # =============================================================================
+
+def ball_lkcs(c: np.ndarray, r: float) -> np.ndarray:
+    """Gaussian Minkowski functionals M_0..M_3 of ball B(c, r) in R^3.
+
+    For a convex set B, the tube T_s(B) = Minkowski sum of B and a ball of radius s.
+    For a ball B(c, r), this is simply B(c, r+s). The Gaussian measure of the tube
+    is then
+
+        μ_γ(T_s) = P(||Z - c|| ≤ r + s) = F((r+s)²)
+
+    with F = ncx²(df=3, nc=||c||²).cdf. Expanding at s=0:
+
+        M_0 = F(r²)
+        M_1 = 2r · f(r²)
+        M_2 = 2 · f(r²) + 4r² · f'(r²)
+        M_3 = 12r · f'(r²) + 8r³ · f''(r²)
+
+    where f = ncx² pdf and f', f'' are its first and second derivatives in x
+    (computed here by central finite differences — stable for r > 0, ||c|| modest).
+
+    Args:
+        c: 3-vector (ball centre in Gaussian value space).
+        r: ball radius.
+
+    Returns:
+        Array [M_0, M_1, M_2, M_3].
+    """
+    rho2 = float(np.sum(np.asarray(c, dtype=float) ** 2))
+    x    = float(r) ** 2
+    eps  = max(1e-5, 1e-4 * (x + 1.0))
+
+    def pdf(y: float) -> float:
+        return float(stats.ncx2.pdf(y, df=3, nc=rho2))
+
+    f0  = pdf(x)
+    f1  = (pdf(x + eps) - pdf(x - eps)) / (2.0 * eps)
+    f2  = (pdf(x + eps) - 2.0 * f0 + pdf(x - eps)) / (eps ** 2)
+    F0  = float(stats.ncx2.cdf(x, df=3, nc=rho2))
+
+    M0 = F0
+    M1 = 2.0 * r * f0
+    M2 = 2.0 * f0 + 4.0 * (r ** 2) * f1
+    M3 = 12.0 * r * f1 + 8.0 * (r ** 3) * f2
+    return np.array([M0, M1, M2, M3], dtype=float)
+
+
+def expected_lkcs_lobes_disjoint(
+    grid: GridSpec,
+    lc: float,
+    centres: np.ndarray,
+    radius: float,
+    sigma: float = 1.0,
+) -> dict[str, float]:
+    """Expected L_0..L_3 and phi for the ball-union hitting set BEFORE contact.
+
+    Valid only for radius < r_c = min_{a≠b} ||c_a - c_b|| / 2 (balls disjoint).
+    In that regime the GMFs of the union equal the sum of per-ball GMFs:
+
+        M_j(D_r) = Σ_a M_j(B(c_a, r))        (disjoint additivity)
+
+    After contact (radius > r_c) the inclusion-exclusion terms require Gaussian-
+    weighted ball-intersection functionals that have not been derived; callers
+    should not use this function in that regime.
+
+    Returns dict with keys 'L0', 'L1', 'L2', 'L3', 'phi'.
+    """
+    a    = grid.length
+    rho_sp = _rho(lc, sigma)
+    M = np.zeros(4)
+    for c in np.asarray(centres):
+        M += ball_lkcs(c, radius)
+    M0, M1, M2, M3 = M
+    L0 = rho_sp ** 3 * a ** 3 * M3 + 3.0 * rho_sp ** 2 * a ** 2 * M2 + 3.0 * rho_sp * a * M1 + M0
+    L1 = 2.0 * rho_sp ** 2 * a ** 3 * M2 + 1.5 * np.pi * rho_sp * a ** 2 * M1 + 3.0 * a * M0
+    L2 = 2.0 * rho_sp * a ** 3 * M1 + 3.0 * a ** 2 * M0
+    L3 = a ** 3 * M0
+    return {"L0": float(L0), "L1": float(L1), "L2": float(L2), "L3": float(L3), "phi": float(M0)}
+
 
 def gaussian_lobe_vf_mc(
     centres: np.ndarray,

@@ -1,0 +1,17 @@
+{
+  "n": 100,
+  "length": 64.0,
+  "length_unit": "mm",
+  "realizations": 5,
+  "seed": 7301,
+  "mode_no": 1000,
+  "merge_tolerance": 0.0,
+  "target_phis": [0.60, 0.70, 0.75, 0.80, 0.85],
+  "classes": [
+    {"name": "coarse_gravel", "lc": 12.0, "q": 16, "share": 0.40},
+    {"name": "fine_gravel", "lc": 6.0, "q": 16, "share": 0.35},
+    {"name": "sand_proxy", "lc": 2.0, "q": 16, "share": 0.25}
+  ],
+  "save_meshes": true,
+  "save_fields": true
+}

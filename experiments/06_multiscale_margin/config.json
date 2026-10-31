@@ -1,0 +1,16 @@
+{
+  "n": 128,
+  "length": 64.0,
+  "length_unit": "mm",
+  "padding_length": 24.0,
+  "realizations": 5,
+  "seed": 7301,
+  "target_phis": [0.60, 0.70, 0.75, 0.80, 0.85],
+  "classes": [
+    {"name": "coarse_gravel", "lc": 12.0, "q": 16, "share": 0.40},
+    {"name": "fine_gravel", "lc": 6.0, "q": 16, "share": 0.35},
+    {"name": "sand_proxy", "lc": 2.0, "q": 16, "share": 0.25}
+  ],
+  "reference_class": 1,
+  "save_volumes": true
+}

@@ -26,16 +26,15 @@ descriptors in three dimensions:
 |--------|------|-----------------|
 | `L3(A_u)` | Volume | Total inclusion volume |
 | `L2(A_u)` | Half surface area | Specific surface (inclusion-matrix interface area / 2) |
-| `L1(A_u)` | Integrated mean curvature / π | Curvature of the inclusion boundary (not measured numerically here) |
+| `L1(A_u)` | Integrated mean curvature / π | Mean curvature integral over the boundary |
 | `L0(A_u)` | Euler characteristic | Topology: #components - #tunnels + #cavities |
 
 `L0` is the most information-rich: positive values indicate a disconnected (island) morphology;
 negative values indicate a tunnel- or percolation-dominated topology.
 
-`L1` is theoretically predicted by the GKF (see formula below) but not currently estimated
-numerically in this project. Computing `L1` from voxel data requires either a careful Crofton
-estimator on the cubical complex or a smooth surface integral of mean curvature, both of which
-carry resolution-dependent bias that has not been characterised here.
+All four LKCs are estimated numerically from voxel realizations; see
+[measurement_conventions.md](measurement_conventions.md) for the estimators used (6- vs 26-
+connectivity Euler, marching-cubes vs Crofton surface, dihedral `L1`) and their known biases.
 
 ## The Gaussian Kinematic Formula
 
