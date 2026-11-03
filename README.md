@@ -19,11 +19,11 @@ numerical checks that convinced us the formulas work.
 
 ![Margin tessellation q=16 φ=0.60 — best result so far](images/margin_t_q16_n256_L64_Lc5_vf60_combined.png)
 
-*The sharpest result so far: margin tessellation at $q = 16$, $\varphi \approx 60\%$,
+The sharpest result so far: margin tessellation at $q = 16$, $\varphi \approx 60\%$,
 $N = 256$, $L = 64$, $l_c = 5$. Top: 3D microstructure with orthogonal
 cross-sections, connectivity coloured by grain ID, and the largest single
 grain (2% of inclusion volume — genuinely disconnected). Bottom: all four
-Lipschitz–Killing curvatures measured vs GKF theory across 5 realisations.*
+Lipschitz–Killing curvatures measured vs GKF theory across 5 realisations.
 
 ## The story in one page
 
@@ -107,7 +107,7 @@ doubles. $\mathbb{E}[L_0] = 0$ lands at ~32% bulk, ~37–51% finite-domain.
 Higher $k$ interpolates back toward Gaussian. $\mathcal M_j$ closed-form
 (Worsley 1994).
 
-### 03 — Student-$t_\nu$ field
+### 03 — Student-t field
 
 ![Student-t_3 at κ=0.5](experiments/03_student_t/results/t_3/display_student_t3_RF_thresh.png)
 
