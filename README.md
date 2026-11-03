@@ -131,13 +131,12 @@ Closed-form $\mathcal M_j^\gamma(D_\delta)$ derived from the polyhedral
 chamber geometry and validated against MC to <2% on all four LKCs at
 $N = 256$.
 
-The inclusion set is the union of $q$ Voronoi-like chambers in the
-sample-path space of $(G_1, \ldots, G_q)$, with a $\delta$-margin
-eroding the shared boundaries. Increasing $q$ subdivides the tessellation
-into finer cells; increasing $\delta$ widens the matrix film and lowers
-$\varphi$. By construction, cells belonging to different winner indices
-are separated by the film, so per-winner disconnection holds at any
-$\delta > 0$.
+Each point $x$ is assigned to whichever field $G_i$ achieves the maximum
+there; it is included if that winner leads the runner-up by at least
+$\delta$. The result partitions space into $q$ types of inclusion cells,
+separated by a matrix film along the near-tie locus. More fields give
+finer cells; a larger margin gives a thicker film and a lower $\varphi$.
+Different winner types are disconnected from each other by construction.
 
 ### 05 — Coalescing lobes
 
@@ -152,13 +151,12 @@ $\mathcal M_j$ *before contact* via single-ball tube probability +
 additivity; after contact the Gaussian-weighted ball-intersection volumes
 are an open analytic problem.
 
-The inclusion set is the preimage under $G$ of the union of four balls of
-radius $r$ centred at tetrahedral vertices in $\mathbb{R}^3$. Before the
-balls touch ($r < r_c$), the four preimage lobes are disjoint and
-$\mathcal M_j^\gamma$ factors by additivity. At $r = r_c$ the lobes make
-first contact; above $r_c$ they merge into a bicontinuous network. The
-transition from isolated inclusions to a connected phase is controlled by
-a single scalar $r/r_c$.
+A point $x$ is included if $G(x)$ falls within distance $r$ of any of
+four fixed centres placed at tetrahedral vertices in $\mathbb{R}^3$.
+Below the contact radius $r_c$, the four preimage lobes are disjoint
+and the GKF factorises by additivity; above $r_c$ they merge into a
+connected network. A single parameter $r/r_c$ controls the full
+morphology sweep from isolated inclusions to bicontinuous phase.
 
 ### 06 — Multiscale margin union
 
