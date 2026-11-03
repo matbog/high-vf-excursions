@@ -1,0 +1,7 @@
+Scene: q=16, phi=0.75 (measured 0.7547), N=256, L=64.0, lc=5.0
+delta = 0.15790 physical = 0.632 voxels
+per-winner components: 3409
+physical binary-union components: 3162
+largest physical component holds 47.95% of inclusion volume
+per-winner spanning: False
+binary-union spanning: x=True, y=True, z=True
