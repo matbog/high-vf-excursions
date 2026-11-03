@@ -17,11 +17,13 @@ Nothing here is a publication-ready contribution. It's an exploration of
 four hitting-set families inside the same GKF scaffolding, with the
 numerical checks that convinced us the formulas work.
 
-![margin tessellation at q=16, φ=0.70](experiments/04_margin_tessellation/paraview/q16_phi70/display_margin_tess_RF_thresh.png)
+![Margin tessellation q=16 φ=0.60 — best result so far](images/margin_t_q16_n256_L64_Lc5_vf60_combined.png)
 
-*Margin tessellation at $q = 16$, $\varphi = 0.70$ — 16 competing
-Gaussian fields with a non-zero winner-vs-runner-up margin. The matrix
-film is sub-voxel in places; individual winner cells are coloured.*
+*The sharpest result so far: margin tessellation at $q = 16$, $\varphi \approx 60\%$,
+$N = 256$, $L = 64$, $l_c = 5$. Top: 3D microstructure with orthogonal
+cross-sections, connectivity coloured by grain ID, and the largest single
+grain (2% of inclusion volume — genuinely disconnected). Bottom: all four
+Lipschitz–Killing curvatures measured vs GKF theory across 5 realisations.*
 
 ## The story in one page
 

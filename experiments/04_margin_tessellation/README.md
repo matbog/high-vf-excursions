@@ -1,6 +1,10 @@
 # Experiment 04 — Margin tessellation
 
-![q=16 margin tessellation at φ=0.70](paraview/q16_phi70/display_margin_tess_RF_thresh.png)
+![Margin tessellation q=16 φ=0.60 — GKF validation](../../images/margin_t_q16_n256_L64_Lc5_vf60_combined.png)
+
+*$q = 16$, $\varphi \approx 60\%$, $N = 256$, $L = 64$, $l_c = 5$ — 3206
+physically disconnected grains with all four LKCs matching GKF theory to
+$<\!2\%$ across 5 realisations.*
 
 Competing Gaussian fields with a "margin" rule. Pushes the disconnected-
 phase volume fraction well past the Gaussian 16% / 22% ceilings while
