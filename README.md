@@ -40,7 +40,7 @@ $$
 
 with $\rho = \sqrt{\lambda_2 / 2\pi}$ and $\lambda_2 = -C''(0)$. The
 spatial side ($\rho$, the cube LKCs) and the value-space side
-($\mathcal M_j^{\gamma}(D)$) are completely separate.
+( $\mathcal M_j^{\gamma}(D)$ ) are completely separate.
 Change the hitting set, change the morphology; the spatial side is
 unchanged. This is what makes the GKF a *morphology generator*: pick a
 hitting set, pay the price of computing its Gaussian Minkowski
@@ -131,12 +131,13 @@ Closed-form $\mathcal M_j^\gamma(D_\delta)$ derived from the polyhedral
 chamber geometry and validated against MC to <2% on all four LKCs at
 $N = 256$.
 
-**Plain-English take.** Imagine four referees scoring every voxel. Only
-include the voxel if the highest score beats the second-highest by at
-least $\delta$. The result tiles space into "winner cells" separated by a
-thin matrix film wherever two fields are tied. Push $q$ up and the cells
-get smaller; push $\delta$ down and the film thins; both knobs give you
-high VFs of mutually disconnected inclusions.
+The inclusion set is the union of $q$ Voronoi-like chambers in the
+sample-path space of $(G_1, \ldots, G_q)$, with a $\delta$-margin
+eroding the shared boundaries. Increasing $q$ subdivides the tessellation
+into finer cells; increasing $\delta$ widens the matrix film and lowers
+$\varphi$. By construction, cells belonging to different winner indices
+are separated by the film, so per-winner disconnection holds at any
+$\delta > 0$.
 
 ### 05 — Coalescing lobes
 
@@ -151,12 +152,13 @@ $\mathcal M_j$ *before contact* via single-ball tube probability +
 additivity; after contact the Gaussian-weighted ball-intersection volumes
 are an open analytic problem.
 
-**Plain-English take.** Imagine every voxel is mapped to a 3D point by a
-smooth random field. Place four target points. A voxel is "in" if its
-point lands close to any target. As you grow the capture radius $r$, the
-four droplets inflate until they touch (at $r = r_c$), then merge into a
-richly connected lobe network. One scalar knob, qualitatively different
-morphologies at either end.
+The inclusion set is the preimage under $G$ of the union of four balls of
+radius $r$ centred at tetrahedral vertices in $\mathbb{R}^3$. Before the
+balls touch ($r < r_c$), the four preimage lobes are disjoint and
+$\mathcal M_j^\gamma$ factors by additivity. At $r = r_c$ the lobes make
+first contact; above $r_c$ they merge into a bicontinuous network. The
+transition from isolated inclusions to a connected phase is controlled by
+a single scalar $r/r_c$.
 
 ### 06 — Multiscale margin union
 
