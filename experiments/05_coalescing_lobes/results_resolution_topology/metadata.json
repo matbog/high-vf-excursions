@@ -1,0 +1,53 @@
+{
+  "schema": "lobes_paired_resolution_v1",
+  "config": {
+    "realizations": 1,
+    "seed": 9417,
+    "length": 100.0,
+    "lc": 10.0,
+    "rho": 1.5,
+    "reference_n": 100,
+    "reference_padding": 20,
+    "mode_no": 1000,
+    "threads": 1,
+    "slab": 16,
+    "grids": [
+      50,
+      100,
+      200
+    ],
+    "radii": [
+      0.85,
+      0.98
+    ],
+    "origin": 20.0,
+    "include_mesh": false
+  },
+  "versions": {
+    "numpy": "2.4.3",
+    "scipy": "1.17.1",
+    "gstools": "1.7.0",
+    "scikit-image": "0.26.0",
+    "matplotlib": "3.10.9"
+  },
+  "source_sha256": {
+    "experiments/05_coalescing_lobes/run_resolution.py": "c52f7d2336b7f591e5c56c9e1288f3bc39373757d485489c2774b2fd3f098202",
+    "experiments/05_coalescing_lobes/measurement.py": "6ef8880f986f6f8d94fa7b428cadcd434589e6360f11b2dfe0fad7c75f05e1fd",
+    "src/adler.py": "322d53326a82209d7f31364e85751f21045e010f861ff7e3249b8bd2c398b05a",
+    "src/measures.py": "191ffad88f866c8bf4050560617437b671d957faaba75670333682df0f230144",
+    "src/fields.py": "78c7a20971a53b9a94bf1131f59e988d05d21eb0886ff4456e97d466ed1cb5aa",
+    "src/excursions.py": "85d9af179212c8bf0d83a243399b6242916ad5a1791dd16b7c3e3a05424f5eba"
+  },
+  "python": "3.12.13 | packaged by conda-forge | (main, Mar  5 2026, 16:36:12) [MSC v.1944 64 bit (AMD64)]",
+  "sampler": "Fixed GSTools RandMeth streams; physical coordinates; float32 samples",
+  "component_seeds": {
+    "1": [
+      8637,
+      22199,
+      2713
+    ]
+  },
+  "status": "complete",
+  "completed_cases": 6,
+  "expected_cases": 6
+}

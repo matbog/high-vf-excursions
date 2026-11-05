@@ -26,7 +26,7 @@ for the margin GMFs.
 Volume calibration and class accounting work. Everything else is
 unresolved. In particular:
 
-- The construction *always* produces a spanning phase at every target VF
+- Every tested realization produces a spanning phase at every tested target VF
   (5/5 realizations span under both 6- and 26-connectivity across
   $\varphi \in \{60, 70, 75, 80, 85\}\%$). This is not "a collection of
   separated aggregates" in any realization we ran.
@@ -210,7 +210,8 @@ used in the GKF. At adequate resolution it agrees with $2/l_c^2$. Saved
 diagnostics compare observed forward-difference variances with the
 corresponding spectral finite-difference prediction, rather than
 confusing finite differences with exact derivatives. This sampler is
-local to exp 06; the other experiments keep their original generators.
+local to the exp 06 voxel runner. The shared `src/fields.py` generator now
+uses GSTools; the deferred interpolated prototype also uses GSTools.
 
 Both 6- and 26-connectivity are reported for Euler, component count,
 spanning, and largest-component fraction. Neither convention is declared
@@ -227,9 +228,9 @@ Six panels, all plotted against the target total aggregate VF. "Union"
 is the composite, "single-scale reference" is a one-scale margin field
 sized to the same total VF for comparison.
 
-- **Top-left — Total aggregate VF.** Measured vs target. The line should
-  sit on $y = x$; it does. Volume calibration is exact (as the
-  construction guarantees).
+- **Top-left — Total aggregate VF.** Measured vs target. The mean is
+  close to $y=x$. Calibration is exact in expectation under independence;
+  a finite realization is not guaranteed to attain its target exactly.
 - **Top-centre — Euler characteristic.** The headline plot and the
   unresolved one. Shows conditional-GKF prediction (dashed), the Bogdan
   2015 paper approximation (dotted), and union measurements under 6- and
@@ -238,8 +239,9 @@ sized to the same total VF for comparison.
   between classes make $L_0$ dominated by connectivity convention rather
   than morphology.
 - **Top-right — Spanning frequency.** Union spans in all 5/5
-  realizations at every VF. The single-scale reference starts
-  disconnected and crosses $0.5$ as it approaches its own ceiling.
+  realizations at every VF. The single-scale reference has lower measured
+  spanning frequency at lower VF; its crossings are empirical finite-sample
+  statistics under the reported digital convention.
 - **Bottom-left — Largest connected component (6-conn).** Fraction of
   aggregate volume held by the single largest component. Already at
   60% target the union's largest component holds >96%; at 85% it holds
@@ -319,7 +321,10 @@ cross-scale connections.
 
 All nine analytical/geometric controls pass. Saved-output checks also
 pass for class-volume accounting, component-volume totals, nested VF
-snapshots, finite values, and source hashes. Across the $N = 128$
+snapshots, and finite values. Historical metadata records paths under the
+former `07_multiscale_margin` name and hashes of sources at execution time;
+it is not a claim that every source hash matches today's corrected code.
+Across the $N = 128$
 fields, ensemble second moments are 1.0107, 0.9982, and 1.0004 for
 coarse, fine, and sand classes; mean directional finite-difference
 energies are within 2.8% of their spectral predictions.
@@ -384,9 +389,11 @@ representative case before launching an ensemble.
 Retained material:
 
 - [Method, tests and small pilots](INTERPOLATED.md)
-- [Matched voxel/interpolated slices](../../explorations/exp06_pilot_runs/results_pl_n24/geometry_slices.png) (archived in `explorations/`)
-- [Stopped full-run notes](../../explorations/exp06_pilot_runs/results_pl_full/STOPPED.md) and
-  [completed measurements](../../explorations/exp06_pilot_runs/results_pl_full/measurements.csv)
+- Local archived slices: `explorations/exp06_pilot_runs/results_pl_n24/`.
+- Local stopped-run notes and measurements:
+  `explorations/exp06_pilot_runs/results_pl_full/`.
+
+These archives are ignored and are not available in the published checkout.
 
 The prototype currently measures $L_0$/$L_3$ and connectivity.
 Numerical $L_1$/$L_2$ and a single conforming Boolean-union mesh remain

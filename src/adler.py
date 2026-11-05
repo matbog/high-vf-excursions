@@ -8,9 +8,9 @@ stationary isotropic Gaussian-related random field on a 3D cube of side a is:
 where rho = sqrt(lambda2 / 2pi), lambda2 = -C''(0) is the second spectral moment,
 and M_j are the Gaussian Minkowski functionals of the hitting set D_u in value space.
 
-What changes between field families (Gaussian, t_nu, margin) is ONLY M_j.
-The spatial side (lambda2, domain LKCs) is identical as long as the correlation
-structure is unchanged.
+The spatial factor is determined by the underlying Gaussian components, not
+by the covariance of their nonlinear transform. Changing the hitting set changes
+M_j; keeping the standardized component covariance fixed keeps the spatial factor.
 """
 
 from __future__ import annotations
@@ -20,11 +20,30 @@ from math import comb
 import numpy as np
 from scipy import optimize, stats
 from scipy.integrate import quad
-from scipy.special import erfc, gamma, ndtr
+from scipy.special import erfc, gammaln, ndtr
 
 from .fields import GridSpec
 
 Array = np.ndarray
+
+
+def _positive(value: float, name: str) -> None:
+    if not np.isfinite(value) or value <= 0:
+        raise ValueError(f"{name} must be finite and positive")
+
+
+def _validate_nu(nu: float) -> None:
+    # This implementation supports the 3D cone formulas only in this range.
+    # This is not a claim that the t field has finite gradient variance at nu=3.
+    if not np.isfinite(nu) or nu < 3:
+        raise ValueError("nu must be finite and >= 3; use the Gaussian API for nu=infinity")
+
+
+def _validate_margin(q: int, delta: float) -> None:
+    if isinstance(q, (bool, np.bool_)) or not isinstance(q, (int, np.integer)) or q < 2:
+        raise ValueError("q must be an integer >= 2")
+    if not np.isfinite(delta) or delta < 0:
+        raise ValueError("delta must be finite and >= 0")
 
 
 # =============================================================================
@@ -36,6 +55,8 @@ def lambda2(lc: float, sigma: float = 1.0) -> float:
 
     lambda2 = -C''(0) = 2 sigma^2 / lc^2.
     """
+    _positive(lc, "lc")
+    _positive(sigma, "sigma")
     return 2.0 * sigma ** 2 / lc ** 2
 
 
@@ -146,17 +167,22 @@ def expected_lkcs_chi2(
 ) -> dict[str, Array]:
     """Expected L0, L1, L2, L3 and phi for a chi2(k) RF on a 3D cube.
 
-    The chi2(k) RF is X(x) = sum_{i=1}^k f_i(x)^2 where f_i are i.i.d. unit-variance
-    Gaussian RFs with correlation length lc.  The spatial factor rho is the same as
-    for the Gaussian components (same covariance structure); only M_j change.
+    X(x) = sum_i f_i(x)^2 for Gaussian components with standard deviation sigma.
+    Standardize the hitting threshold by sigma**2; the spatial factor uses the
+    unit-variance Gaussian components. The shared field generator uses sigma=1.
 
     kappas must be > 0 (chi2 support is [0, +inf)).
 
     Returns dict with keys 'L0', 'L1', 'L2', 'L3', 'phi'.
     """
-    kappas = np.asarray(kappas, dtype=float)
+    _positive(sigma, "sigma")
+    if not np.isfinite(k) or k < 1:
+        raise ValueError("k must be finite and >= 1")
+    kappas = np.asarray(kappas, dtype=float) / sigma**2
+    if np.any(~np.isfinite(kappas)) or np.any(kappas <= 0):
+        raise ValueError("chi2 thresholds must be finite and > 0")
     a = grid.length
-    rho = _rho(lc, sigma)
+    rho = _rho(lc)
     M0 = chi2_m0(kappas, k)
     M1 = chi2_m1(kappas, k)
     M2 = chi2_m2(kappas, k)
@@ -182,12 +208,14 @@ def _c_nu(u: Array, nu: float) -> Array:
     all nu, so all LKCs at kappa=0 must agree across field families).
     Limit: c_nu(u) -> phi(u) as nu -> infinity.
     """
+    _validate_nu(nu)
     u = np.asarray(u)
-    return np.exp(-0.5 * np.log(2.0 * np.pi)) * (1.0 + u ** 2 / nu) ** (-(nu - 1.0) / 2.0)
+    return np.exp(-0.5 * np.log(2.0 * np.pi) - .5 * (nu - 1) * np.log1p(u**2 / nu))
 
 
 def t_m0(u: Array, nu: float) -> Array:
     """M0 = P(T_nu >= u) = scipy.stats.t.sf(u, df=nu)."""
+    _validate_nu(nu)
     return stats.t.sf(np.asarray(u), df=nu)
 
 
@@ -206,7 +234,8 @@ def t_m2(u: Array, nu: float) -> Array:
     A_nu -> 1 as nu -> inf, recovering Gaussian M2 = u * phi(u).
     """
     u = np.asarray(u)
-    A = np.sqrt(2.0 / nu) * gamma((nu + 1.0) / 2.0) / gamma(nu / 2.0)
+    _validate_nu(nu)
+    A = np.exp(.5 * np.log(2.0 / nu) + gammaln((nu + 1.0) / 2.0) - gammaln(nu / 2.0))
     return A * u * _c_nu(u, nu)
 
 
@@ -216,6 +245,7 @@ def t_m3(u: Array, nu: float) -> Array:
     Zero-crossing at u_c = sqrt(nu/(nu-1)), the bulk-limit EC-zero threshold.
     As nu -> inf: u_c -> 1 and M3 -> (u^2-1)*phi(u) = gaussian_m3(u).
     """
+    _validate_nu(nu)
     u = np.asarray(u)
     return ((nu - 1.0) / nu * u ** 2 - 1.0) * _c_nu(u, nu)
 
@@ -229,10 +259,15 @@ def expected_lkcs_t(
     M_j use the cone-geometry functionals (_c_nu family), NOT the t_nu PDF.
     Key check: at kappa=0, {T_nu>=0}={Z_0>=0} so all LKCs should match the
     Gaussian values — verified by the fact that M_j(0) = Gaussian M_j(0).
+
+    sigma is the common positive standard deviation of ALL Gaussian components.
+    It cancels in the ratio field, so it does not change these expectations.
+    nu >= 3 is the supported range; the Gaussian API handles nu=infinity.
     """
     kappas = np.asarray(kappas, dtype=float)
     a = grid.length
-    rho = _rho(lc, sigma)
+    _positive(sigma, "sigma")
+    rho = _rho(lc)
     M0 = t_m0(kappas, nu)
     M1 = t_m1(kappas, nu)
     M2 = t_m2(kappas, nu)
@@ -254,24 +289,26 @@ def find_percolation_threshold(
 ) -> tuple[float, float]:
     """Find kappa_c (zero-crossing of E[L0]) and the corresponding phi_c.
 
-    phi_c is the volume fraction at the percolation threshold according to the
-    Adler EC criterion (Roubin & Colliat 2016).
+    Historical function name: this finds an EC-zero proxy, not a measured or
+    guaranteed percolation threshold. The GKF does not predict spanning.
 
     Args:
         grid:     Grid specification (for domain LKCs).
         lc:       Correlation length.
         nu:       t_nu degrees of freedom, or None (mutually exclusive with k_chi2).
         k_chi2:   chi2(k) degrees of freedom, or None (mutually exclusive with nu).
-        sigma:    Field standard deviation (Gaussian only).
+        sigma:    Common Gaussian-component standard deviation.
         u_search: (lower, upper) bracket for root search.
 
     Returns:
         (kappa_c, phi_c).  Returns (nan, nan) if no zero-crossing found in bracket.
     """
+    if nu is not None and k_chi2 is not None:
+        raise ValueError("nu and k_chi2 are mutually exclusive")
     def ec(u_scalar: float) -> float:
         u = np.asarray([u_scalar])
         if k_chi2 is not None:
-            return float(expected_lkcs_chi2(grid, lc, k_chi2, u)["L0"][0])
+            return float(expected_lkcs_chi2(grid, lc, k_chi2, u, sigma)["L0"][0])
         if nu is not None:
             return float(expected_lkcs_t(grid, lc, nu, u, sigma)["L0"][0])
         return float(expected_lkcs_gaussian(grid, lc, u, sigma)["L0"][0])
@@ -281,7 +318,7 @@ def find_percolation_threshold(
         return float("nan"), float("nan")
     kc = float(optimize.brentq(ec, u_lo, u_hi, xtol=1e-4))
     if k_chi2 is not None:
-        phi_c = float(stats.chi2.sf(kc, df=k_chi2))
+        phi_c = float(stats.chi2.sf(kc / sigma**2, df=k_chi2))
     elif nu is not None:
         phi_c = float(stats.t.sf(kc, df=nu))
     else:
@@ -300,6 +337,9 @@ def _normal_density(x: float) -> float:
 
 def margin_m0(q: int, delta: float) -> float:
     """M0 = q integral phi(t) Phi(t-delta)^(q-1) dt = P(A_delta)."""
+    _validate_margin(q, delta)
+    if delta == 0:
+        return 1.0
     integrand = lambda t: _normal_density(t) * ndtr(t - delta) ** (q - 1)
     val, _ = quad(integrand, -10.0, 10.0, epsabs=2e-11, epsrel=2e-11, limit=200)
     return float(q * val)
@@ -307,6 +347,9 @@ def margin_m0(q: int, delta: float) -> float:
 
 def margin_m1(q: int, delta: float) -> float:
     """M1: Gaussian boundary measure of the q polyhedral winner chambers."""
+    _validate_margin(q, delta)
+    if delta == 0:
+        return 0.0  # D_0 is all value space; not the separated-chamber limit.
     integrand = (
         lambda t: _normal_density(t) * _normal_density(t - delta) * ndtr(t - delta) ** (q - 2)
     )
@@ -320,6 +363,9 @@ def margin_stratum_measure(q: int, delta: float, codimension: int) -> float:
     One winning coordinate, k runner-up coordinates exactly delta below it,
     all remaining below those. The sqrt(k+1) factor is the induced surface Jacobian.
     """
+    _validate_margin(q, delta)
+    if delta == 0:
+        raise ValueError("Separated-chamber strata require delta > 0")
     k = codimension
     if not 1 <= k <= min(3, q - 1):
         return 0.0
@@ -339,13 +385,18 @@ def margin_gmfs(q: int, delta: float) -> np.ndarray:
     Normal-cone constants: pairwise wedge angle pi/3; trihedral solid angle
     3*arccos(1/3) - pi.
 
-    NOTE: These formulas are numerically validated for q=2 (exact half-space
-    identities) and for q=4,8,16 at phi=0.50,0.70,0.80. A formal proof of
-    the stratified-tube decomposition has not yet been published.
+    For delta > 0 the chambers are separated. At delta=0 their union is all
+    value space: return [1, 0, 0, 0], not the generally different right-hand
+    limit. q=2 has exact half-space controls; finite-grid comparisons for other
+    q support the formulas but do not prove continuum accuracy. The complete
+    stratified-tube proof remains to be written.
 
     Returns:
         Array [M0, M1, M2, M3].
     """
+    _validate_margin(q, delta)
+    if delta == 0:
+        return np.array([1.0, 0.0, 0.0, 0.0])
     a = delta / np.sqrt(2.0)
     S1 = margin_stratum_measure(q, delta, 1)
     S2 = margin_stratum_measure(q, delta, 2)
@@ -366,12 +417,14 @@ def expected_lkcs_margin(
 
     Uses the same GKF flag-coefficient formulas as expected_lkcs_gaussian, with the
     polyhedral hitting-set M_j from margin_gmfs() in place of the Gaussian M_j.
+    delta is in component-value units; standardization uses delta/sigma.
 
     Returns dict with scalar float keys 'L0', 'L1', 'L2', 'L3', 'phi'.
     """
     a = grid.length
-    rho = _rho(lc, sigma)
-    M0, M1, M2, M3 = margin_gmfs(q, delta)
+    _positive(sigma, "sigma")
+    rho = _rho(lc)
+    M0, M1, M2, M3 = margin_gmfs(q, delta / sigma)
     L0 = rho ** 3 * a ** 3 * M3 + 3.0 * rho ** 2 * a ** 2 * M2 + 3.0 * rho * a * M1 + M0
     L1 = 2.0 * rho ** 2 * a ** 3 * M2 + 1.5 * np.pi * rho * a ** 2 * M1 + 3.0 * a * M0
     L2 = 2.0 * rho * a ** 3 * M1 + 3.0 * a ** 2 * M0
@@ -402,7 +455,7 @@ def delta_for_vf(q: int, phi: float) -> float:
 
 # =============================================================================
 # Coalescing lobes: Gaussian-space ball union
-# Volume fraction is estimated by Monte Carlo (no closed-form M_j before contact).
+# Ball tube coefficients are available before contact; union VF also has an MC check.
 # =============================================================================
 
 def ball_lkcs(c: np.ndarray, r: float) -> np.ndarray:
@@ -432,8 +485,11 @@ def ball_lkcs(c: np.ndarray, r: float) -> np.ndarray:
         Array [M_0, M_1, M_2, M_3].
     """
     rho2 = float(np.sum(np.asarray(c, dtype=float) ** 2))
+    if np.asarray(c).shape != (3,) or not np.isfinite(rho2):
+        raise ValueError("c must be a finite 3-vector")
+    _positive(r, "r")
     x    = float(r) ** 2
-    eps  = max(1e-5, 1e-4 * (x + 1.0))
+    eps  = min(max(1e-5, 1e-4 * (x + 1.0)), .25 * x)
 
     def pdf(y: float) -> float:
         return float(stats.ncx2.pdf(y, df=3, nc=rho2))
@@ -464,17 +520,26 @@ def expected_lkcs_lobes_disjoint(
 
         M_j(D_r) = Σ_a M_j(B(c_a, r))        (disjoint additivity)
 
-    After contact (radius > r_c) the inclusion-exclusion terms require Gaussian-
+    At or after contact (radius >= r_c) the inclusion-exclusion terms require Gaussian-
     weighted ball-intersection functionals that have not been derived; callers
-    should not use this function in that regime.
+    should not use this function in that regime. sigma is the common Gaussian
+    component SD; centres and radius are standardized by sigma.
 
     Returns dict with keys 'L0', 'L1', 'L2', 'L3', 'phi'.
     """
+    _positive(sigma, "sigma")
+    _positive(radius, "radius")
+    centres = np.asarray(centres, dtype=float)
+    if centres.ndim != 2 or centres.shape[1] != 3 or len(centres) == 0 or not np.all(np.isfinite(centres)):
+        raise ValueError("centres must have finite shape (K, 3), K >= 1")
+    for i, c in enumerate(centres):
+        if np.any(np.linalg.norm(centres[i+1:] - c, axis=1) <= 2 * radius):
+            raise ValueError("Disjoint-ball theory requires radius strictly below first contact")
     a    = grid.length
-    rho_sp = _rho(lc, sigma)
+    rho_sp = _rho(lc)
     M = np.zeros(4)
     for c in np.asarray(centres):
-        M += ball_lkcs(c, radius)
+        M += ball_lkcs(c / sigma, radius / sigma)
     M0, M1, M2, M3 = M
     L0 = rho_sp ** 3 * a ** 3 * M3 + 3.0 * rho_sp ** 2 * a ** 2 * M2 + 3.0 * rho_sp * a * M1 + M0
     L1 = 2.0 * rho_sp ** 2 * a ** 3 * M2 + 1.5 * np.pi * rho_sp * a ** 2 * M1 + 3.0 * a * M0

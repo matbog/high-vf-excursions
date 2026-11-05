@@ -1,4 +1,4 @@
-"""Experiment 04: Coalescing Gaussian-space lobes.
+"""Experiment 05: Coalescing Gaussian-space lobes, union measurement schema v2.
 
 A 3D Gaussian vector field G(x) = (G1(x), G2(x), G3(x)) maps each voxel to a
 point in auxiliary Gaussian space R^3. Four fixed target centres c_a are placed
@@ -16,14 +16,14 @@ Before r_c the lobes are disjoint value-space balls (GKF M_j are additive).
 After r_c they overlap and inclusion-exclusion terms enter the M_j formulas —
 this contribution has not yet been analytically derived.
 
-Key finding: physical percolation occurred before r/r_c = 1 (i.e., before the
-value-space lobes touched), with a large negative Euler characteristic dip
-near r_c suggesting a tunnel-rich transition.
+Measure the binary union under both connectivities. Keep ball-preimage sums
+and nearest-centre partition diagnostics in explicitly separate columns.
+The historical results/ files use an older schema and are never overwritten.
 
 Run:
     mamba run -n rf_explo python run.py
 
-Outputs (all in results/):
+Outputs (by default in results_union_v2/):
     coalescing_lobes_sweep.csv      — all realisations, all radii
     coalescing_lobes_slices.png     — winner-coloured central slices
     coalescing_lobes_diagnostics.png — 4-panel diagnostic
@@ -34,26 +34,24 @@ Seeds: SEED=9417.
 from __future__ import annotations
 
 import csv
+import argparse
+import hashlib
+import json
 import sys
-from dataclasses import asdict, dataclass
+from importlib.metadata import version
 from pathlib import Path
+from types import SimpleNamespace
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parents[2]))
-from src import adler, excursions, fields, measures
+from src import adler, excursions, fields
 from src.adler import expected_lkcs_lobes_disjoint
 from src.fields import GridSpec
-from src.measures import (
-    measure_euler,
-    measure_l1_from_field,
-    measure_surface_area_crofton,
-    measure_surface_area_from_field,
-)
+from measurement import measure_lobes
 
-RESULTS = Path(__file__).parent / "results"
-RESULTS.mkdir(exist_ok=True)
+RESULTS = Path(__file__).parent / "results_union_v2"
 
 SEED = 9417
 N = 100
@@ -66,29 +64,33 @@ RADIUS_OVER_RC = [0.45, 0.65, 0.85, 0.98, 1.02, 1.15, 1.35, 1.60]
 MC_SAMPLES = 2_000_000
 
 
-@dataclass
-class Row:
-    realization: int
-    radius: float
-    radius_over_rc: float
-    theory_phi:   float    # Gaussian-space MC (valid at all r)
-    theory_L0:    float    # GKF prediction (valid only for r/r_c < 1)
-    theory_L1:    float
-    theory_L2:    float
-    theory_L3:    float
-    measured_phi: float
-    euler:        int      # 26-connectivity Euler, per-ball sum
-    l1_winner:    float    # signed-field L1, per-ball sum
-    l2_crofton:   float    # Crofton L2, per-ball sum
-    l2_field:     float    # signed-field MC L2, per-ball sum
-    largest_fraction_phase: float
-    spans_any:    bool
+Row = SimpleNamespace
+
+
+def _sample_std(values) -> float:
+    """No dispersion estimate is available for the one-realization smoke run."""
+    return float(np.std(values, ddof=1)) if len(values) > 1 else 0.0
 
 
 def run() -> None:
+    if RESULTS.exists() and any(RESULTS.iterdir()):
+        raise SystemExit(f"Output directory is not empty: {RESULTS}. Choose a new --output.")
+    RESULTS.mkdir(parents=True, exist_ok=True)
+    root = Path(__file__).resolve().parents[2]
+    sources = [Path(__file__).resolve(), Path(__file__).with_name("measurement.py").resolve(),
+               root / "src/adler.py", root / "src/measures.py", root / "src/fields.py"]
+    metadata = {
+        "measurement_schema": "union_v2", "status": "running", "seed": SEED,
+        "n": N, "length": LENGTH, "lc": LC, "rho": RHO, "padding": PADDING,
+        "realizations": N_REALIZATIONS, "radius_over_rc": RADIUS_OVER_RC,
+        "mc_samples": MC_SAMPLES, "python": sys.version,
+        "versions": {name: version(name) for name in ("numpy", "scipy", "gstools", "scikit-image", "matplotlib")},
+        "generator": "GSTools Gaussian rescale=1; shared src.fields wrapper",
+        "source_sha256": {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources},
+    }
+    (RESULTS / "metadata.json").write_text(json.dumps(metadata, indent=2)+"\n", encoding="utf-8")
     grid = GridSpec(n=N, length=LENGTH)
     centres = excursions.tetrahedral_centres(RHO)
-    K = len(centres)
     rc = float(np.linalg.norm(centres[0] - centres[1]) / 2.0)
     ratios = np.array(RADIUS_OVER_RC)
     radii = rc * ratios
@@ -120,25 +122,7 @@ def run() -> None:
         ])   # shape (K, N, N, N)
 
         for radius, ratio, phi in zip(radii, ratios, theory_phi):
-            phase    = distances <= radius
-            occupied = int(phase.sum())
-            from scipy import ndimage
-            labels, _ = ndimage.label(phase, ndimage.generate_binary_structure(3, 1))
-            sizes   = np.bincount(labels.ravel())
-            largest = int(sizes[1:].max(initial=0)) if occupied > 0 else 0
-
-            # Per-ball LKCs (summed over K balls)
-            euler_pb = 0
-            l1_pb    = 0.0
-            l2cr_pb  = 0.0
-            l2fd_pb  = 0.0
-            for a in range(K):
-                mask_a = phase & (nearest == a)
-                s_a    = radius - per_ball_dists[a]
-                euler_pb += int(measure_euler(mask_a, connectivity=3))
-                l2cr_pb  += float(measure_surface_area_crofton(mask_a, grid.dx))
-                l1_pb    += float(measure_l1_from_field(s_a, grid.dx, level=0.0))
-                l2fd_pb  += float(measure_surface_area_from_field(s_a, grid.dx, level=0.0))
+            measured = measure_lobes(per_ball_dists, float(radius), grid)
 
             # Full LKC theory (only valid for r/r_c < 1)
             if ratio < 1.0:
@@ -147,39 +131,31 @@ def run() -> None:
             else:
                 th_L0 = th_L1 = th_L2 = th_L3 = float("nan")
 
-            perc = measures.measure_percolation(phase)
-            spans_any = perc["x"] or perc["y"] or perc["z"]
-
             rows.append(Row(
                 realization=realization + 1,
                 radius=float(radius),
                 radius_over_rc=float(ratio),
                 theory_phi=float(phi),
                 theory_L0=th_L0, theory_L1=th_L1, theory_L2=th_L2, theory_L3=th_L3,
-                measured_phi=float(phase.mean()),
-                euler=euler_pb,
-                l1_winner=l1_pb,
-                l2_crofton=l2cr_pb,
-                l2_field=l2fd_pb,
-                largest_fraction_phase=largest / occupied if occupied else 0.0,
-                spans_any=spans_any,
+                **measured,
             ))
             def _th(v: float) -> str:
                 return f"{v:7.1f}" if (ratio < 1.0 and not np.isnan(v)) else "    n/a"
-            print(f"  r={realization+1} r/r_c={ratio:.2f} phi={phase.mean():.3f}  "
-                  f"L0={euler_pb:6d}/{_th(th_L0)}  "
-                  f"L1={l1_pb:7.0f}/{_th(th_L1)}  "
-                  f"L2cr={l2cr_pb:7.0f}/{_th(th_L2)}")
+            print(f"  r={realization+1} r/r_c={ratio:.2f} phi={measured['measured_phi']:.3f}  "
+                  f"union L0(6/26)={measured['union_euler_6']}/{measured['union_euler_26']} "
+                  f"theory={_th(th_L0)}")
 
     with (RESULTS / "coalescing_lobes_sweep.csv").open("w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=list(Row.__annotations__.keys()))
+        w = csv.DictWriter(f, fieldnames=list(vars(rows[0])))
         w.writeheader()
-        w.writerows(asdict(r) for r in rows)
+        w.writerows(vars(r) for r in rows)
     print("\n  saved coalescing_lobes_sweep.csv")
 
     _plot_slices(distances_all, nearest_all, radii, ratios, theory_phi)
     _plot_diagnostics(rows, ratios, theory_phi)
     _plot_lkcs(rows, ratios)
+    metadata["status"] = "complete"
+    (RESULTS / "metadata.json").write_text(json.dumps(metadata, indent=2)+"\n", encoding="utf-8")
 
 
 def _plot_slices(distances_all, nearest_all, radii, ratios, theory_phi) -> None:
@@ -202,7 +178,7 @@ def _plot_slices(distances_all, nearest_all, radii, ratios, theory_phi) -> None:
                     transform=ax.transAxes, fontsize=7,
                     bbox=dict(facecolor="white", alpha=0.8, edgecolor="none"))
         axes[row, 0].set_ylabel(f"realisation {row + 1}")
-    fig.suptitle(rf"Tetrahedral Gaussian lobes (contact at $r/r_c=1$, dashed)",
+    fig.suptitle(rf"Tetrahedral Gaussian lobes (value-space contact at $r/r_c=1$)",
                  fontsize=13)
     fig.savefig(RESULTS / "coalescing_lobes_slices.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
@@ -217,7 +193,7 @@ def _plot_diagnostics(rows: list[Row], ratios, theory_phi) -> None:
         ])
     def std_by_ratio(attr: str) -> np.ndarray:
         return np.array([
-            np.std([getattr(r, attr) for r in rows if np.isclose(r.radius_over_rc, ratio)], ddof=1)
+            _sample_std([getattr(r, attr) for r in rows if np.isclose(r.radius_over_rc, ratio)])
             for ratio in ratios
         ])
     def theory_vals(attr: str) -> np.ndarray:
@@ -240,8 +216,10 @@ def _plot_diagnostics(rows: list[Row], ratios, theory_phi) -> None:
     axes[0, 0].legend(fontsize=8)
 
     # L0 (Euler) with theory curve for r/r_c < 1
-    axes[0, 1].errorbar(ratios, mean_by_ratio("euler"), yerr=std_by_ratio("euler"),
-                         fmt="o-", color="#3a8cb4", ms=4, label="measured (26-conn)")
+    for rank, style in ((6, "s--"), (26, "o-")):
+        key = f"union_euler_{rank}"
+        axes[0, 1].errorbar(ratios, mean_by_ratio(key), yerr=std_by_ratio(key),
+                             fmt=style, ms=4, label=f"binary union ({rank}-conn)")
     th_L0 = theory_vals("theory_L0")
     mask  = ~np.isnan(th_L0)
     axes[0, 1].plot(ratios[mask], th_L0[mask], "-", color="#ff6e7c", lw=2, label="GKF theory (disjoint)")
@@ -250,14 +228,18 @@ def _plot_diagnostics(rows: list[Row], ratios, theory_phi) -> None:
     axes[0, 1].set_title("L0 — Euler\n(theory valid only before contact)")
     axes[0, 1].legend(fontsize=8, loc="best")
 
-    axes[1, 0].plot(ratios, mean_by_ratio("largest_fraction_phase"), "o-", ms=4)
+    for rank in (6, 26):
+        axes[1, 0].plot(ratios, mean_by_ratio(f"union_largest_fraction_{rank}"), "o-", ms=4, label=f"{rank}-conn")
+    axes[1, 0].legend(fontsize=8)
     axes[1, 0].set_ylabel("largest component / phase")
     axes[1, 0].set_title("Component coalescence")
 
-    axes[1, 1].plot(ratios, mean_by_ratio("spans_any"), "o-", ms=4)
+    for rank in (6, 26):
+        axes[1, 1].plot(ratios, mean_by_ratio(f"union_spans_{rank}"), "o-", ms=4, label=f"{rank}-conn")
+    axes[1, 1].legend(fontsize=8)
     axes[1, 1].set_ylim(-0.05, 1.05)
     axes[1, 1].set_ylabel("spanning frequency")
-    axes[1, 1].set_title("Physical percolation\n(occurs before value-space contact)")
+    axes[1, 1].set_title("Binary-union spanning (finite grid)")
 
     fig.suptitle(rf"Coalescing lobes  ($N={N}^3$, $L_c={LC}$, {N_REALIZATIONS} realisations)")
     fig.savefig(RESULTS / "coalescing_lobes_diagnostics.png", dpi=200, bbox_inches="tight")
@@ -266,7 +248,7 @@ def _plot_diagnostics(rows: list[Row], ratios, theory_phi) -> None:
 
 
 def _plot_lkcs(rows: list[Row], ratios) -> None:
-    """4-panel: L0/L1/L2(Crofton)/L2(MC-field) measured vs theory, with ±5% band."""
+    """Union measurements throughout; pre-contact per-ball controls also shown."""
     def mean(attr):
         return np.array([
             np.mean([getattr(r, attr) for r in rows if np.isclose(r.radius_over_rc, ratio)])
@@ -274,7 +256,7 @@ def _plot_lkcs(rows: list[Row], ratios) -> None:
         ])
     def std(attr):
         return np.array([
-            np.std([getattr(r, attr) for r in rows if np.isclose(r.radius_over_rc, ratio)], ddof=1)
+            _sample_std([getattr(r, attr) for r in rows if np.isclose(r.radius_over_rc, ratio)])
             for ratio in ratios
         ])
     def th(attr):
@@ -284,17 +266,19 @@ def _plot_lkcs(rows: list[Row], ratios) -> None:
         ])
 
     specs = [
-        ("euler",      "theory_L0", "L0 — Euler (26-conn)"),
-        ("l1_winner",  "theory_L1", "L1 — mean curvature (signed-field MC)"),
-        ("l2_crofton", "theory_L2", "L2 — surface area (Crofton)"),
-        ("l2_field",   "theory_L2", "L2 — surface area (MC on field)"),
+        ("union_euler_26", "theory_L0", "L0 — union Euler (26-conn)", "sum_ball_euler_26"),
+        ("union_L1_field", "theory_L1", "L1 — union signed-field mesh", "sum_ball_L1_field"),
+        ("union_L2_crofton", "theory_L2", "L2 — union half-area (Crofton)", "sum_ball_L2_crofton"),
+        ("union_L2_field", "theory_L2", "L2 — union half-area (field mesh)", "sum_ball_L2_field"),
     ]
     fig, axes = plt.subplots(1, 4, figsize=(19, 4.6), constrained_layout=True)
-    for ax, (meas, th_key, title) in zip(axes, specs):
+    for ax, (meas, th_key, title, control) in zip(axes, specs):
         m = mean(meas); s = std(meas); t = th(th_key)
         ok = ~np.isnan(t)
         ax.errorbar(ratios, m, yerr=s, fmt="o-", color="#3a8cb4", ecolor="#3a8cb4",
-                    capsize=3, ms=4, lw=1.4, label="measured")
+                    capsize=3, ms=4, lw=1.4, label="binary/scalar union")
+        ax.plot(ratios[ok], mean(control)[ok], "x:", color="0.4",
+                label="per-ball sum (pre-contact only)")
         ax.plot(ratios[ok], t[ok], "-", color="#ff6e7c", lw=2.0,
                 label="GKF theory (r/r_c < 1)")
         ax.axvline(1.0, color="crimson", ls="--", lw=1.0,
@@ -315,5 +299,16 @@ def _plot_lkcs(rows: list[Row], ratios) -> None:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=RESULTS)
+    parser.add_argument("--n", type=int, default=N)
+    parser.add_argument("--realizations", type=int, default=N_REALIZATIONS)
+    parser.add_argument("--radii", type=float, nargs="+", default=RADIUS_OVER_RC, help="Ratios r/r_c")
+    parser.add_argument("--mc-samples", type=int, default=MC_SAMPLES)
+    args = parser.parse_args()
+    if args.n < 4 or args.realizations < 1 or args.mc_samples < 1 or any(not np.isfinite(r) or r <= 0 for r in args.radii):
+        parser.error("Require n>=4, positive realizations/sample count and positive finite radii")
+    RESULTS, N, N_REALIZATIONS = args.output, args.n, args.realizations
+    RADIUS_OVER_RC, MC_SAMPLES = sorted(set(args.radii)), args.mc_samples
     run()
-    print("Done. Results in experiments/05_coalescing_lobes/results/")
+    print(f"Done. Results in {RESULTS}")

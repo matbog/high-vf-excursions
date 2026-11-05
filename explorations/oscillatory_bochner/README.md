@@ -1,59 +1,78 @@
-# Exploration — Oscillatory Covariance RFs and the Bochner Boundary
+# Oscillatory covariance and Bochner diagnostics
 
-## Status
+This exploration has two separate parts: a proposed covariance built from
+a complex scale, and a real field generated from an explicitly nonnegative
+radial spectrum. They must not be interpreted as the same model.
 
-Exploratory direction. Not yet connected to the main high-VF Adler story.
-Planned for future investigation.
+## Complex-scale candidate
 
-## Scientific question
+For $C(r)=\exp[-r^2/(2R^2e^{2i\theta})]$, the relevant real-field candidate
+is $\operatorname{Re}C(r)$. Its spectral density, up to a positive Fourier
+normalization, is
 
-The Feigenbaum bifurcation diagram lives on the real axis of the Mandelbrot set.
-Analogously, standard Gaussian RF morphology lives in a real-parameter slice of a
-larger covariance parameter space. What happens when the covariance parameter is
-extended to the complex plane?
+$$
+\operatorname{Re}S(k)
+\propto e^{-k^2R^2\cos(2\theta)/2}
+\cos\!\left(3\theta-\tfrac12 k^2R^2\sin(2\theta)\right),
+\qquad 0\leq\theta<\pi/4.
+$$
 
-For C(r) = exp(-r²/2Lc²) with complex Lc = R exp(i theta):
+At $\theta=0$ this is Gaussian and nonnegative. For every
+$0<\theta<\pi/4$, the cosine takes negative values at some finite
+wavenumber: the candidate fails Bochner's criterion on the full continuum.
+A plot over $0\leq k\leq\pi/dx$ tests only that band; underflow and finite
+cutoffs can hide negative lobes. It is not a covariance-validity phase
+boundary. The endpoint $\theta=\pi/4$ is excluded from this integrable
+Gaussian-transform calculation.
 
-    Re[S(k)] = (2pi)^(3/2) R^3 exp(-k²R²cos2theta/2) cos(3theta - k²R²sin2theta/2)
+The complex even function itself also fails the Hermitian covariance
+condition for a stationary complex field unless it is real. The diagnostic
+therefore explicitly concerns its real part.
 
-Bochner's theorem: C is a valid covariance iff Re[S(k)] >= 0 for all k.
-The boundary of validity in (theta, R) space is the 'Mandelbrot set' of Gaussian RFs.
+## A valid nonnegative-spectrum alternative
 
-This script also generates oscillatory covariance fields via a sum-of-Gaussians
-spectral density (always valid by construction), which interpolate between standard
-Gaussian morphology and quasi-periodic structures.
+The generator instead uses
 
-## Key parameters
+$$
+S(k)=e^{-L_d^2(k-\omega)^2/4}+e^{-L_d^2(k+\omega)^2/4},
+\qquad \omega=2\pi/\lambda,\quad k=\|\mathbf k\|.
+$$
 
-| Parameter | Value |
-|---|---|
-| `SEED` | 7 |
-| `N` | 100 (voxels per side) |
-| Bochner map: theta range | 0 to pi/4 (120 points) |
-| Bochner map: R range | 2 to 20 voxels (100 points) |
-| Oscillatory sweep: L_d | 8.0 |
-| Oscillatory sweep: lambda | [500, 40, 16, 8, 4] voxels |
+This radial spectrum is nonnegative. Its normalized **three-dimensional**
+continuum covariance is
 
-## How to run
+$$
+C(r)=e^{-(r/L_d)^2}
+\frac{\cos(\omega r)+b\,\operatorname{sinc}(\omega r)}{1+b},
+\qquad b=\frac{L_d^2\omega^2}{2},
+$$
 
-```bash
-mamba run -n rf_explo python run.py
-```
+where $\operatorname{sinc}(x)=\sin(x)/x$.
+The expression follows from the radial Fourier transform
+$\int_0^\infty k^2S(k)\operatorname{sinc}(kr)\,dk$, normalized at $r=0$.
+The earlier reference $e^{-(r/L_d)^2}\operatorname{sinc}(\omega r)$
+belongs to a different spectrum and was not the covariance of this sampler.
 
-Expected runtime: ~2–3 minutes.
+The implementation filters the FFT of real Gaussian white noise and applies
+a deterministic ensemble-variance normalization. It retains the random DC
+mode and does not standardize each realisation by its own mean and SD.
+Those sample-dependent operations would change the Gaussian ensemble.
 
-## Outputs
+On a finite FFT grid, the exact covariance is the inverse discrete spectrum,
+with periodicity, truncation, and the implemented removal of even-grid
+Nyquist planes. The continuum curve is a reference; agreement is not exact
+by construction. Empirical autocorrelation is normalized by the true
+zero-lag sample value, not the average of a radial bin.
 
-| File | Contents |
-|---|---|
-| `results/bochner_map.png` | Bochner validity in (theta, R) space + example field slices |
-| `results/oscillatory_sweep.png` | Morphology from smooth blobs to quasi-periodic structures |
+## Outputs and analytical scope
 
-## Potential future directions
+The corrected script writes `results_corrected/` and refuses a nonempty
+destination. Historical figures under `results/` retain the earlier
+normalization and reference curve and have not been regenerated.
 
-- Map the full Bochner boundary for the squared-exponential and Matern covariance families.
-- Derive Adler LKC formulas for oscillatory covariance RFs (lambda_2 changes; are higher
-  spectral moments needed?).
-- Explore whether morphologies near the Bochner boundary exhibit near-fractal topology.
-- Connection to Lee-Yang zeros: analytic continuation of the EC formula E[L0](u + iv) in
-  the complex threshold plane.
+A valid spectrum alone does not demonstrate higher nonspanning aggregate
+VF. A GKF calculation would need the corresponding component spectral
+moment and the usual smoothness/regularity assumptions, followed by a
+separate connectivity study.
+
+Reference: [Rasmussen & Williams, GPML, covariance functions](https://gaussianprocess.org/gpml/chapters/RW4.pdf).

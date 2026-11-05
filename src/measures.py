@@ -5,7 +5,7 @@ Quantities measured:
     L1  Integrated mean curvature / pi — dihedral angles on the marching-cubes
         mesh (Schläfli-type formula for PL surfaces). Binary-surface bias can
         persist under refinement; no convergence rate is established here.
-    L2  Half surface area — marching-cubes estimate. Carries O(dx) resolution bias.
+    L2  Half surface area — marching-cubes or three-direction Crofton estimate.
     L3  Volume — exact on the voxel grid.
 """
 
@@ -88,9 +88,8 @@ def _l1_from_mesh(verts: np.ndarray, faces: np.ndarray) -> float:
 def measure_l1(phase: np.ndarray, dx: float) -> float:
     """L1 via dihedral angles on marching cubes of a BINARY phase mask.
 
-    Binarizing the field before meshing loses subvoxel interface positions;
-    the resulting curvature bias scales ~O(1/N) under grid refinement. For
-    higher accuracy pass the smooth signed field directly via
+    Binarizing loses subvoxel interface positions. No universal convergence
+    rate is established here. To retain sampled scalar information use
     `measure_l1_from_field`.
     """
     padded = np.pad(phase.astype(np.float32), 1, constant_values=0.0)
@@ -106,20 +105,15 @@ def measure_l1(phase: np.ndarray, dx: float) -> float:
 def measure_l1_from_field(
     scalar_field: np.ndarray, dx: float, level: float = 0.0
 ) -> float:
-    """L1 via dihedral angles on marching cubes of a SMOOTH SIGNED FIELD.
+    """L1 of the marching-cubes mesh of {scalar_field >= level}.
 
-    `scalar_field` must be a continuous array whose level-0 isosurface IS the
-    boundary of the region of interest ({scalar >= level} = inside). This
-    eliminates the subvoxel binarization bias of `measure_l1`: the mesh
-    vertices sit at the true continuum level set rather than snapped to voxel
-    midpoints, so the dihedral angles accurately reflect continuum curvature.
-
-    Padding uses a large negative value (array_min − 1) so the field crosses
-    `level` at the array boundary, closing the mesh with a surface aligned
-    with the domain faces. This matches the GKF formula's domain-face terms.
+    Edge interpolation retains more information than binary meshing, but is
+    not the exact smooth-field level set. A sampled min/max transform can miss
+    an interior feature. Padding closes the mesh approximately; its crossings
+    depend on scalar values and are not an exact clipping to the domain faces.
     """
     scalar_field = scalar_field.astype(np.float32)
-    pad_value = float(scalar_field.min()) - 1.0
+    pad_value = min(float(scalar_field.min()), float(level)) - 1.0
     padded = np.pad(scalar_field, 1, constant_values=pad_value)
     try:
         verts, faces, _, _ = measure.marching_cubes(
@@ -153,20 +147,13 @@ def measure_surface_area(phase: np.ndarray, dx: float) -> float:
 def measure_surface_area_from_field(
     scalar_field: np.ndarray, dx: float, level: float = 0.0
 ) -> float:
-    """Half-surface-area L2 via marching cubes of a SMOOTH SIGNED FIELD.
+    """L2 of a mesh interpolated from scalar samples, with approximate closure.
 
-    Analogous to `measure_l1_from_field`: mesh vertices sit at the true continuum
-    isosurface via linear interpolation (not snapped to voxel edges). Padding with
-    `min(field) − 1` closes the mesh at the domain boundary.
-
-    Known trade-off vs `measure_surface_area_crofton`: marching cubes carries a
-    small amplitude bias on curved surfaces (triangles underestimate curved
-    area), partially cancelled by the mesh's many facets being slightly offset
-    from the true surface. In practice, on isotropic Gaussian excursions, the
-    net bias at N≥128 is comparable to or smaller than Crofton's.
+    This shares the interpolation and domain-padding limitations documented in
+    measure_l1_from_field. It is not an exact continuum surface measurement.
     """
     scalar_field = scalar_field.astype(np.float32)
-    pad_value = float(scalar_field.min()) - 1.0
+    pad_value = min(float(scalar_field.min()), float(level)) - 1.0
     padded = np.pad(scalar_field, 1, constant_values=pad_value)
     try:
         verts, faces, _, _ = measure.marching_cubes(
@@ -196,18 +183,18 @@ def measure_surface_area_crofton(phase: np.ndarray, dx: float) -> float:
     1. Interior: for an isotropic surface the stereological Cauchy relation
        gives S_interior = (2/3) * (N_x + N_y + N_z) * dx^2, where N_d counts
        voxel-pair transitions in direction d. Half of that:
-            L2_interior = (N_x + N_y + N_z) * dx^2 / 6.
+            L2_interior = (N_x + N_y + N_z) * dx^2 / 3.
        NOTE: averaging over only 3 axis directions is unbiased for isotropic
        surfaces but anisotropic surfaces (e.g. the cube faces themselves)
        are underestimated by factor 2/3 — hence we DO NOT run Crofton on a
        zero-padded array; instead the face term is handled analytically.
 
     2. Domain faces: half the area of the 6 cube faces occupied by phase.
-       Matches the 3a^2 * M_0 term in the GKF L2 formula exactly.
+       Its expected value is 3a^2 * M_0 for stationary voxel samples.
 
-    Unlike marching cubes, which carries a ~1.09 amplitude bias on isotropic
-    surfaces, this estimator is unbiased on isotropic surfaces to <0.1% at
-    N>=128 on a sphere.
+    The continuous directional identity is unbiased for isotropic ensembles.
+    Finite differences can miss multiple crossings within a grid interval;
+    this implementation has no universal finite-resolution accuracy guarantee.
     """
     N_x = int(np.sum(phase[1:,  :,  :] != phase[:-1, :,  :]))
     N_y = int(np.sum(phase[ :, 1:,  :] != phase[ :, :-1, :]))
@@ -223,13 +210,15 @@ def measure_surface_area_crofton(phase: np.ndarray, dx: float) -> float:
     return L2_interior + L2_faces
 
 
-def measure_percolation(phase: np.ndarray) -> dict[str, bool]:
+def measure_percolation(phase: np.ndarray, connectivity: int = 1) -> dict[str, bool]:
     """Check whether any connected component spans from face 0 to face -1 along each axis.
 
     Returns:
         Dict with keys 'x', 'y', 'z' mapping to bool.
     """
-    labels = measure.label(phase, connectivity=1)
+    if connectivity not in (1, 3):
+        raise ValueError("connectivity must be 1 (6-neighbour) or 3 (26-neighbour)")
+    labels = measure.label(phase, connectivity=connectivity)
     result: dict[str, bool] = {}
     for axis, key in enumerate(("x", "y", "z")):
         face0 = set(np.unique(np.take(labels, 0, axis=axis)))
@@ -245,8 +234,9 @@ def measure_percolation_per_winner(
 
     Used for the margin tessellation model, where 'spanning' means a cluster
     of a single winner type (not the union of all types) forms a face-to-face
-    connected path.  This is the correct metric for the 'disconnected inclusion'
-    claim: the inclusion phase is disconnected if no individual winner type spans.
+    connected path under 6-connectivity. This ignores digital contacts between
+    different labels: binary-union connectivity must also be measured. Absence
+    of per-winner spanning does not establish continuum disconnection.
 
     Args:
         phase:   Binary inclusion mask (True = included voxel).

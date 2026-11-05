@@ -1,312 +1,158 @@
 # Experiment 04 — Margin tessellation
 
-![Margin tessellation q=16 φ=0.60 — GKF validation](../../images/margin_t_q16_n256_L64_Lc5_vf60_combined.png)
-
-*$q = 16$, $\varphi \approx 60\%$, $N = 256$, $L = 64$, $l_c = 5$ — 3206
-physically disconnected grains with all four LKCs matching GKF theory to
-$<\!2\%$ across 5 realisations.*
-
-Competing Gaussian fields with a "margin" rule. Pushes the disconnected-
-phase volume fraction well past the Gaussian 16% / 22% ceilings while
-keeping the Adler link intact.
-
-## The model
-
-Let $G = (G_1, \ldots, G_q)$ be $q$ i.i.d. smooth Gaussian RFs. Include a
-voxel $x$ iff the winner's lead over the runner-up exceeds a margin
-$\delta$:
+Let $G_1,\ldots,G_q$ be independent unit-variance Gaussian fields with
+correlation $\exp(-r^2/l_c^2)$. Write $G_{(q)}$ and $G_{(q-1)}$ for the
+largest and second-largest values. Include a point when
 
 $$
-A_\delta = \bigl\{\, x : \max_i G_i(x) - \mathrm{second\!-\!max}_i\,G_i(x) \geq \delta \,\bigr\}.
+G_{(q)}(x)-G_{(q-1)}(x)\geq\delta.
 $$
 
-The hitting set in $\mathbb{R}^q$ is a disjoint union of $q$ unbounded
-polyhedral "winner" chambers; the matrix film is where two or more fields
-are tied. Larger $q$ → more, smaller winner cells. Larger $\delta$ →
-thicker film, smaller $\varphi$.
+The scalar margin $\delta$ controls expected VF. For $\delta>0$, different
+winner labels are separated in the continuous model. This does not prevent
+a single label from spanning, and does not guarantee that a sampled binary
+phase resolves the separating matrix film.
 
-Different winner labels are mutually separated by the film by
-construction, but a *single* winner can still span. The relevant
-percolation check is per-winner spanning, not spanning of the union.
+![Margin tessellation](paraview/q16_phi70/display_margin_tess_RF_thresh.png)
 
-## Adler link status
+## GMFs and their scope
 
-Closed-form $\mathcal M_j^\gamma(D_\delta)$ for $j = 0 \ldots 3$,
-numerically validated to <2% at $N = 256$ across $q \in \{2, 4, 8, 16\}$
-on all four LKCs. A formal stratified-tube proof is not written up — the
-$q = 2$ identities and the $N = 256$ convergence are the current
-evidence.
-
-## The $\mathcal M_j$ (inline)
-
-Set $a = \delta/\sqrt{2}$. The codimension-$k$ stratum measures are
+The expected VF is
 
 $$
-S_k(q,\delta) = q \binom{q-1}{k} \sqrt{k+1}
-\int_{-\infty}^{\infty}
-\varphi(t+\delta)\,\varphi(t)^{k}\,\Phi(t)^{q-1-k}\,dt,
-\qquad 1 \leq k \leq \min(3, q-1).
+\mathcal M_0=q\int_{\mathbb R}\varphi(t)\Phi(t-\delta)^{q-1}\,dt.
 $$
 
-Then
+Define $a=\delta/\sqrt2$ and, for $1\leq k\leq\min(3,q-1)$,
+
+$$
+S_k=q\binom{q-1}{k}\sqrt{k+1}
+\int_{\mathbb R}\varphi(t+\delta)\varphi(t)^k
+\Phi(t)^{q-1-k}\,dt.
+$$
+
+Set absent strata to zero. For $\delta>0$, the implemented coefficients are
 
 $$
 \begin{aligned}
-\mathcal M_0(q,\delta) &= q \int_{-\infty}^{\infty}
-    \varphi(t)\,\Phi(t-\delta)^{q-1}\,dt, \\[2pt]
-\mathcal M_1(q,\delta) &= S_1 \;=\; -\sqrt{2}\,\frac{\partial \mathcal M_0}{\partial \delta}, \\[2pt]
-\mathcal M_2(q,\delta) &= a\, S_1 + \frac{\pi}{3}\, S_2, \\[2pt]
-\mathcal M_3(q,\delta) &= (a^{2}-1)\, S_1
-    + \frac{4a}{\sqrt{3}}\, S_2
-    + 2\!\left(3\arccos\!\tfrac{1}{3} - \pi\right)\! S_3.
+\mathcal M_1&=S_1,\\
+\mathcal M_2&=aS_1+\tfrac\pi3 S_2,\\
+\mathcal M_3&=(a^2-1)S_1+\tfrac{4a}{\sqrt3}S_2
++2(3\arccos(1/3)-\pi)S_3.
 \end{aligned}
 $$
 
-The constants are the normal-cone angles: $\pi/3$ for a wedge of two
-active facets, $3\arccos(1/3) - \pi$ for the equilateral spherical
-triangle of three active facets. For $q = 2$ the formulas reduce exactly
-to twice the Gaussian $\mathcal M_j$ at $\delta/\sqrt{2}$ — a check the
-code runs on every launch (also checks
-$\mathcal M_1 = -\sqrt{2}\,\partial \mathcal M_0/\partial \delta$).
+Insert these in the [cube GKF](../../docs/framework.md). These are
+one-dimensional integral formulas with an outlined stratified-tube
+derivation; the complete proof remains outstanding. At exactly
+$\delta=0$, the union is all value space, so the correct GMFs are
+$(1,0,0,0)$ and the expected LKCs are those of the domain. Higher GMFs
+need not approach these values as $\delta\downarrow0$.
 
-Full derivation (chamber stratification + normal-cone integration):
-[`theory/gaussian_minkowski_functionals.md`](../../theory/gaussian_minkowski_functionals.md).
+## What the committed sweep shows
 
-## What it runs
+`results/margin_sweep.csv` contains 480 rows:
+three resolutions (64, 128, 256), four values of $q$ (2, 4, 8, 16),
+eight target VFs (30, 40, 50, 60, 70, 80, 85, 90%), and five realisations.
+The domain has $L=64,l_c=5$.
 
-- `N_VALUES = [64, 128, 256]`, `N_MAIN = 128`, `LENGTH = 64`, `LC = 5`.
-- `Q_VALUES = [2, 4, 8, 16]`, 10 target VFs in $[0.30, 0.90]$.
-- 5 realizations per $(N, q, \varphi)$.
-- Per-winner $L_0 \ldots L_3$ + per-winner spanning.
+At $N=256,q=16$, target VF 60%, ensemble-mean relative errors are:
 
-```bash
-mamba run -n rf_explo python run.py
-```
+| Descriptor | Error |
+|---|---:|
+| Per-winner Euler, 26 neighbours | −1.53% |
+| Sampled margin-field $L_1$ | −0.77% |
+| Crofton $L_2$ | −1.89% |
+| Volume | −0.09% |
 
-Runtime ≈ 2.5 h for the full three-resolution convergence; ≈ 30 min at
-$N = 128$ only (edit `N_VALUES`).
+This setting supports good mean agreement; it does not establish a
+global under-2% bound. For example, the mean Euler error at $N=256,q=2$,
+target VF 30%, is about −16.4%. Percent errors are unstable near theoretical
+zeros. The committed results do not establish a universal convergence rate.
 
-## Estimator choices
+The runner sums per-winner 26-neighbour Euler values. Its spanning diagnostic
+uses per-winner 6-neighbour components. Neither is identical to applying
+both conventions to the binary union. See
+[measurement conventions](../../docs/measurement_conventions.md).
 
-See [`docs/measurement_conventions.md`](../../docs/measurement_conventions.md).
-Short version:
+## Saved scenes and connectivity
 
-- $L_0$: 26-connectivity (thin films sub-voxel at high $q$, high
-  $\varphi$).
-- $L_1$: dihedral sum on marching cubes of the *smooth signed margin
-  field* $s_i(x) = G_i(x) - \max_{j \neq i} G_j(x) - \delta$.
-- $L_2$: Crofton with analytic domain-face term (primary); MC on the
-  signed field (`l2_field` column) for comparison.
+The saved `paraview/q16_phi60_n256/phase.vti` has actual VF 60.77%.
+Rechecking that same binary phase gives:
 
-Field generation uses `gstools` through `src.fields.simulate_random_field`.
+| Neighbours | Components | Largest fraction of inclusion volume | Spanning |
+|---|---:|---:|---|
+| 6 | 3,206 | 2.04% | None |
+| 26 | 1,838 | 44.86% | All axes |
 
-## Outputs
+At target VF 75%, the saved scene's actual VF is 75.47% and it spans all
+axes under both conventions. Largest-component fractions are about
+47.95% (6 neighbours) and 99.62% (26 neighbours).
+The historical images and summary files retain their original 6-neighbour
+statistics. They are not proof of continuum-disconnected grains.
 
-| File | Contents |
-|---|---|
-| `results/margin_sweep.csv` | per-row $(N, q, \varphi)$ measurements and theory |
-| `results/margin_sweep.png` | spanning frequency + $L_0 \pm \mathrm{std}$ vs theory, $N = 128$ |
-| `results/margin_main.png` | 4×5 grid: per-$q$ LKC error bars + slices, $N = 128$ |
-| `results/margin_euler_ratio.png` | measured/theory % deviation vs $\varphi$, $N = 128$ |
-| `results/margin_convergence.png` | % deviation vs $N$, $\varphi$-averaged, per $q$ |
+## Ceiling study: finite evidence, not a VF guarantee
 
-![margin tessellation: LKCs vs theory](results/margin_main.png)
+The historical Phase A CSV has 600 rows: six $q$ values, ten target VFs,
+and ten independent fields per $q$. A field is reused across VF thresholds;
+100 rows per $q$ are not 100 independent trials at a fixed threshold.
 
-![measured/theory ratio vs φ](results/margin_euler_ratio.png)
+- $q=2,4,8$: all ten fields span at every tested VF from 70% to 98%.
+- $q=16$: spanning counts rise from 0/10 at 70%, to 1/10 at 75%,
+  2/10 at 80–92%, 3/10 at 94%, and 4/10 at 96–98%.
+- $q=32,64$: no spanning observed in these ten fields at the tested thresholds.
 
-![convergence vs N](results/margin_convergence.png)
+These are **per-winner, 6-neighbour** results. Zero spans in ten trials has
+a one-sided 95% binomial upper bound of about 25.9% for spanning probability.
+It does not establish a safe operating ceiling.
 
-## Key numerical results ($N = 256$)
+Phase B has 90 rows: two $q$ values, three resolutions, three VFs
+(85, 90, 95%), and five fields per setting. For $q=16$, counts were 0/5
+at $N=64$ and 2/5 at each higher resolution; $q=32$ had 0/5.
+Seeds differ across resolutions, so this is not a paired refinement study.
 
-Measured/theory ratios:
+There is no demonstrated EC-zero at VF 85–90% for $q=16$ in this setup:
+the implemented expected Euler remains positive through that range and
+near VF 100% on the positive-margin branch.
 
-| LKC | $q=2$ | $q=4$ | $q=8$ | $q=16$ |
-|-----|-----|-----|-----|------|
-| $L_0$ (26-conn)      | 0.957 | 0.973 | 0.985 | 0.983 |
-| $L_1$ (signed field) | 0.995 | 1.004 | 1.002 | 0.992 |
-| $L_2$ (Crofton)      | 0.999 | 0.996 | 0.987 | 0.981 |
-| $L_3$                | 1.00  | 1.00  | 1.00  | 1.00  |
+## Margin units and resolution
 
-Convergence from $N = 64 \to 128 \to 256$ is monotonic across all LKCs.
-$L_1$/$L_2$ scale roughly $\mathcal O(1/N^2)$, matching the expected
-marching-cubes mesh amplitude bias.
+$\delta$ has Gaussian-component **value units**. It is not a physical
+thickness, and $\delta/dx$ is not a number of film voxels.
+Near a regular two-field tie, with competing fields $G_i,G_j$ and no
+other winner, the local full film thickness is approximately
 
-## Film thickness
+$$
+w(x)\simeq\frac{2\delta}{\|\nabla(G_i-G_j)(x)\|}.
+$$
 
-At $\varphi = 0.90$, $q = 16$: $\delta \approx 0.059$ physical units,
-i.e. $0.59$ voxels at $N = 128$. The film is sub-voxel at the highest
-$\varphi$ values, so individual winner cells can fragment into spurious
-extra components — this is a discretization limit (see
-`margin_convergence.png` for the fix at $N = 256$), not a formula failure.
+The gradient varies in space, so neither a single thickness nor a minimum
+grid resolution follows from $\delta$ alone. Example unit-component margins
+are about 0.05897, 0.05044, and 0.04462 at VF 90% for $q=16,32,64$.
 
-## Ceiling push
+Historical ceiling CSV columns `delta_physical` and `delta_voxels` are
+misnamed: they store $\delta$ and $\delta/dx$, respectively.
+Historical film-resolution figures derived from those columns are not valid
+spatial-thickness estimates. They are preserved as historical artifacts.
+The corrected ceiling runner writes `delta` and `dx_over_lc` and replaces
+those plots with value-margin and measured-VF diagnostics.
 
-Separate from the GKF-validation sweep above, `run_ceiling.py` pushes
-$q$ to 32 and 64 and $\varphi$ to 0.98 to locate the practical ceiling
-for *disconnected* morphology. The question is: at what
-$(q, \varphi, N)$ does the per-winner spanning (any single winner-type
-cluster touching opposite domain faces along any axis) actually fail?
+## Running
 
-**Phase A** — spanning phase diagram at $N = 128$, $q \in \{2, 4, 8, 16, 32, 64\}$,
-$\varphi \in [0.70, 0.98]$, 10 realizations/cell.
+From the repository root:
 
-![ceiling push — spanning + film thickness](results/ceiling_phase_a.png)
+~~~bash
+python experiments/04_margin_tessellation/run.py
+python experiments/04_margin_tessellation/run_ceiling.py --help
+~~~
 
-![VF calibration across q](results/ceiling_phase_a_vf.png)
+The main sweep writes its historical `results/` location; preserve or move
+those outputs before a deliberate rerun. The corrected ceiling runner
+defaults to `results_ceiling_v2/` and refuses a nonempty destination.
+Use `--output` for another destination. No new ceiling or convergence
+campaign was run as part of the review corrections.
 
-**Phase B** — resolution convergence for $q \in \{16, 32\}$ at
-$\varphi \in \{0.85, 0.90, 0.95\}$, $N \in \{64, 128, 256\}$, 5
-realizations each.
-
-![ceiling push — resolution convergence](results/ceiling_phase_b.png)
-
-### Headline (per-winner spanning check)
-
-| $q$ | Usable for disconnected high-$\varphi$? | Notes |
-|---|---|---|
-| 2–8  | ❌ | Spans in 100% of realizations at every $\varphi \geq 0.70$ |
-| 16   | ⚠️ | Transition zone; 10–40% spanning at $\varphi \geq 0.75$, resolution-sensitive at $N = 64$ |
-| 32+  | ✅ (per-winner) | **No per-winner spanning observed** across $\varphi \in [0.70, 0.98]$ (200 trials each) |
-
-For $q \geq 32$ the construction stays reliably **per-winner-disconnected**
-up to $\varphi = 0.98$ (the highest tested). We never reached a spanning
-regime at $q = 32$ or $q = 64$ — the real per-winner ceiling is above
-$0.98$.
-
-### Important caveat — "disconnected" has two meanings
-
-The ceiling-push spanning check above is the **per-winner** check:
-"does any single winner-label cluster span the domain?" That stays at
-zero for $q \geq 32$. But at these resolutions the matrix film is deeply
-sub-voxel, and on the voxel grid, neighbouring winner cells **physically
-touch** across the unresolved film. If you measure spanning on the
-*binary union* (phase mask, ignoring winner labels), the picture is
-very different:
-
-- **Per-winner spanning** (what the ceiling table reports): no single
-  winner reaches opposite domain faces. Theoretical "disconnected cells"
-  as the GKF defines them.
-- **Binary-union spanning** (what ParaView's Connectivity filter on
-  `phase.vti` reports): at $q = 32$, $\varphi = 0.75$, $N = 128$, the
-  binary union forms a **single giant percolating cluster** — because
-  the ~0.27-voxel film cannot physically separate adjacent winners.
-
-Which interpretation matters depends on the downstream use:
-
-- **Particle *identity*** (per-winner labels used by a mesher, physics
-  solver, or statistical tracker): the construction gives you 5241
-  individually-labelled aggregates even when they're voxel-touching.
-  The ceiling claim holds in that sense.
-- **Physical connectivity** (transport, diffusion, mechanical percolation
-  measured on the binary phase alone): at $q = 32$, $N = 128$,
-  $\varphi = 0.75$, the phase physically percolates. The ceiling claim
-  does *not* hold in that sense.
-
-### To get BOTH high VF AND physical disconnection
-
-**The matrix film must be solidly resolved,** $\delta/dx \geq 1$ voxel.
-The transition is remarkably sharp — at $\delta/dx < 1$ the voxelized
-morphology is a dominant spanning sponge; at $\delta/dx \geq 1$ it is a
-cloud of genuinely separated particles.
-
-**Two scenes at the same (q, N) demonstrate the transition:**
-
-| Scene | $\delta/dx$ | Per-winner components | Physical components | Largest physical | Binary spanning |
-|---|---|---|---|---|---|
-| $q = 16$, $\varphi = 0.75$, $N = 256$ | 0.63 (sub-vox) | 3409 | 3162 | 48% of volume | ✅ spans all axes |
-| $q = 16$, $\varphi = 0.60$, $N = 256$ | **1.10** (resolved) | **3206** | **3206** | **2% of volume** | **❌ no spanning** |
-
-At $\varphi = 0.75$ the sub-voxel film ($\delta/dx = 0.63$) leaks: half
-the volume forms one spanning sponge, labelled 3162 components only
-through 6-conn stickiness. At $\varphi = 0.60$ the resolved film
-($\delta/dx = 1.10$) separates cleanly: per-winner and physical counts
-match exactly, the largest piece is tiny (2% of volume), and the phase
-does not span.
-
-To get both high VF *and* physical disconnection, pick $(q, \varphi, N)$
-so that $\delta/dx > 1$. From the film-thickness table:
-
-| $(q, \varphi)$ | $\delta$ (physical) | minimum $N$ at $L = 64$ |
-|---|---|---|
-| $q = 16$, $\varphi = 0.60$ | 0.274 | $N \geq 233$ (✅ our scene at 256) |
-| $q = 16$, $\varphi = 0.75$ | 0.158 | $N \geq 405$ |
-| $q = 32$, $\varphi = 0.75$ | 0.136 | $N \geq 471$ |
-| $q = 32$, $\varphi = 0.90$ | 0.038 | $N \geq 1685$ |
-| $q = 64$, $\varphi = 0.90$ | 0.033 | $N \geq 1930$ |
-
-The low-$\varphi$ end is easily reachable; VF of 90%+ with physical
-disconnection requires either overnight-scale runs at very high $N$ or a
-protected-gap construction that enforces physical gaps regardless of
-voxel resolution (see future work in
-`experiments/06_multiscale_margin/`).
-
-### Practical honest conclusion
-
-For disconnected-aggregate materials modeling:
-
-- **Window where physical disconnection is cheap:** $(q, \varphi, N)$
-  such that $\delta/dx \geq 1$. For $q = 16$ this means $\varphi \leq
-  0.60$ at $N = 256$, or $\varphi \leq 0.75$ at $N \geq 405$. In this
-  regime the per-winner construction gives both labelled and physically
-  separated aggregates, with ~3200 clean grains at 60% VF in a 64 mm
-  cube — a usable concrete-like morphology.
-- **Transition zone** ($0.6 < \delta/dx < 1$): the construction gives
-  mostly-separated grains but a dominant spanning cluster emerges.
-- **Deep sub-voxel regime** ($\delta/dx \ll 1$, e.g. $q \geq 32$ at any
-  practical $N$): the per-winner construction gives well-labelled
-  particles for label-aware downstream workflows (meshing, per-phase
-  physics coupling, statistical descriptors), but the voxelized
-  physical morphology is a connected sponge, not aggregates.
-
-### Film thickness is deeply sub-voxel in the safe regime
-
-| $q$ | $\varphi = 0.90$ | $\varphi = 0.95$ | $\varphi = 0.98$ |
-|-----|------------------|------------------|------------------|
-| 16 | 0.14 vx | 0.07 vx | 0.02 vx |
-| 32 | 0.08 vx | 0.04 vx | 0.02 vx |
-| 64 | 0.07 vx | 0.03 vx | 0.02 vx |
-
-At $q = 64$, $\varphi = 0.98$ the matrix film is $\delta/dx \approx 0.02$
-voxels. Yet per-winner spanning stays at zero. This is because the
-construction identifies each voxel with its *winning field index*,
-not with a voxel-adjacent "matrix film". Neighbouring voxels of
-different winners can touch physically but remain in different
-connected components — the per-winner spanning check correctly reports
-them as disconnected. This is the structural reason high-$q$ margin
-tessellation defeats the voxel-resolution limit.
-
-### Resolution convergence (Phase B)
-
-- **$q = 32$:** spanning fraction $= 0$ at $N \in \{64, 128, 256\}$,
-  $\varphi \in \{0.85, 0.90, 0.95\}$. **The disconnected result is
-  resolution-robust.**
-- **$q = 16$:** spanning fraction jumps from 0 at $N = 64$ (undersampling
-  artefact — too few voxels per winner for correct connected-component
-  detection) to ~0.4 at $N = 128$ and $N = 256$. Use $N \geq 128$ for
-  $q = 16$.
-
-### Practical recipe
-
-For a target VF $\varphi$ in the disconnected regime:
-- $\varphi \lesssim 0.80$: $q = 16$ at $N \geq 128$ works, with ~10–20%
-  spanning risk per realization (reject-and-resample as needed).
-- $\varphi \in [0.85, 0.98]$: use $q \geq 32$ for guaranteed-disconnected
-  morphology.
-- Larger $q$ is always safer; the only cost is field-generation time
-  ($q = 64$ takes ~6 min of field gen per realization at $N = 128$).
-
-### Outputs
-
-| File | Contents |
-|---|---|
-| `results/ceiling_phase_a.csv` | per-realization $(q, \varphi, N, r)$ measurements |
-| `results/ceiling_phase_a.png` | spanning heatmap + film thickness |
-| `results/ceiling_phase_a_vf.png` | VF calibration $\varphi_{\text{meas}}$ vs $\varphi_{\text{target}}$ |
-| `results/ceiling_phase_b.csv` | per-realization convergence table |
-| `results/ceiling_phase_b.png` | spanning + film vs $N$ per $(q, \varphi)$ |
-
-```bash
-mamba run -n rf_explo python run_ceiling.py           # full ~5 h run
-mamba run -n rf_explo python run_ceiling.py --phase a # just the heatmap
-mamba run -n rf_explo python run_ceiling.py --phase b # just convergence
-```
+The scene exporters still report their explicitly labelled 6-neighbour
+statistics. A full resolution study under both conventions, and ultimately
+a consistent continuum geometry, remain necessary for physical aggregate
+connectivity claims.

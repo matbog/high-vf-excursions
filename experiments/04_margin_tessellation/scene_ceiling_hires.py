@@ -1,11 +1,9 @@
 """High-resolution ceiling-push scene at N=512 to test physical disconnection.
 
-Same (q, phi) as scene_ceiling.py but at N=512 instead of 128. The point:
-at N=128 the film is 0.27 voxels (sub-voxel) and the physical binary
-union merges most winner cells into one giant cluster despite the
-per-winner construction being disconnected. At N=512 the film is 1.09
-voxels (just resolved) — this is where we expect the physical binary
-union to actually disconnect into separate particles.
+Same (q, phi) as scene_ceiling.py but at N=512 instead of 128.
+The margin is in Gaussian value units, not spatial units. Resolution alone
+does not guarantee separation. This legacy exporter measures 6-connectivity;
+its "physical" output names mean binary-union labels, not continuum topology.
 
 Measures BOTH per-winner and physical binary-union spanning + component
 counts, then exports a full ParaView scene set for direct comparison
@@ -73,13 +71,8 @@ def main() -> None:
     print(f"       shape = {fs.shape}, mem = {fs.nbytes / 1e9:.1f} GB")
 
     delta = adler.delta_for_vf(Q, PHI)
-    film_voxels = delta / grid.dx
-    print(f"\n[2/5] delta for phi={PHI}: {delta:.5f} physical  "
-          f"({film_voxels:.3f} voxels)")
-    if film_voxels < 1:
-        print(f"       WARNING: film still sub-voxel at N={N}")
-    else:
-        print(f"       film is resolved (>1 voxel)")
+    print(f"\n[2/5] delta for phi={PHI}: {delta:.5f} (component-value units); "
+          f"dx={grid.dx:.4f} (spatial units). Gap resolution requires measurement.")
 
     t0 = time.time()
     print(f"\n[3/5] Computing margin + phase + winners...")
@@ -150,7 +143,8 @@ def main() -> None:
     with (OUT / "summary.txt").open("w") as f:
         f.write(f"Scene: q={Q}, phi={PHI} (measured {measured_vf:.4f}), "
                 f"N={N}, L={LENGTH}, lc={LC}\n")
-        f.write(f"delta = {delta:.5f} physical = {film_voxels:.3f} voxels\n")
+        f.write(f"delta = {delta:.5f} (component-value units); dx = {grid.dx:.4f}\n")
+        f.write("Connectivity below is 6-neighbour binary connectivity, not continuum topology.\n")
         f.write(f"per-winner components: {n_per_winner}\n")
         f.write(f"physical binary-union components: {n_physical}\n")
         f.write(f"largest physical component holds {largest_frac*100:.2f}% "

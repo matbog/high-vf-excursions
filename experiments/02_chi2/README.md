@@ -5,7 +5,9 @@
 $\chi^2$ field $X(x) = \sum_i f_i(x)^2$ with $k = 1$ (one squared
 Gaussian) as the default. The marginal is $\chi^2(k)$; the Adler GKF
 applies with the Worsley (1994) $\mathcal M_j$ for $D_u = [u, \infty)$
-under a chi-squared distribution.
+under a chi-squared distribution, equivalently the exterior of a ball in
+Gaussian component space. The component correlation is Gaussian; the
+derived chi-squared field has correlation $C_G(r)^2$.
 
 **Adler link:** fully closed-form. See `theory/README.md` for context;
 Worsley (1994, eq. 3) for the $\mathcal M_j$.
@@ -17,7 +19,8 @@ excursion $\{\lvert Z\rvert \geq \sqrt{u}\}$ — the volume fraction at any
 threshold is twice the one-sided Gaussian value. This moves the
 $\mathbb{E}[L_0] = 0$ crossing from the Gaussian 16% to roughly 32% in
 the bulk limit, and higher still in a finite domain. Larger $k$
-interpolates back toward the Gaussian ceiling.
+approaches the Gaussian EC-zero proxy. An EC-zero is not a spanning
+threshold or a hard bound on disconnected VF.
 
 Bulk $\varphi_c^+$ (where $\mathcal M_3(u) = 0$):
 
@@ -67,7 +70,10 @@ Runtime ≈ 10–15 min.
   ($\{Z \geq \sqrt{u}\}$ vs $\{Z \leq -\sqrt{u}\}$) can touch across voxel
   faces (594 contacts seen at $u = 0.25$, seed 42). The binary union then
   loses the separating interface, biasing $L_0$ and $L_1$ at those
-  thresholds. Not seen at $l_c \geq 7$.
+  thresholds. The cited check did not observe those face contacts at
+  $l_c\geq7$; that does not establish their absence for every sample or
+  adjacency convention. At $l_c=4,u=0.25$, mean $L_1$ is about 67% below
+  theory in the saved sweep, so broad accuracy claims are inappropriate.
 - Spanning probability from only 10 realizations is a coarse staircase;
   the plotted sigmoid is indicative.
 

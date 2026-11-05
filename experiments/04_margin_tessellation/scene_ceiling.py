@@ -51,8 +51,8 @@ def main() -> None:
     print(f"  shape = {fs.shape}, mem = {fs.nbytes / 1e6:.0f} MB")
 
     delta = adler.delta_for_vf(Q, PHI)
-    print(f"delta for phi={PHI}: {delta:.5f} physical  "
-          f"({delta / grid.dx:.3f} voxels)")
+    print(f"delta for phi={PHI}: {delta:.5f} in Gaussian-component value units; "
+          f"dx={grid.dx:.3f} (spatial units). Film thickness is not delta/dx.")
 
     # Margin scalar
     top2   = np.partition(fs, kth=Q - 2, axis=0)[-2:]

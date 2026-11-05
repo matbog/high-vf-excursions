@@ -1,241 +1,167 @@
 # high-vf-excursions
 
-Excursion sets of Gaussian-related random fields as microstructure
-models, with analytical descriptors through the Gaussian Kinematic
-Formula (GKF).
+> **Work in progress.** This is an unfinished research project. Nothing here
+> should be treated as a final, fully validated framework: theory, numerical
+> methods, results, and interpretations remain subject to revision.
 
-A scalar Gaussian random field in 3D tops out at ~16% disconnected
-inclusion volume fraction — the point where the Euler characteristic of
-the excursion set crosses zero and inclusions begin to merge into a
-spanning phase. For a lot of microstructures of interest (concrete
-aggregates, battery electrodes, closed-cell foams) that ceiling is way
-below where you want to be. This repo collects a progression of model
-extensions that push the ceiling and tracks what happens to the Adler
-link along the way.
+Random-field excursion sets as microstructure models, with expected
+Lipschitz–Killing curvatures (LKCs) from the Gaussian Kinematic Formula (GKF).
 
-Nothing here is a publication-ready contribution. It's an exploration of
-four hitting-set families inside the same GKF scaffolding, with the
-numerical checks that convinced us the formulas work.
+The aim is high aggregate volume fraction (VF), a scalar morphology control,
+and analytical expectations, especially for Euler characteristic $L_0$ and
+volume $L_3$. The familiar Gaussian bulk EC-zero occurs at about 16% VF.
+It is a topology proxy, **not a hard limit on disconnected VF or a
+percolation theorem**. This repository explores other hitting sets and
+records both their analytical scope and their numerical limitations.
 
-![Margin tessellation q=16 φ=0.60 — best result so far](images/margin_t_q16_n256_L64_Lc5_vf60_combined.png)
+![Margin tessellation q=16 at approximately 60% VF](images/margin_t_q16_n256_L64_Lc5_vf60_combined.png)
 
-The sharpest result so far: margin tessellation at $q = 16$, $\varphi \approx 60\%$,
-$N = 256$, $L = 64$, $l_c = 5$. Top: 3D microstructure with orthogonal
-cross-sections, connectivity coloured by grain ID, and the largest single
-grain (2% of inclusion volume — genuinely disconnected). Bottom: all four
-Lipschitz–Killing curvatures measured vs GKF theory across 5 realisations.
+This saved $q=16$, $N=256$, $L=64$, $l_c=5$ scene has measured VF 60.77%.
+Its component colouring uses 6-neighbour connectivity. Rechecking the same
+binary phase gives:
 
-## The story in one page
+| Convention | Components | Largest component / inclusion volume | Spans |
+|---|---:|---:|---|
+| 6 neighbours | 3,206 | 2.04% | No |
+| 26 neighbours | 1,838 | 44.86% | All three axes |
 
-The Adler–Taylor GKF (Adler & Taylor 2007; Taylor 2006) gives a
-closed-form expectation for every Lipschitz–Killing curvature of the
-excursion set of a Gaussian-related field. For a cube of side $a$ and a
-scalar hitting set $D$,
+The image therefore does not establish disconnected continuum aggregates.
+The accompanying LKC comparison uses five separate realisations at target
+VF 60%; those ensemble means agree within 2% at this particular setting.
+
+## The analytical link
+
+For independent, identically distributed, smooth unit-variance Gaussian
+components $G$, a regular hitting set $D$, and an isotropic spatial metric,
 
 $$
-\mathbb{E}\!\left[L_i\bigl(f^{-1}(D)\bigr)\right]
-= \sum_{j=0}^{N-i} \binom{i+j}{j}\,
-  \rho^{j}\, L_{i+j}(\text{cube})\, \mathcal M_j^{\gamma}(D),
+\mathbb E[L_i(G^{-1}(D))]
+=\sum_{j=0}^{3-i}
+\left[\begin{matrix}i+j\\j\end{matrix}\right]
+\rho^j L_{i+j}(M)\mathcal M_j^\gamma(D),
+\qquad
+\left[\begin{matrix}n\\k\end{matrix}\right]
+=\binom nk\frac{\omega_n}{\omega_k\omega_{n-k}}.
 $$
 
-with $\rho = \sqrt{\lambda_2 / 2\pi}$ and $\lambda_2 = -C''(0)$. The
-spatial side ($\rho$, the cube LKCs) and the value-space side
-( $\mathcal M_j^{\gamma}(D)$ ) are completely separate.
-Change the hitting set, change the morphology; the spatial side is
-unchanged. This is what makes the GKF a *morphology generator*: pick a
-hitting set, pay the price of computing its Gaussian Minkowski
-functionals, get analytical control over the first four morphological
-moments of the resulting random microstructure.
+Here $\omega_k=\pi^{k/2}/\Gamma(1+k/2)$, $\omega_0=1$, and
+$\rho=1/(l_c\sqrt\pi)$ for component correlation
+$\exp(-r^2/l_c^2)$. These are **flag coefficients**, not ordinary binomial
+coefficients. The spatial metric belongs to the underlying Gaussian
+components; nonlinear derived fields generally have different covariance.
 
-We work through four hitting-set families, roughly in order of how far
-each strays from the standard GKF territory:
+Changing $D$ changes the expected LKCs while retaining the spatial factor.
+These are four expected geometric descriptors, not a complete description
+of morphology or a prediction of connectivity. Some GMFs require numerical
+quadrature; “analytical” does not always mean an elementary closed form.
 
-- **Scalar half-line** $[u, \infty)$ — the Gaussian baseline.
-- **Scalar $[u, \infty)$ under non-Gaussian marginal** — chi² and
-  Student-$t_\nu$ fields, both already in the literature (Worsley 1994).
-- **Polyhedral winner chamber** $\{z_{(q)} - z_{(q-1)} \geq \delta\}$ —
-  the margin tessellation.
-- **Union of balls** $\bigcup_a B(c_a, r)$ — coalescing lobes.
+## What each experiment establishes
 
-The first two give us the standard tools and tell us one simple negative
-result: the marginal distribution almost doesn't matter for the
-disconnected-phase VF ceiling. The ceiling is set by the spatial
-correlation. The last two are the small novel pieces here: both reach
-VFs far above the Gaussian ceiling, both come with closed-form
-$\mathcal M_j$ (the lobes case only before contact), both validated
-numerically to a few percent on $N^3 \geq 128^3$ grids.
+| Experiment | Quantity being reported | Analytical scope and qualification |
+|---|---|---|
+| 01 Gaussian | Finite-cube EC-zero VF ≈21.8% for $L=100,l_c=8$ | All four expected LKCs; bulk EC-zero VF ≈15.9% |
+| 02 $\chi^2$, $k=1$ | EC-zero VF ≈37–51% across the tested correlation lengths | Two Gaussian tails; all four expected LKCs |
+| 03 Student-$t_3$ | Finite-cube EC-zero VF ≈21.1% for $L=100,l_c=8$ | Standard ratio-field formulas; little change in this EC-zero proxy |
+| 04 Margin tessellation | High prescribed VF, including 85–90% | Implemented chamber GMFs for $\delta>0$; proof outline and numerical evidence, with substantial resolution/connectivity qualifications |
+| 05 Coalescing lobes | Pre-contact measured VF reaches 66.84% in the centre-position sweep | Ball additivity only for $r<r_c$; within-lobe spanning persists, and voxel-union topology remains resolution-sensitive |
+| 06 Multiscale margin | Composite target VF 60–85% | Conditional GKF for independent stages; numerical unions span in the saved pilot |
 
-## Disconnected-phase VF ceiling at a glance
-
-The upper $\mathbb{E}[L_0] = 0$ crossing on a $100^3$ grid at $l_c = 8$
-($l_c = 5$ for exp 04), per model family:
-
-| Family | $\varphi_c^+$ (finite domain) | Adler link |
-|--------|------------------------|------------|
-| Gaussian (scalar)                 | ~22% | Full closed-form |
-| Student-$t_\nu$ ($\nu = 3$)       | ~21% | Full closed-form (Worsley 1994) |
-| $\chi^2$ ($k = 1$)                | ~37–51% ($l_c$-dependent) | Full closed-form (Worsley 1994) |
-| Margin tessellation ($q = 16$)    | 85–90% | Closed-form $\mathcal M_j$, informal proof |
-| Coalescing lobes                  | ~55% at $r/r_c = 1$ | Closed-form before contact only |
-| Multiscale margin union           | up to ~85% composite | Independent-union approximation |
-
-"Finite domain" matters: the bulk-limit numbers are lower
-(e.g. 16% Gaussian) because boundary terms shift the crossing. For the
-derivation story, see [`theory/README.md`](theory/README.md).
-
-## Experiments
-
-Six experiments, each self-contained in `experiments/NN_*/`. Each one has
-its own `README.md` with the model, inline formulas, estimator choices,
-and the current numerical results.
+These rows deliberately report different quantities. In particular, 85–90%
+is not an EC-zero ceiling for margin tessellation, and value-space contact
+does not identify a spatial spanning threshold.
 
 ### 01 — Gaussian baseline
 
-![Gaussian RF at κ ≈ 0](experiments/01_gaussian_baseline/results/lc_07/display_Gauss_RF_thresh.png)
+![Gaussian field excursion](experiments/01_gaussian_baseline/results/lc_07/display_Gauss_RF_thresh.png)
 
-The ground truth. Scalar Gaussian field, Gaussian covariance, exact
-closed-form $\mathcal M_j$, MC comparison across $L_0 \ldots L_3$ at
-three correlation lengths. Every other experiment is compared to this.
+A scalar half-line hitting set with exact GMFs. The saved measurements
+provide a baseline for discretisation and sampling errors; systematic
+bias remains in some estimators even after averaging.
 
-### 02 — $\chi^2$ field
+### 02 — Chi-squared fields
 
-![χ²(k=1) excursion](experiments/02_chi2/results/lc_07/display_chi2-1_RF_thresh.png)
+![Chi-squared excursion](experiments/02_chi2/results/lc_07/display_chi2-1_RF_thresh.png)
 
-$X = \sum_i f_i^2$. For $k = 1$ the excursion set is just the two-tail
-Gaussian $\{\lvert Z\rvert \geq \sqrt{u}\}$, so the volume fraction
-doubles. $\mathbb{E}[L_0] = 0$ lands at ~32% bulk, ~37–51% finite-domain.
-Higher $k$ interpolates back toward Gaussian. $\mathcal M_j$ closed-form
-(Worsley 1994).
+$X=\sum_i G_i^2$. For $k=1$, the positive-threshold excursion is
+$\{|G|\geq\sqrt u\}$, a disjoint union of two tails. At low thresholds,
+the separating film can be unresolved by the grid.
 
-### 03 — Student-t field
+### 03 — Student-t fields
 
-![Student-t_3 at κ=0.5](experiments/03_student_t/results/t_3/display_student_t3_RF_thresh.png)
+![Student-t excursion](experiments/03_student_t/results/t_3/display_student_t3_RF_thresh.png)
 
-Worsley field $T_\nu = Z_0 / \sqrt{\chi^2_\nu / \nu}$. Polynomial tails
-barely move $\varphi_c^+$ — it drops *slightly* with $\nu$ (from 21.8%
-at $\nu \to \infty$ to 21.1% at $\nu = 3$). The marginal distribution is
-not the lever. Our main contribution here was fixing a wrong
-$\mathcal M_j$ formula that circulated in an earlier version — the
-correct cone-geometry derivation is in
-[`theory/student_t_derivation.md`](theory/student_t_derivation.md).
+$T_\nu=G_0/\sqrt{\sum_{i=1}^{\nu}G_i^2/\nu}$ uses spatially varying,
+independent Gaussian components. Its GMFs come from cone geometry, not
+derivatives of its marginal density. Common component amplitude cancels.
+See [the formula note](theory/student_t_derivation.md).
 
 ### 04 — Margin tessellation
 
-![q=16 margin tessellation at φ=0.70](experiments/04_margin_tessellation/paraview/q16_phi70/display_margin_tess_RF_thresh.png)
+![Margin tessellation](experiments/04_margin_tessellation/paraview/q16_phi70/display_margin_tess_RF_thresh.png)
 
-$q$ competing i.i.d. Gaussian fields; include a voxel iff the winner's
-lead over the runner-up exceeds a margin $\delta$. The matrix film sits
-where two or more fields are nearly tied. Reaches VFs of 85–90% with
-every individual winner cell topologically disconnected from the rest.
-Closed-form $\mathcal M_j^\gamma(D_\delta)$ derived from the polyhedral
-chamber geometry and validated against MC to <2% on all four LKCs at
-$N = 256$.
-
-Each point $x$ is assigned to whichever field $G_i$ achieves the maximum
-there; it is included if that winner leads the runner-up by at least
-$\delta$. The result partitions space into $q$ types of inclusion cells,
-separated by a matrix film along the near-tie locus. More fields give
-finer cells; a larger margin gives a thicker film and a lower $\varphi$.
-Different winner types are disconnected from each other by construction.
+Include a point when the winner's lead over the runner-up exceeds
+$\delta$. Different winner labels cannot touch in the continuous model
+when $\delta>0$, but a single label can have a spanning component.
+The margin is in **field-value units**, not spatial film thickness.
+Thin films and sampled connectivity remain central limitations.
 
 ### 05 — Coalescing lobes
 
-![coalescing lobes at r/r_c = 0.98](experiments/05_coalescing_lobes/paraview/rrc0p98/display_coalescing_lobes_RF_thresh.png)
+![Coalescing lobes](experiments/05_coalescing_lobes/paraview/rrc0p98/display_coalescing_lobes_RF_thresh.png)
 
-Vector Gaussian field $G: M \to \mathbb{R}^3$. Fix four centres at the
-vertices of a tetrahedron in Gaussian value space; include a voxel iff
-its Gaussian-space image lies within $r$ of any centre. Single morphology
-parameter $r/r_c$ sweeps from disjoint droplets ($r/r_c = 0.5$), to
-touching ($r/r_c = 1$), to merged bicontinuous ($r/r_c > 1$). Closed-form
-$\mathcal M_j$ *before contact* via single-ball tube probability +
-additivity; after contact the Gaussian-weighted ball-intersection volumes
-are an open analytic problem.
-
-A point $x$ is included if $G(x)$ falls within distance $r$ of any of
-four fixed centres placed at tetrahedral vertices in $\mathbb{R}^3$.
-Below the contact radius $r_c$, the four preimage lobes are disjoint
-and the GKF factorises by additivity; above $r_c$ they merge into a
-connected network. A single parameter $r/r_c$ controls the full
-morphology sweep from isolated inclusions to bicontinuous phase.
+A vector Gaussian field maps into four balls centred at tetrahedral
+vertices. Radius controls VF and value-space overlap. Below contact,
+ball GMFs add; after contact, intersection terms are required.
+The runner now separates binary-union, individual-ball, and nearest-centre
+partition measurements. Historical results are preserved and explicitly
+qualified in the [experiment README](experiments/05_coalescing_lobes/README.md).
+Completed resolution and centre-position studies find good volume agreement
+and encouraging per-ball Euler agreement, but do not establish isolated
+spatial aggregates. Their remaining questions are documented there.
 
 ### 06 — Multiscale margin union
 
-![multiscale margin at VF=60%](experiments/06_multiscale_margin/paraview/vf60/display_mulitscale_margin_RF_thresh.png)
+![Multiscale margin](experiments/06_multiscale_margin/paraview/vf60/display_mulitscale_margin_RF_thresh.png)
 
-Combines three margin tessellations at different correlation lengths
-(coarse / fine / sand) into a single composite. Deferred prototype: the
-exact union-GMF is unknown in closed form, so we use the independent-
-union approximation of Bogdan (2015). The experiment is primarily a
-granulometry demo — "can we hit a prescribed VF-per-phase mix inside the
-margin model?" — rather than a GKF validation.
+Independent coarse, fine, and sand stages use different correlation
+lengths. Conditional GKF gives expected intersection LKCs and hence a
+union recursion under its regularity assumptions; a single common-metric
+union GMF is unnecessary. Expected VF and phase shares are calibrated,
+but the saved numerical composites span. Precise interpolation remains
+a deferred prototype.
 
-## Quick start
+## Running and reading the repository
 
-```bash
+~~~bash
 mamba env create -f environment.yml
 mamba activate rf_explo
-
 cd experiments/01_gaussian_baseline
-mamba run -n rf_explo python run.py
-# outputs land in experiments/01_gaussian_baseline/results/
-```
+python run.py
+~~~
 
-Each experiment writes figures, CSVs, and (optionally) ParaView-ready
-`.vti`/`.vtp` to its own `results/`. See the experiment's `README.md` for
-parameters, runtimes, and what to look at.
+Experiments share `src/`. Read each experiment's README before running:
+parameters, output paths, estimator conventions, and costs differ.
+The corrected experiment 05 runner defaults to `results_union_v2/` and
+refuses to overwrite a nonempty output directory.
 
-## Documentation
+- [Framework and API](docs/framework.md)
+- [Limits of the analytical claims](docs/limits.md)
+- [Measurement conventions](docs/measurement_conventions.md)
+- [Theory notes and outstanding derivations](theory/README.md)
 
-- [`docs/framework.md`](docs/framework.md) — GKF primer and library usage.
-- [`docs/limits.md`](docs/limits.md) — what the Adler link does and does
-  not give for each family.
-- [`docs/measurement_conventions.md`](docs/measurement_conventions.md) —
-  how we estimate $L_0 \ldots L_3$ from voxels; which estimator we use
-  for what and why.
-- [`theory/README.md`](theory/README.md) — umbrella note; derivations in
-  the siblings.
-
-## Repository layout
-
-```
-src/
-  fields.py          RF generation (Gaussian, chi², Student-t, margin, vector) via gstools
-  excursions.py      excursion-set construction, margin phase, lobe distances
-  measures.py        L_0..L_3 estimators (26-conn, dihedral L_1, Crofton L_2)
-  adler.py           Adler-Taylor expectations for every hitting set used here
-  io.py / io_hdf5.py ParaView export (VTI/VTP), HDF5 for the multiscale run
-
-experiments/
-  01_gaussian_baseline/   scalar Gaussian — baseline GKF validation
-  02_chi2/                chi² field — Worsley M_j, raises VF ceiling
-  03_student_t/           Student-t field — cone-geometry M_j, VF ceiling essentially unchanged
-  04_margin_tessellation/ winner-margin tessellation — reaches 85–90% VF
-  05_coalescing_lobes/    tetrahedral lobe union — single morphology knob
-  06_multiscale_margin/   multi-Lc composite via independent-union approximation
-
-docs/     short usage / limits / measurement notes
-theory/   derivations (Student-t, margin, ball-union)
-references/   reference PDFs
-```
-
-`explorations/` holds sandbox code, pilot runs, and older research notes;
-it is `.gitignore`d.
+`src/` contains generation, excursion construction, measurements,
+expectations, and exports. `experiments/01_*` through `06_*` contain the
+main studies; `references/` holds source material. Most of
+`explorations/` is ignored, but the oscillatory-Bochner README and runner
+are tracked. Historical CSVs and figures have not been regenerated by
+the review corrections.
 
 ## References
 
-- Adler, R.J. & Taylor, J.E. (2007). *Random Fields and Geometry*.
-  Springer.
-- Taylor, J.E. (2006). A Gaussian kinematic formula.
-  *Annals of Probability* 34(1), 122–158.
-- Worsley, K.J. (1994). Local maxima and the expected Euler characteristic
-  of excursion sets of chi-squared, F and t fields.
-  *Adv. Appl. Prob.* 26(1), 13–42.
-- Roubin, E. & Colliat, J.-B. (2016). Critical probability of percolation
-  over bounded region in N-dimensional Euclidean space.
-  *J. Stat. Mech.* P033306.
-- Roubin, E. (2013). *Meso-scale FE and morphological modelling of
-  heterogeneous media*. PhD thesis, ENS Cachan.
-- Bogdan, M. (2015). *Morphological multiscale modeling of cementitious
-  materials — Application to effective diffusive properties prediction.*
-  PhD thesis, ENS Cachan.
-  [tel-01346484](https://theses.hal.science/tel-01346484v1).
+- Adler & Taylor (2007), *Random Fields and Geometry*.
+- [Taylor (2006), A Gaussian kinematic formula](https://arxiv.org/abs/math/0602545).
+- [Taylor & Adler (2009), Gaussian processes, kinematic formulae and Poincaré's limit](https://arxiv.org/abs/math/0612580).
+- Worsley (1994), *Local maxima and the expected Euler characteristic of excursion sets of chi-squared, F and t fields*.
+- [Roubin & Colliat (2016), Critical probability of percolation over bounded region](https://arxiv.org/abs/1510.08252).
+- [Bobrowski & Skraba (2020), Homological percolation and the Euler characteristic](https://arxiv.org/abs/1910.10146), for the distinction between EC-zero heuristics and percolation.
+- [Bogdan (2015), Morphological multiscale modeling of cementitious materials](https://theses.hal.science/tel-01346484v1).

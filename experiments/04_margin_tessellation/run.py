@@ -2,10 +2,11 @@
 
 The margin tessellation A_delta = {max_i G_i(x) - second_max_i G_i(x) >= delta}
 retains the winner-cell cores and removes a matrix film around tie interfaces.
-By increasing q (number of competitors) the winner cells become smaller and
-more numerous, enabling disconnected volume fractions up to 90%+.
+Increasing q changes the winner-cell morphology and permits high prescribed
+VF. Disconnected spatial aggregates still require separate resolution and
+connectivity checks; a positive margin alone is not sufficient.
 
-The hitting set D_delta in R^q is a disjoint union of polyhedral winner chambers,
+For delta > 0, D_delta in R^q is a disjoint union of polyhedral winner chambers,
 so the morphology is a Gaussian-related excursion and the GKF applies.
 Closed M_j formulas exist (theory/gaussian_minkowski_functionals.md) and have
 been numerically validated, but no published formal stratified-tube proof exists yet.
@@ -123,9 +124,10 @@ def run_sweep() -> list[Row]:
                     phase, winners = excursions.margin_excursion(fs, delta)
                     m = measures.measure_all(phase, grid)
                     theory_lkcs = expected_lkcs_margin(grid, LC, q, delta)
-                    # Per-winner sums: disjoint winner types → additive for all LKCs.
+                    # Per-winner sums are continuum-additive for delta > 0;
+                    # digital contacts can make them differ from binary-union LKCs.
                     # L0 uses 26-conn, L2 uses Crofton (primary) and signed-field MC
-                    # (comparison), L1 uses marching cubes on the smooth signed field
+                    # (comparison), L1 uses marching cubes on the sampled signed field
                     # s_i(x) = G_i(x) − max_{j≠i} G_j(x) − δ.
                     sorted_top2 = np.partition(fs, kth=q - 2, axis=0)[-2:]
                     max_field   = sorted_top2[1]
@@ -452,8 +454,9 @@ def run_analytical_checks() -> None:
 def make_convergence_figure(rows: list[Row]) -> None:
     """Convergence of measured/theory LKC ratios vs N, per q, averaged over φ.
 
-    Shows how the N=64 → 128 → 256 refinement reduces estimator biases for
-    each LKC. Replaces the old exp06 convergence figure now that exp04 is
+    Compares biases across N=64, 128, 256 without asserting monotone convergence.
+    Whiskers pool variation across phi and realizations; they are not standard
+    errors at a fixed phi. Replaces the old exp06 convergence figure now that exp04 is
     the single home for margin-tessellation validation.
     """
     nq = len(Q_VALUES)

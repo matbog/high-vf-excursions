@@ -1,299 +1,147 @@
-# Adler–Taylor LKC Expectations for Student-$t$ Random Fields
+# Expected LKCs of Student-t random fields
 
-## 1. The Adler–Taylor Kinematic Formula
+## 1. GKF convention
 
-For a smooth, stationary, isotropic Gaussian-related random field $f$ on an $N$-dimensional
-compact manifold $M$ (with boundary), the expected Lipschitz–Killing curvatures (LKCs) of
-the excursion set $A_u = \{x \in M : f(x) \geq u\}$ are given by
-
-$$
-\mathbb{E}\bigl[L_i(A_u)\bigr]
-= \sum_{j=0}^{N-i} \binom{i+j}{j}
-  \left(\frac{\lambda_2}{2\pi}\right)^{j/2}
-  L_{i+j}(M)\; \mathcal{M}_j(D_u),
-\tag{1}
-$$
-
-where:
-
-- $L_k(M)$ are the LKCs of the domain $M$ (purely geometric constants),
-- $\lambda_2 = -C''(0)$ is the second spectral moment of the covariance $C(r)$,
-- $D_u = [u, +\infty)$ is the *hitting set* in distribution space,
-- $\mathcal{M}_j(D_u)$ are the Minkowski functionals of $D_u$ — they carry all
-  information about the marginal distribution.
-
-**What changes between field families:** only $\mathcal{M}_j(D_u)$.
-The spatial side $(\lambda_2,\, L_{i+j}(M))$ is identical as long as the correlation
-structure is unchanged.
-
----
-
-## 2. LKCs of a 3D Cube
-
-For a cube of side $a$, the non-zero domain LKCs are
+Let the Gaussian components be independent, unit variance, stationary,
+and isotropic, with correlation $\exp(-r^2/l_c^2)$. For a regular hitting
+set $D$, use
 
 $$
-L_3(M) = a^3,\quad
-L_2(M) = 3a^2,\quad
-L_1(M) = 3a,\quad
-L_0(M) = 1.
+\mathbb E[L_i(G^{-1}(D))]
+=\sum_{j=0}^{3-i}
+\left[\begin{matrix}i+j\\j\end{matrix}\right]
+\rho^jL_{i+j}(M)\mathcal M_j^\gamma(D),
+\qquad \rho=\frac{1}{l_c\sqrt\pi}.
 $$
 
-Substituting into (1) for $N = 3$ and expanding all binomial coefficients:
+The bracket is the flag coefficient
+$\binom nk\omega_n/(\omega_k\omega_{n-k})$, with
+$\omega_k=\pi^{k/2}/\Gamma(1+k/2)$.
+It is not an ordinary binomial coefficient.
+
+## 2. Cube expansion
+
+For side $a$, the cube LKCs are $(1,3a,3a^2,a^3)$, and
 
 $$
-\mathbb{E}[L_0(A_u)]
-= \left(\frac{\lambda_2}{2\pi}\right)^{3/2} a^3\,\mathcal{M}_3
-+ 3\left(\frac{\lambda_2}{2\pi}\right) a^2\,\mathcal{M}_2
-+ 3\left(\frac{\lambda_2}{2\pi}\right)^{1/2} a\,\mathcal{M}_1
-+ \mathcal{M}_0,
-\tag{2a}
+\begin{aligned}
+\mathbb E[L_0]&=\rho^3a^3\mathcal M_3+3\rho^2a^2\mathcal M_2+3\rho a\mathcal M_1+\mathcal M_0,\\
+\mathbb E[L_1]&=2\rho^2a^3\mathcal M_2+\tfrac{3\pi}{2}\rho a^2\mathcal M_1+3a\mathcal M_0,\\
+\mathbb E[L_2]&=2\rho a^3\mathcal M_1+3a^2\mathcal M_0,\\
+\mathbb E[L_3]&=a^3\mathcal M_0.
+\end{aligned}
 $$
 
-$$
-\mathbb{E}[L_1(A_u)]
-= 2\left(\frac{\lambda_2}{2\pi}\right) a^3\,\mathcal{M}_3
-+ 3\left(\frac{\lambda_2}{2\pi}\right)^{1/2} a^2\,\mathcal{M}_2
-+ 3\,a\,\mathcal{M}_1,
-\tag{2b}
-$$
+Earlier versions of this note had incorrect GMF indices and coefficients
+in the $L_1,L_2$ lines. The equations above agree with the shared implementation.
+
+## 3. Gaussian reference
+
+For a standard half-line threshold $u$,
 
 $$
-\mathbb{E}[L_2(A_u)]
-= \frac{3}{2}\left(\frac{\lambda_2}{2\pi}\right)^{1/2} a^3\,\mathcal{M}_3
-+ 3\,a^2\,\mathcal{M}_2
-+ 3\,a\,\mathcal{M}_1,
-\tag{2c — check binomials}
+(\mathcal M_0,\mathcal M_1,\mathcal M_2,\mathcal M_3)
+=(\bar\Phi(u),\varphi(u),u\varphi(u),(u^2-1)\varphi(u)).
 $$
 
-$$
-\mathbb{E}[L_3(A_u)] = a^3\,\mathcal{M}_0.
-\tag{2d}
-$$
+For component SD $\sigma$, standardize $u$ to $u/\sigma$.
+This reference is recovered in the Student-t large-$\nu$ limit.
 
-> **Note.** $\mathbb{E}[L_3]$ is simply the expected volume, confirming
-> $\mathcal{M}_0(D_u) = \mathbb{P}(f \geq u)$.
+## 4. Ratio construction and scale
 
-For a **Gaussian covariance** $C(r) = \sigma^2 \exp(-r^2/l_c^2)$:
+With independent Gaussian fields $Z_0,\ldots,Z_\nu$ of common SD $\sigma$,
 
 $$
-\lambda_2 = \frac{2\sigma^2}{l_c^2}.
+T_\nu(x)=\frac{Z_0(x)}
+{\sqrt{\sum_{i=1}^\nu Z_i(x)^2/\nu}}.
 $$
 
----
+The common amplitude cancels exactly. The marginal is standard $t_\nu$,
+with variance $\nu/(\nu-2)$ only for $\nu>2$; there is no factor $\sigma^2$.
+The spatial metric in the GKF belongs to the **standardized Gaussian
+components**, not to the nonlinear t field.
 
-## 3. Minkowski Functionals for the Gaussian Distribution
+In particular, the t field's gradient second moment diverges for
+$\nu\leq4$; this is not a reason to insert an infinite spectral factor into
+the component-space GKF. The formula API supports finite $\nu\geq3$;
+the direct generator requires integer $\nu\geq3$. Lower-degree cases
+require separate treatment of singularities and are outside this API.
+No blanket claim that all Cauchy-field geometric formulas are impossible
+is intended. Use the Gaussian API for $\nu=\infty$.
 
-The hitting set $D_u = [u, +\infty)$ for the standard Gaussian $Z \sim \mathcal{N}(0,\sigma^2)$
-has Minkowski functionals (derived from the Steiner tube formula applied to the half-line):
+A single random denominator constant over the whole domain is a different
+spatial model and does not justify these same expected-LKC formulas.
 
-$$
-\mathcal{M}_0^{(\gamma)}(u) = \bar\Phi\!\left(\frac{u}{\sigma}\right)
-= \frac{1}{2}\operatorname{erfc}\!\left(\frac{u}{\sigma\sqrt{2}}\right),
-\tag{3a}
-$$
+## 5. Cone GMFs
 
-$$
-\mathcal{M}_1^{(\gamma)}(u) = \frac{1}{\sigma\sqrt{2\pi}}\exp\!\left(-\frac{u^2}{2\sigma^2}\right),
-\tag{3b}
-$$
+The hitting set is the cone
+$D_u=\{z_0\geq(u/\sqrt\nu)\|(z_1,\ldots,z_\nu)\|\}$ in Gaussian component
+space. Its Gaussian tube coefficients are not obtained by differentiating
+the scalar t survival function.
 
-$$
-\mathcal{M}_2^{(\gamma)}(u) = \frac{u}{\sigma^2}\,\mathcal{M}_1^{(\gamma)}(u),
-\tag{3c}
-$$
-
-$$
-\mathcal{M}_3^{(\gamma)}(u) = \frac{u^2 - \sigma^2}{\sigma^4}\,\mathcal{M}_1^{(\gamma)}(u).
-\tag{3d}
-$$
-
-The pattern is $\mathcal{M}_j^{(\gamma)} = \mathcal{M}_1^{(\gamma)}\cdot H_{j-1}(u/\sigma)/\sigma^{j-1}$,
-where $H_k$ are (probabilist's) Hermite polynomials.
-
----
-
-## 4. Student-$t$ Random Fields
-
-### 4.1 Construction
-
-Let $Z_0, Z_1, \ldots, Z_\nu$ be independent stationary Gaussian RFs, all with the same
-covariance $C(r) = \sigma^2 \exp(-r^2/l_c^2)$. Define the **Worsley $t_\nu$ field**:
+Writing
 
 $$
-T_\nu(x) = \frac{Z_0(x)}{\sqrt{\chi^2_\nu(x)/\nu}},
-\qquad \chi^2_\nu(x) = \sum_{i=1}^{\nu} Z_i(x)^2.
-\tag{4}
+c_\nu(u)=\frac{1}{\sqrt{2\pi}}
+(1+u^2/\nu)^{-(\nu-1)/2},
+\qquad
+A_\nu=\sqrt{\frac2\nu}
+\frac{\Gamma((\nu+1)/2)}{\Gamma(\nu/2)},
 $$
 
-This is a valid stationary RF with:
-
-- **Marginal distribution** $T_\nu(x) \sim t_\nu$ at every point (numerator and denominator
-  are independent because they involve different components $Z_i$),
-- **Second spectral moment** $\lambda_2 = 2\sigma^2/l_c^2$ (of the numerator $Z_0$; proved
-  in Worsley 1994 that the Adler formula uses this quantity),
-- **Spatially varying denominator** — this is the key: a scalar $\chi^2$ construction
-  ($T = Z/\sqrt{s/\nu}$ with $s$ a fixed scalar per realisation) would merely rescale
-  a Gaussian field and the $t_\nu$ Adler formula would not apply.
-
-The marginal PDF is
+the implemented coefficients are
 
 $$
-p_\nu(u) = \frac{\Gamma\!\left(\frac{\nu+1}{2}\right)}{\sqrt{\nu\pi}\;\Gamma\!\left(\frac{\nu}{2}\right)}
-\left(1 + \frac{u^2}{\nu}\right)^{-(\nu+1)/2}.
-\tag{5}
+\begin{aligned}
+\mathcal M_0&=\bar F_\nu(u),&
+\mathcal M_1&=c_\nu(u),\\
+\mathcal M_2&=A_\nu u c_\nu(u),&
+\mathcal M_3&=\left(\frac{\nu-1}{\nu}u^2-1\right)c_\nu(u).
+\end{aligned}
 $$
 
-For $\nu \geq 2$ the variance is $\sigma^2_\nu = \nu\sigma^2/(\nu-2)$; for $\nu \geq 3$ the
-second moment $\lambda_2$ is finite and the Adler formula applies.
+These are the standard t-field EC-density expressions in the present GMF
+normalization. This note states the cone formulas and consistency checks;
+it is not a complete derivation of every tube integral.
+The implementation evaluates gamma ratios logarithmically.
 
-### 4.2 Tail behavior
+Checks with geometric meaning:
 
-For large $|u|$: $p_\nu(u) \sim C_\nu |u|^{-(\nu+1)}$ — **polynomial**, much heavier than
-the Gaussian $\exp(-u^2/2\sigma^2)$.  This shifts the volume fraction still present at
-the percolation threshold:
+- At $u=0$, the excursion is the numerator's Gaussian half-space, so all
+  four expected LKCs agree with the Gaussian formulas.
+- As $\nu\to\infty$, $A_\nu\to1$ and $c_\nu\to\varphi$.
+- Scaling every Gaussian component by the same positive number leaves
+  the ratio and all predictions unchanged.
 
-| Field | Tail | EC-zero phi_c+ (finite domain, lc=8, a=100) |
-|-------|------|----------------------------------------------|
-| Gaussian | $\exp(-u^2/2)$ | $\approx 21.8\%$ |
-| $\chi^2(k=1)$ | $u^{-1/2}\exp(-u/2)$ | $\approx 37\text{–}51\%$ (lc-dependent) |
-| $t_\nu$, $\nu=10$ | $u^{-11}$ | $\approx 21.7\%$ |
-| $t_\nu$, $\nu=3$ | $u^{-4}$ | $\approx 21.1\%$ |
+## 6. Finite-domain expectations
 
-Note: $t_\nu$ ceilings are nearly identical to Gaussian — see Section 7.
+Insert the coefficients above into Section 2 with
+$\rho=1/(l_c\sqrt\pi)$, independently of common component amplitude.
+In particular $\mathbb E[L_3]=a^3\bar F_\nu(u)$.
+This gives an expectation, not a guarantee that one sample or one
+voxel estimator agrees with it.
 
----
+## 7. EC-zero proxy
 
-## 5. Minkowski Functionals for the $t_\nu$ Distribution
+The bulk positive EC-zero is $u_{\rm EC}=\sqrt{\nu/(\nu-1)}$.
+Finite-cube boundary terms shift it. For $a=100,l_c=8$:
 
-**Important:** The M_j are NOT obtained by differentiating the survival function. The
-excursion set $\{T_\nu \geq u\}$ is the preimage of a cone in $\mathbb{R}^{\nu+1}$ Gaussian
-space, and the GKF requires the Gaussian Minkowski functionals of that cone — not the
-scalar $t_\nu$ marginal derivatives. (The PDF-derivative approach gives expressions that
-fail the decisive consistency check at $u=0$; see Section 7.)
+| $\nu$ | Bulk threshold | Bulk VF | Finite-cube threshold | Finite-cube VF |
+|---|---:|---:|---:|---:|
+| Gaussian limit | 1.000 | 15.87% | 0.7787 | 21.81% |
+| 10 | 1.054 | 15.83% | 0.8159 | 21.68% |
+| 5 | 1.118 | 15.72% | 0.8588 | 21.48% |
+| 3 | 1.225 | 15.40% | 0.9280 | 21.09% |
 
-Define the cone-geometry base function:
-
-$$
-c_\nu(u) = \frac{1}{\sqrt{2\pi}}\left(1 + \frac{u^2}{\nu}\right)^{-(\nu-1)/2}.
-\tag{6e}
-$$
-
-Then:
-
-$$
-\mathcal{M}_0^{(t)}(u) = \bar F_\nu(u) = \mathbb{P}(T_\nu \geq u),
-\tag{6a}
-$$
-
-$$
-\mathcal{M}_1^{(t)}(u) = c_\nu(u),
-\tag{6b}
-$$
-
-$$
-\mathcal{M}_2^{(t)}(u) = A_\nu\, u\, c_\nu(u),
-\quad A_\nu = \sqrt{\tfrac{2}{\nu}}\,\frac{\Gamma((\nu+1)/2)}{\Gamma(\nu/2)},
-\tag{6c}
-$$
-
-$$
-\mathcal{M}_3^{(t)}(u) = \left(\frac{\nu-1}{\nu}\,u^2 - 1\right) c_\nu(u).
-\tag{6d}
-$$
-
-### Limiting cases
-
-- $\nu \to \infty$: $c_\nu(u) \to \varphi(u)$, $A_\nu \to 1$, and all
-  $\mathcal{M}_j^{(t)} \to \mathcal{M}_j^{(\gamma)}$ — recovers the Gaussian formulas (3).
-- $u = 0$: $c_\nu(0) = \varphi(0)$ for **all** $\nu$ — consistent with the identity
-  $\{T_\nu \geq 0\} = \{Z_0 \geq 0\}$ (same excursion set for all $\nu$, so all LKCs at
-  $\kappa=0$ must agree across field families).
-- $\mathcal{M}_3(u) = 0$ at $u_c = \sqrt{\nu/(\nu-1)}$ — the bulk EC-zero threshold.
-- $\nu = 1$ (Cauchy): no finite variance, $\lambda_2$ is undefined, Adler formula breaks.
-- **Safe range:** $\nu \geq 3$.
-
----
-
-## 6. Full Expected LKCs for a 3D Cube with a $t_\nu$ Field
-
-Substituting (6) into (2) with $\lambda_2 = 2\sigma^2/l_c^2$
-(and writing $\rho = \sqrt{\lambda_2 / 2\pi} = \sigma/(l_c\sqrt{\pi})$):
-
-$$
-\mathbb{E}[L_0(A_u)]
-= \rho^3 a^3\,\mathcal{M}_3^{(t)}
-+ 3\rho^2 a^2\,\mathcal{M}_2^{(t)}
-+ 3\rho\, a\,\mathcal{M}_1^{(t)}
-+ \mathcal{M}_0^{(t)},
-\tag{7a}
-$$
-
-$$
-\mathbb{E}[L_3(A_u)] = a^3\,\bar F_\nu(u).
-\tag{7b}
-$$
-
-The volume fraction $\Phi = \bar F_\nu(u)$ is controlled by the threshold $u$ through the
-$t_\nu$ survival function, which decays polynomially — hence for the same $u$, a $t_\nu$
-field produces significantly more volume than a Gaussian field.
-
----
-
-## 7. Percolation Criterion
-
-Following Roubin & Colliat (2016), the **percolation thresholds in volume fraction** are
-the roots of $\mathbb{E}[L_0(A_u)] = 0$:
-
-$$
-\bar F_\nu(\kappa_c^\pm) = \Phi_c^\pm.
-\tag{8}
-$$
-
-The upper root $\Phi_c^+$ (high threshold, meatball regime — disconnected inclusions)
-and lower root $\Phi_c^-$ (sponge regime — connected complement) bound the disconnected
-phase. For a Gaussian, $\Phi_c^+ \approx 15.9\%$ at $\beta \to \infty$.
-
-For a $t_\nu$ field, $\mathcal{M}_3(u) = 0$ at $u_c = \sqrt{\nu/(\nu-1)}$, which is larger
-than the Gaussian $u_c = 1$ and increases with heavier tails. However, $\Phi_c^+ =
-\bar F_\nu(u_c) = \mathbb{P}(T_\nu \geq \sqrt{\nu/(\nu-1)})$ is slightly **smaller** than
-the Gaussian value, because the heavier tail raises the threshold faster than the CDF
-responds. The two effects nearly cancel:
-
-| $\nu$ | $u_c$ | $\Phi_c^+$ (bulk) | $\Phi_c^+$ (finite domain) |
-|--------|--------|-------------------|---------------------------|
-| $\infty$ (Gaussian) | 1.000 | 15.87% | 21.81% |
-| 10 | 1.054 | 15.83% | 21.68% |
-| 5  | 1.118 | 15.72% | 21.48% |
-| 3  | 1.225 | 15.40% | 21.09% |
-
-**Conclusion:** $t_\nu$ fields do not meaningfully raise the disconnected VF ceiling.
-Marginal tail heaviness is almost irrelevant; the ceiling is controlled by the spatial
-correlation structure ($\rho$, $a/l_c$), not the marginal distribution.
-
-$$
-\Phi_c^+(t_\nu) \lesssim \Phi_c^+(\text{Gaussian}).
-$$
-
----
-
-## 8. Connection to the Paper Extension
-
-The natural extension of Roubin–Colliat (2016) to non-Gaussian fields follows these steps:
-
-1. **Derive** $\mathcal{M}_j^{(t)}$ (done above; refs: Worsley 1994, Taylor 2006).
-2. **Compute** $\mathbb{E}[L_0]$ analytically for $t_\nu$ via (7a).
-3. **Find** $\kappa_c^\pm(\nu, \beta)$ numerically (roots of the EC curve).
-4. **Map** $\Phi_c^+(\nu, \beta)$ — the achievable disconnected VF as function of tail heaviness.
-5. **Compare** against Monte Carlo measurements (test_4.py validates steps 1–4).
-6. **Apply** to cement paste / battery electrode morphologies where $\Phi > 16\%$ is required.
-
----
+Thus this family barely changes this particular EC-zero proxy at fixed
+component correlation and domain. It does not prove that marginal
+distributions never matter, or that these VFs bound nonspanning samples.
+A spatial percolation threshold requires a separate measurement.
 
 ## References
 
-- Adler, R.J. & Taylor, J.E. (2007). *Random Fields and Geometry*. §11.7 (non-Gaussian EC densities).
-- Worsley, K.J. (1994). Local maxima and the expected Euler characteristic of excursion sets of $\chi^2$, $F$ and $t$ fields. *Advances in Applied Probability*, 26(1), 13–42.
-- Taylor, J.E. (2006). A Gaussian kinematic formula. *Annals of Probability*, 34(1), 122–158.
-- Roubin, E. & Colliat, J.-B. (2016). Critical probability of percolation over bounded region in $N$-dimensional Euclidean space. *Journal of Statistical Mechanics*, P033306.
-- Roubin, E. (2013). *Meso-scale FE and morphological modelling of heterogeneous media* (PhD thesis). §2 (LKC framework, $\chi^2$ derivation).
+- Adler & Taylor (2007), *Random Fields and Geometry*.
+- Worsley (1994), *Local maxima and the expected Euler characteristic of excursion sets of chi-squared, F and t fields*.
+- [Taylor (2006), A Gaussian kinematic formula](https://arxiv.org/abs/math/0602545).
+- [Taylor & Adler, flag-coefficient GKF](https://arxiv.org/abs/math/0612580).
+- [SPM's t-field EC densities](https://github.com/spm/spm/blob/main/spm_ECdensity.m), an independent implementation of the normalization.

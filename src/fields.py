@@ -1,4 +1,4 @@
-"""Random field generation on 3-D periodic and bounded grids.
+"""Random field generation at 3-D grid samples via GSTools.
 
 Gaussian fields are generated via the gstools library (same engine SPAM uses)
 through a thin wrapper `simulate_random_field` that mirrors SPAM's API. All
@@ -13,8 +13,9 @@ matches ours — one of the few models where our `lc` and gstools' `len_scale`
 coincide directly. Other covariance models (Matern, Exponential, ...) can be
 used via `simulate_random_field` with their own kwargs.
 
-What changes between field families (chi², Student-t, margin) is only the
-marginal distribution; the spatial correlation structure is identical.
+These families share the covariance of their Gaussian components. Their
+nonlinear transforms generally have different spatial correlations (for
+example Corr(sum G_i(x)^2, sum G_i(y)^2) = Corr(G(x),G(y))**2).
 """
 
 from __future__ import annotations
@@ -198,7 +199,9 @@ def generate_student_t_rf(
     M_j values exact for this construction. A scalar chi^2 denominator would
     merely rescale Z_0 per realisation and the formula would not apply.
 
-    Valid range: nu >= 3 (nu=1 Cauchy has undefined lambda_2).
+    Supported range: integer nu >= 3, matching the implemented 3D cone GMFs.
+    The GKF uses the standardized Gaussian-component metric. The t field's own
+    gradient second moment diverges for nu <= 4; this is not that metric.
 
     Args:
         grid: Grid specification.
@@ -209,9 +212,8 @@ def generate_student_t_rf(
     Returns:
         float32 array of shape (n, n, n).
     """
-    nu = int(nu)
-    if nu < 3:
-        raise ValueError("nu must be >= 3 for finite lambda_2")
+    if not isinstance(nu, (int, np.integer)) or isinstance(nu, (bool, np.bool_)) or nu < 3:
+        raise ValueError("nu must be an integer >= 3")
     lc_voxels = lc / grid.dx
     Z0 = _generate_one(grid.n, lc_voxels, rng)
     chi2 = sum(_generate_one(grid.n, lc_voxels, rng) ** 2 for _ in range(nu))
@@ -245,10 +247,9 @@ def generate_vector_field(
 ) -> np.ndarray:
     """Stack of n_components independent Gaussian RFs, optionally cropped.
 
-    When padding > 0 the field is generated on a (n + 2*padding)^3 periodic
-    grid and then the central n^3 cube is returned. This avoids the periodic-
-    boundary wrap-around artefacts that appear near the domain edges when the
-    field is used as a non-periodic Gaussian-space map.
+    When padding > 0 the field is generated on a larger GSTools grid and the
+    central n^3 cube is returned. RandMeth is not a periodic FFT generator;
+    padding is retained for historical API compatibility, not to remove wrap.
 
     Args:
         grid:        Grid specification for the *output* field.

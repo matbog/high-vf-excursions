@@ -1,189 +1,129 @@
-# Framework: random field excursion sets and the Gaussian Kinematic Formula
+# Random-field morphology and the Gaussian Kinematic Formula
 
-## The excursion set morphology model
+Let $G:M\to\mathbb R^q$ have independent, identically distributed Gaussian
+components and let $A=G^{-1}(D)$. The hitting set $D$ determines which field
+values belong to the inclusion phase. Scalar Gaussian thresholds, chi-squared
+exteriors, Student-t cones, margin chambers, and unions of balls are different
+choices of $D$.
 
-A random field `f : M -> R` assigns a random real value to every point of a spatial domain
-`M` (here, a cube in R^3). The field is characterised by its marginal distribution — what
-value a single point is likely to take — and its covariance function `C(r) = Cov(f(x), f(x+r))`,
-which controls spatial smoothness and correlation length. In this project the covariance is
-always Gaussian: `C(r) = sigma^2 * exp(-r^2 / lc^2)`, with correlation length `lc`.
+Our unit-variance components have correlation $C_G(r)=\exp(-r^2/l_c^2)$.
+A nonlinear field derived from them need not have this correlation: for
+example, the correlation of a sum of squared independent components is
+$C_G(r)^2$. The GKF uses the **component-induced metric**.
 
-The **excursion set** at threshold $u$ is the binary field
+## Descriptors and conventions
 
-$$
-A_u = \{\, x \in M : f(x) \geq u \,\}.
-$$
+| LKC | Meaning |
+|---|---|
+| $L_3$ | Inclusion volume |
+| $L_2$ | Half the total boundary area, including boundary on the domain faces |
+| $L_1$ | Integrated mean curvature divided by $\pi$ |
+| $L_0$ | Euler characteristic $\beta_0-\beta_1+\beta_2$ |
 
-This partitions the domain into an inclusion phase $A_u$ and a matrix
-phase $M \setminus A_u$. Varying $u$ sweeps volume fraction continuously:
-high $u$ gives sparse inclusions; low $u$ gives a dense, percolating
-phase. The two-parameter family $(l_c, u)$ covers a wide range of
-microstructure morphologies within a single generative model.
+Positive Euler characteristic does not imply a nonspanning phase.
+$L_0$ equals the number of components only when tunnels and cavities
+are absent. Four LKCs do not uniquely determine a morphology.
 
-The **Lipschitz-Killing curvatures** (LKCs) of $A_u$ are the standard
-scalar morphological descriptors in three dimensions:
+## GKF and cube expansion
 
-| Symbol | Name | Physical meaning |
-|--------|------|-----------------|
-| $L_3(A_u)$ | Volume | Total inclusion volume |
-| $L_2(A_u)$ | Half surface area | Specific surface (inclusion-matrix interface area / 2) |
-| $L_1(A_u)$ | Integrated mean curvature $/\,\pi$ | Mean curvature integral over the boundary |
-| $L_0(A_u)$ | Euler characteristic | Topology: #components - #tunnels + #cavities |
-
-$L_0$ is the most information-rich: positive values indicate a
-disconnected (island) morphology; negative values indicate a tunnel- or
-percolation-dominated topology.
-
-All four LKCs are estimated numerically from voxel realizations; see
-[measurement_conventions.md](measurement_conventions.md) for the
-estimators used (6- vs 26-connectivity Euler, marching-cubes vs Crofton
-surface, dihedral $L_1$) and their known biases.
-
-## The Gaussian Kinematic Formula
-
-For a smooth, stationary, isotropic Gaussian-related random field on a 3D
-cube of side $a$, the Adler-Taylor formula gives
+For smooth, independent unit-variance components with an isotropic common
+metric, and a suitably regular domain and hitting set,
 
 $$
-\mathbb{E}[L_i(A_u)]
-= \sum_{j=0}^{3-i} \binom{i+j}{j}\, \rho^{j}\, L_{i+j}(M)\,
-    \mathcal M_j^{\gamma}(D_u).
+\mathbb E[L_i(A)]=\sum_{j=0}^{3-i}
+\left[\begin{matrix}i+j\\j\end{matrix}\right]
+\rho^j L_{i+j}(M)\mathcal M_j^\gamma(D),
+\quad
+\left[\begin{matrix}n\\k\end{matrix}\right]
+=\binom nk\frac{\omega_n}{\omega_k\omega_{n-k}},
+\quad
+\omega_k=\frac{\pi^{k/2}}{\Gamma(1+k/2)}.
 $$
 
-The four LKC expectations on a 3D cube of side $a$ are
+With unit components, $\lambda_2=2/l_c^2$ and
+$\rho=\sqrt{\lambda_2/(2\pi)}=1/(l_c\sqrt\pi)$.
+For a cube of side $a$, $(L_0,L_1,L_2,L_3)=(1,3a,3a^2,a^3)$:
 
 $$
 \begin{aligned}
-\mathbb{E}[L_3(A_u)] &= a^3\, \mathcal M_0, \\[2pt]
-\mathbb{E}[L_2(A_u)] &= 2\rho a^3\, \mathcal M_1 + 3 a^2\, \mathcal M_0, \\[2pt]
-\mathbb{E}[L_1(A_u)] &= 2\rho^2 a^3\, \mathcal M_2
-    + \tfrac{3\pi}{2}\rho a^2\, \mathcal M_1 + 3 a\, \mathcal M_0, \\[2pt]
-\mathbb{E}[L_0(A_u)] &= \rho^3 a^3\, \mathcal M_3 + 3\rho^2 a^2\, \mathcal M_2
-    + 3\rho a\, \mathcal M_1 + \mathcal M_0.
+\mathbb E[L_0]&=\rho^3a^3\mathcal M_3+3\rho^2a^2\mathcal M_2+3\rho a\mathcal M_1+\mathcal M_0,\\
+\mathbb E[L_1]&=2\rho^2a^3\mathcal M_2+\tfrac{3\pi}{2}\rho a^2\mathcal M_1+3a\mathcal M_0,\\
+\mathbb E[L_2]&=2\rho a^3\mathcal M_1+3a^2\mathcal M_0,\\
+\mathbb E[L_3]&=a^3\mathcal M_0.
 \end{aligned}
 $$
 
-**Terms:**
+The flag coefficient, for example $[2\;1]=\pi/2$, is essential.
+See [Taylor & Adler](https://arxiv.org/abs/math/0612580).
 
-- $\rho = \sqrt{\lambda_2 / 2\pi}$ where
-  $\lambda_2 = -C''(0) = 2\sigma^2 / l_c^2$ is the second spectral moment
-  of the covariance. $\rho$ encodes spatial regularity and scale.
-- $a^3$, $3a^2$, $3a$, $1$ are the domain LKCs of a cube of side $a$
-  (volume, surface, edge, vertex).
-- $\mathcal M_j^{\gamma}(D_u)$ are the **Gaussian Minkowski functionals**
-  of the hitting set $D_u = \{\, z \in \mathbb{R} : z \geq u \,\}$ — the
-  region of value space that maps to the inclusion phase.
-
-**The central structural insight:**
-
-The spatial geometry (encoded in $\rho$ and the domain LKCs) is
-completely separated from the value-space geometry (encoded in
-$\mathcal M_j$). When the marginal distribution changes — Gaussian to
-Student-$t$, or scalar to vector — only $\mathcal M_j$ changes. The
-spatial side is identical as long as the covariance structure is
-unchanged.
-
-**Gaussian $\mathcal M_j$ (exact closed form):**
+For a standard Gaussian half-line $[u,\infty)$,
 
 $$
-\begin{aligned}
-\mathcal M_0 &= \mathbb{P}(Z \geq u) = \tfrac{1}{2}\,\mathrm{erfc}(u/\sqrt{2})
-    &&\text{(volume fraction)} \\[2pt]
-\mathcal M_1 &= \varphi(u) = (2\pi)^{-1/2} e^{-u^2/2}
-    &&\text{(boundary density)} \\[2pt]
-\mathcal M_2 &= u\, \varphi(u) &&\text{(mean curvature density)} \\[2pt]
-\mathcal M_3 &= (u^2 - 1)\, \varphi(u) &&\text{(Gaussian curvature density)}
-\end{aligned}
+(\mathcal M_0,\mathcal M_1,\mathcal M_2,\mathcal M_3)
+=(\bar\Phi(u),\varphi(u),u\varphi(u),(u^2-1)\varphi(u)).
 $$
 
-**The percolation criterion:**
+For common component SD $\sigma$, either standardize the hitting set and
+use the unit-component metric, or consistently pair nonstandard GMFs with
+the unstandardized metric. The APIs use these equivalent conventions:
 
-The upper zero-crossing of $\mathbb{E}[L_0(A_u)]$ as a function of $u$
-corresponds to a transition from positive Euler characteristic
-(disconnected inclusions dominate) to negative (tunnels and percolation
-dominate). The volume fraction at this crossing, $\varphi_c^+$, is the
-maximum disconnected inclusion volume fraction consistent with the Adler
-expectation.
+- Gaussian: threshold $u/\sigma$ (implemented with scaled density derivatives).
+- Chi-squared: threshold $u/\sigma^2$.
+- Margin: margin $\delta/\sigma$.
+- Balls: centres $c/\sigma$ and radius $r/\sigma$.
+- Student-t: common $\sigma$ cancels exactly in the ratio.
 
-Two distinct values arise:
+Student-t GMFs require the cone in Gaussian component space, not derivatives
+of the scalar t survival function. See [the formula note](../theory/student_t_derivation.md).
+Margin formulas apply to separated chambers for $\delta>0$; at exactly
+$\delta=0$ the union is all value space and its GMFs are $(1,0,0,0)$.
 
-- **Infinite-domain (bulk) limit** — only the volume term
-  $\rho^3 a^3 \mathcal M_3$ survives as $a/l_c \to \infty$. For Gaussian
-  fields $\mathcal M_3 = 0$ at $u = 1$, giving $\varphi_c^+ \to 16\%$.
-- **Finite-domain result** — boundary terms ($3 a^2 \mathcal M_2$,
-  $3 a \mathcal M_1$, $\mathcal M_0$) shift the zero-crossing. For
-  $N = 100$, $l_c = 8.0$ the finite-domain result is
-  $\varphi_c^+ \approx 22\%$ ($\kappa_c^+ \approx 0.78$). The
-  `find_percolation_threshold` function returns this value.
+## EC-zero, contact, and spanning
 
-## Using the library
+The positive-threshold root of $\mathbb E[L_0]=0$ is an **EC-zero proxy**.
+For the Gaussian bulk term it is $u=1$, VF 15.87%. Cube boundary terms
+shift it: $a=100,l_c=8$ gives $u\approx0.779$, VF 21.81%.
+These numbers depend on physical $a/l_c$, not directly on grid size $N$.
 
-All computations use the `src/` library. Run from the repository root or set `sys.path`:
+The historical function name `find_percolation_threshold` is retained,
+but it returns an EC-zero, not measured spanning probability.
+Value-space contact is a separate event (for example, touching balls).
+Finite-domain spanning must be measured with an explicit geometry and
+connectivity convention. None of these thresholds is generally guaranteed
+to coincide with the others, including in a large-domain limit.
 
-```python
+## Minimal use
+
+~~~python
 import numpy as np
-import sys, pathlib
-sys.path.insert(0, str(pathlib.Path('.').resolve()))  # from repo root
-
 from src.fields import GridSpec, generate_gaussian_rf
 from src.measures import measure_all
 from src.adler import expected_lkcs_gaussian
 
-# Define a grid: 100^3 voxels, physical side 100.0
 grid = GridSpec(n=100, length=100.0)
-rng = np.random.default_rng(42)
-
-# Generate one Gaussian RF with correlation length lc=8.0
-field = generate_gaussian_rf(grid, lc=8.0, rng=rng)
-
-# Threshold at kappa=1.0 — gives VF ≈ 16%
-phase = field >= 1.0
-m = measure_all(phase, grid)
-print(f"measured: phi={m['vf']:.3f}, euler={m['euler']:.0f}")
-
-# Compare to Adler-Taylor prediction
+field = generate_gaussian_rf(grid, lc=8.0, rng=np.random.default_rng(42))
+measured = measure_all(field >= 1.0, grid)
 theory = expected_lkcs_gaussian(grid, lc=8.0, kappas=np.array([1.0]))
-print(f"theory:   phi={theory['phi'][0]:.3f}, euler={theory['L0'][0]:.0f}")
-```
+print(measured["vf"], theory["phi"][0])
+print(measured["euler"], theory["L0"][0])
+~~~
 
-**`measure_all` returns:**
+`measure_all` uses voxel volume, 6-neighbour Euler/spanning, and binary
+marching-cubes surface; curvature is enabled with `compute_l1=True`.
+It is not the measurement policy of
+every experiment. See [measurement conventions](measurement_conventions.md).
 
-| Key | Description |
-|-----|-------------|
-| `vf` | Volume fraction |
-| `volume` | Total inclusion volume |
-| `euler` | Euler characteristic (cubical complex) |
-| `half_surface` | Half the marching-cubes surface area |
-| `percolates_x/y/z` | Whether any component spans the domain |
+## What can be calibrated
 
-**Threshold sweep (experiment 01 pattern):**
+Given a fixed model family, a threshold controls its expected VF and the
+associated expected LKC curve. Allowing an additional scale parameter may
+permit fitting both expected VF and Euler density, but feasibility and
+uniqueness require checking. A single scalar does not independently fit
+several arbitrary descriptors, grain sizes, and connectivity constraints.
 
-```python
-thresholds = np.linspace(-2.5, 2.5, 25)
-theory = expected_lkcs_gaussian(grid, lc=8.0, kappas=thresholds)
-
-measured_L0 = []
-for kappa in thresholds:
-    m = measure_all(field >= kappa, grid)
-    measured_L0.append(m['euler'])
-# theory['L0'] and measured_L0 match to within single-realisation noise
-```
-
-## What the Adler link gives you
-
-1. **Closed-form calibration.** Given a target volume fraction and Euler
-   density, the system
-   $(\varphi_{\text{target}}, \chi_{\text{target}}) = (\mathcal M_0(u), \mathbb{E}[L_0]/a^3)$
-   can be inverted numerically to find $(l_c, u)$ without running any
-   simulations. This is the primary use in materials modelling.
-
-2. **No simulation budget for expectation.** The expected LKCs are
-   available instantly for any parameter set. Simulation is only needed
-   to quantify realisation-to-realisation variance or to explore models
-   where the analytic formula does not yet hold.
-
-3. **Limits: expectation only.** The formula gives $\mathbb{E}[L_i]$. A
-   single realisation will differ. Variance decreases with domain size
-   (ergodicity), but for small domains or near topological transitions
-   the fluctuations can be large. See [limits.md](limits.md) for a
-   precise account of where the formula holds and where it does not.
+The GKF gives expectations, including finite-domain boundary terms.
+It does not itself give variances, convergence rates, or a guarantee that
+one realisation is near its expectation. Under suitable mixing assumptions,
+spatial averages can concentrate with increasing domain size; the variance
+of an extensive quantity need not decrease. Grid refinement addresses
+discretisation error, not finite-domain sampling uncertainty.

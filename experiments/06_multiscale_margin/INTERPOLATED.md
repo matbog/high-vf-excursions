@@ -1,16 +1,16 @@
-# Interpolated geometry in experiment 07
+# Interpolated geometry in experiment 06
 
 **Deferred on 31 October 2026 because of computational cost.** The working
 experiment remains the voxel workflow. This document and the prototype are kept
 for later research; see the final section of [README.md](README.md) and the
-[stopped full-run notes](results_pl_full/STOPPED.md). The commands below describe
+local stopped-run archive (`explorations/exp06_pilot_runs/results_pl_full/`). The commands below describe
 the retained prototype, not a currently running job.
 
 `run_interpolated.py` is a separate, experimental measurement path for **L0,
 L3, connected components and spanning**. It uses GSTools Gaussian components
 and constructs margin regions between samples. `run.py` and its saved FFT/voxel
 results remain the historical baseline. All new code, configuration and outputs
-are inside experiment 07.
+are inside experiment 06.
 
 ## What is interpolated
 
@@ -121,9 +121,9 @@ sensitivity remain necessary, as does independent validation of the margin GMFs.
 With `rf_explo` active, from the repository root:
 
 ```bash
-python -B experiments/07_multiscale_margin/test_interpolated.py
-python -B experiments/07_multiscale_margin/run_interpolated.py --n 12 --q 4 --realizations 1 --phis .6 .8 --output experiments/07_multiscale_margin/results_pl_n12
-python -B experiments/07_multiscale_margin/run_interpolated.py --n 24 --q 4 --realizations 1 --phis .6 .8 --output experiments/07_multiscale_margin/results_pl_n24
+python -B experiments/06_multiscale_margin/test_interpolated.py
+python -B experiments/06_multiscale_margin/run_interpolated.py --n 12 --q 4 --realizations 1 --phis .6 .8 --output experiments/06_multiscale_margin/results_pl_n12
+python -B experiments/06_multiscale_margin/run_interpolated.py --n 24 --q 4 --realizations 1 --phis .6 .8 --output experiments/06_multiscale_margin/results_pl_n24
 ```
 
 Those are small computational pilots, not concrete-mixture calibration runs.
@@ -135,7 +135,7 @@ N=100, q=16, five realizations, and five VF targets. The full configuration is
 available through:
 
 ```bash
-python -B experiments/07_multiscale_margin/run_interpolated.py --output experiments/07_multiscale_margin/results_pl_full
+python -B experiments/06_multiscale_margin/run_interpolated.py --output experiments/06_multiscale_margin/results_pl_full
 ```
 
 This is a correctness-first implementation. It retains component arrays and
@@ -148,7 +148,7 @@ runner, so it can be used alongside other work.
 
 Use `--no-meshes` or `--no-fields` to reduce saved files, and `--mode-no` for a
 separate spectral-mode sensitivity study. Outputs must remain in a subdirectory
-of experiment 07. Existing output folders require `--overwrite`, which only
+of experiment 06. Existing output folders require `--overwrite`, which only
 accepts directories carrying this runner's metadata and replaces all their old
 files to avoid stale mesh blocks.
 
@@ -212,13 +212,11 @@ convergence to the smooth-field theory: neither grid resolves the sand scale.
 Both interpolated pilot unions span the domain at both targets. This is not a
 direct comparison with the old q=16 FFT experiments.
 
-Inspect the [N=24 summary](results_pl_n24/summary.md),
-[comparison plots](results_pl_n24/comparison.png), and
-[matched slices](results_pl_n24/geometry_slices.png). For ParaView, open
-[the 60% target geometry](results_pl_n24/meshes_r1_vf_0.6000.vtm) or
-[the 80% target geometry](results_pl_n24/meshes_r1_vf_0.8000.vtm).
+The N=24 summary, comparison figures, slices, and ParaView meshes are locally
+archived under `explorations/exp06_pilot_runs/results_pl_n24/`. This archive
+is ignored and is not included in the published checkout.
 To regenerate the slice comparison:
 
 ```bash
-python -B experiments/07_multiscale_margin/preview_interpolated.py experiments/07_multiscale_margin/results_pl_n24
+python -B experiments/06_multiscale_margin/preview_interpolated.py explorations/exp06_pilot_runs/results_pl_n24
 ```

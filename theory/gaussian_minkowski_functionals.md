@@ -38,7 +38,7 @@ D_\delta=\{z:z_{(q)}-z_{(q-1)}\geq\delta\},
 \]
 
 where (z_{(q)}\) and (z_{(q-1)}\) are the largest and second-largest
-coordinates. Equivalently, (D_\delta) is the disjoint union
+coordinates. For $\delta>0$, (D_\delta) is the disjoint union
 
 \[
 D_{\delta,i}=\{z:z_i-z_j\geq\delta\quad\forall j\ne i\}.
@@ -140,8 +140,13 @@ formulas reduce exactly to the two-half-space result when (q=2):
 2(a^2-1)\varphi(a)\right).
 \]
 
-These formulas have passed algebraic (q=2) tests and numerical periodic-field
-checks at several volume fractions. A formal publication proof should still
+At exactly $\delta=0$, the union is all value space and its GMFs are
+$(1,0,0,0)$. The positive-margin formulas above must not be substituted at
+zero: the chambers meet, so additivity over separated pieces no longer applies.
+
+The formulas have an exact two-half-space control at $q=2$. Periodic-field
+checks described below are historical exploratory evidence, without a
+reproducible periodic runner in the published experiment. A formal proof must still
 state the chamber stratification, reach/tube-radius restriction and normal-cone
 integration carefully.
 
@@ -197,7 +202,9 @@ recover (\mathcal M_1^\gamma,\mathcal M_2^\gamma) and
 Monte Carlo tube-probability curve.
 
 At target volume fraction (\phi=0.70), using a squared-exponential covariance
-with (L_c=8), the first numerical campaign produced:
+with (L_c=8), the historical exploratory campaign reported the table below.
+Its periodic runner and raw samples are not part of the published experiment;
+this table is not a reproducible accuracy bound for the committed cube sweep:
 
 | q | M0 | M1 | M2 | M3 |
 |---:|---:|---:|---:|---:|
@@ -220,8 +227,8 @@ and discretization bias in addition to sampling uncertainty.
 The sign of (\mathcal M_3) is especially informative in three dimensions:
 on a torus it is proportional to expected Euler density. At (\phi=0.70), the
 change from negative for (q=4) to positive for (q\ge8) is consistent with a
-transition from handle/percolation-dominated winner domains to
-component-dominated winner cores.
+change in the balance of components, tunnels, and cavities. It does not
+establish a spatial spanning transition or identify component counts.
 
 The closed formulas above supply the required facet, pairwise-edge and
 triple-stratum contributions. Remaining work is formal proof presentation and
@@ -248,9 +255,9 @@ thickness. It links:
 
 ## Required theory before publication
 
-1. Derive or numerically evaluate (\mathcal M_j^\gamma(D_\delta)) for
-   (j=1,2,3). Polyhedral edges make the stratified hitting-set version of the
-   GKF relevant.
+1. Complete the proof of the implemented formulas for
+   $\mathcal M_1,\mathcal M_2,\mathcal M_3$, including normal-cone orientation
+   and integration. The formulas above are an outline, not a finished proof.
 2. Establish whether additivity over the (q) separated chambers applies directly
    for every (\delta>0), and handle the singular limit (\delta\downarrow0).
 3. Compare the expected-EC zero with direct wrapping probability.

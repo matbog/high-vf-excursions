@@ -38,12 +38,16 @@ Runtime ≈ 5 min on a laptop.
 
 ![volume fraction, Euler, spanning vs threshold](results/percolation.png)
 
-- $L_0, L_2, L_3$ match Adler to MC noise across all three $l_c$.
+- Mean discrepancies include systematic discretisation bias, not only MC
+  noise. For example, at $l_c=7$, threshold 1.0417, mean $L_2$ is 5.89%
+  above theory (about 20.8 standard errors for ten realisations). At
+  $l_c=4$, threshold 1.4583, mean Euler is 5.71% above theory.
 - $L_1$ matches in shape; absolute amplitude depends on which estimator —
   see `docs/measurement_conventions.md`.
 - The upper $\mathbb{E}[L_0] = 0$ crossing lands at $\varphi_c^+ \approx 22\%$
   for $l_c = 8$ in a $100^3$ box (bulk value is 15.9%; the boundary terms
-  shift it up).
+  shift it up). This is an EC-zero proxy, not a maximum disconnected VF
+  or a guarantee about spanning. The relevant scale is physical $L/l_c$.
 
 ## Known limitations
 

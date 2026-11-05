@@ -1,0 +1,38 @@
+{
+  "measurement_schema": "union_v2",
+  "status": "complete",
+  "seed": 9417,
+  "n": 100,
+  "length": 100.0,
+  "lc": 10.0,
+  "rho": 1.5,
+  "padding": 20,
+  "realizations": 4,
+  "radius_over_rc": [
+    0.45,
+    0.65,
+    0.85,
+    0.98,
+    1.02,
+    1.15,
+    1.35,
+    1.6
+  ],
+  "mc_samples": 2000000,
+  "python": "3.12.13 | packaged by conda-forge | (main, Mar  5 2026, 16:36:12) [MSC v.1944 64 bit (AMD64)]",
+  "versions": {
+    "numpy": "2.4.3",
+    "scipy": "1.17.1",
+    "gstools": "1.7.0",
+    "scikit-image": "0.26.0",
+    "matplotlib": "3.10.9"
+  },
+  "generator": "GSTools Gaussian rescale=1; shared src.fields wrapper",
+  "source_sha256": {
+    "experiments\\05_coalescing_lobes\\run.py": "e464f77b161c236966c2658de956058e21a1b1d022cf4b2c800491a6f133be01",
+    "experiments\\05_coalescing_lobes\\measurement.py": "1d2c30b56fd795a80b8f519588a0bab4d66064622a0f85967cf14a3f8cce1666",
+    "src\\adler.py": "322d53326a82209d7f31364e85751f21045e010f861ff7e3249b8bd2c398b05a",
+    "src\\measures.py": "191ffad88f866c8bf4050560617437b671d957faaba75670333682df0f230144",
+    "src\\fields.py": "78c7a20971a53b9a94bf1131f59e988d05d21eb0886ff4456e97d466ed1cb5aa"
+  }
+}

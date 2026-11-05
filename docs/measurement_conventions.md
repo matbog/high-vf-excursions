@@ -1,146 +1,99 @@
 # Measurement conventions
 
-How we estimate the four Lipschitz-Killing curvatures $L_0 \ldots L_3$ of
-a voxel realization, which choices carry known bias, and when those
-biases matter for comparing against the Adler expectation. All
-estimators live in `src/measures.py`.
+The GKF refers to a continuous set inside a finite cube. Current experiments
+estimate its LKCs from sampled fields. Always record the estimator and
+connectivity alongside a result.
 
-The GKF predicts expectations in the continuum. A single voxel
-realization gives you a discretized set, and every estimator imposes
-some structure on how that voxel set is turned into a geometric
-quantity. The convention matters: on thin films or near-tangent
-surfaces, two defensible estimators can disagree by a factor of two or
-more.
+## Volume and grid geometry
 
-## $L_3$ — Volume
+`GridSpec.dx = length/n`. Voxel VF is the fraction of occupied samples;
+$L_3=\mathrm{VF}\,L^3$ treats each sample as a cube of volume $dx^3$.
 
-Trivial. $L_3 = (\text{\# True voxels}) \cdot dx^3$. Exact on the voxel
-grid.
+The VTI exporter stores these samples as point data, with point coordinates
+spanning $(N-1)dx$. ParaView interpolation, voxel occupancy, and a padded
+marching-cubes mesh therefore do not define identical geometry. Padding
+closes a mesh, but its boundary position is not exact clipping at the
+theoretical domain faces. The padded VTP export also needs a coordinate
+offset to align it exactly with the unpadded VTI. A consistent interpolation
+framework is deferred; a smooth rendering alone is not validation.
 
-## $L_2$ — Half surface area
+## Surface, $L_2$
 
-Two estimators are implemented. They answer slightly different questions
-and have different biases.
-
-**Marching cubes on a binary mask** (`measure_surface_area`): zero-pads
-the phase, runs `skimage.measure.marching_cubes` at level 0.5, sums the
-triangle areas, divides by two. The classic amplitude bias is roughly
-1.088 on an isotropic sphere surface — individual triangles slightly
-underestimate curved area and the net surface sits half a voxel offset
-from the true level set. At our grid sizes ($N \geq 128$) this bias is
-about 1–3% on Gaussian excursions.
-
-**Marching cubes on a signed field** (`measure_surface_area_from_field`):
-takes a smooth scalar field whose zero level set is the true surface.
-Vertices sit on the continuum level set rather than on voxel edges.
-This is what we use whenever the signed field is available (margin
-tessellation, coalescing lobes) because it eliminates the sub-voxel
-snapping error.
-
-**Crofton with analytic face term** (`measure_surface_area_crofton`):
-counts voxel-pair transitions in the three axis directions and
-reconstructs
+- `measure_surface_area` meshes a binary phase at 0.5 and returns half
+  the triangle area.
+- `measure_surface_area_from_field` meshes a sampled signed field at the requested
+  level and returns half the triangle area.
+- `measure_surface_area_crofton` counts internal inside/outside transitions
+  along three coordinate directions and adds occupied domain-face area:
 
 $$
-L_2^{\text{interior}} = \frac{(N_x + N_y + N_z)\, dx^2}{6}
+\widehat L_2=\frac{(N_x+N_y+N_z)\,dx^2}{3}
++\frac12 A_{\mathrm{occupied\ domain\ faces}}.
 $$
 
-by the stereological Cauchy relation (unbiased for isotropic surfaces).
-The domain-face contribution (voxels on $\partial M$ that belong to the
-phase) is added analytically to match the GKF's $3 a^2 \mathcal M_0$
-boundary term.
+The previous documentation's denominator 6 for the internal transition term
+was wrong. The separate face term gives $3L^2$ for a fully occupied cube.
+Directional averaging relies on isotropy for the random internal interface;
+the box boundary is handled explicitly rather than by isotropic averaging. Finite sampling
+can miss multiple crossings between adjacent points, so the formula is
+not an unbiased guarantee for every grid.
 
-On isotropic Gaussian excursions, Crofton is unbiased to <0.1% at
-$N \geq 128$ on a sphere; marching-cubes-on-binary carries the ~1.09
-amplitude bias. On polyhedral surfaces (e.g. the matrix films of the
-margin tessellation), marching-cubes-on-the-signed-field is the better
-estimator because Crofton's 3-direction isotropy assumption fails along
-axis-aligned facets.
+Margin chambers are polyhedral in **Gaussian value space**. Their spatial
+preimages need not have planar or axis-aligned interfaces. Missing thin
+films is a sampling problem, not evidence that ensemble isotropy fails.
 
-Default policy in experiments: Crofton for Gaussian baselines where the
-surface is isotropic; signed-field marching cubes for margin and lobe
-models.
+## Curvature, $L_1$
 
-## $L_1$ — Integrated mean curvature $/\,\pi$
-
-**Dihedral-angle estimator** (`measure_l1`, `measure_l1_from_field`). For
-a consistently-oriented PL surface mesh with directed edges,
+For an oriented closed piecewise-linear surface,
 
 $$
-\int_S H\, dA \;=\; \tfrac{1}{2} \sum_{\text{edges}} \lvert e\rvert\, \theta_e,
+L_1=\frac{1}{2\pi}\sum_e |e|\theta_e,
 $$
 
-where $\theta_e$ is the signed dihedral angle at edge $e$ (positive
-convex, negative concave). We extract the mesh from
-`skimage.marching_cubes`, pair each half-edge with its reverse, compute
-dihedrals from the two face normals, and return the result divided by
-$\pi$ to match the convention $L_1 = (\int H\, dA)/\pi$ used in the GKF
-formula.
+with signed exterior dihedral angle $\theta_e$ (positive for convex bends).
+`measure_l1` uses a binary marching-cubes mesh;
+`measure_l1_from_field` uses the sampled scalar field. Passing scalar values
+retains some interface-position information lost on binarization, but does
+not remove all grid, padding, nonsmooth-field, or topology errors.
+No general error bound or convergence rate has been established here.
 
-Both variants exist for the same reason as for $L_2$: `measure_l1` runs
-marching cubes on the binary phase mask;
-`measure_l1_from_field` runs it on the smooth signed field.
+For a union of balls in value space, experiment 05 meshes
+$s(x)=r-\min_a\|G(x)-c_a\|$. This captures the sampled union boundary,
+including its crease geometry only to the accuracy of the mesh.
+Interpolating sampled $s$ is not equivalent to interpolating $G$ and
+then taking distances or performing exact Boolean clipping.
 
-**Known bias.** Binarizing before meshing loses sub-voxel interface
-positions, which produces a residual amplitude bias of roughly $1.7\times$
-at $N = 64$ on isotropic Gaussian surfaces (verified against the GKF
-expectation). Passing the signed field directly removes most of this —
-the amplitude ratio drops to ~1.00 at $N = 128$. We have not
-characterized a convergence rate; treat `measure_l1` as a sanity-check
-estimator and `measure_l1_from_field` as the production one when the
-signed field exists.
+## Euler characteristic and connectivity
 
-## $L_0$ — Euler characteristic
+`measure_euler` supports 6-neighbour (`connectivity=1`) and 26-neighbour
+(`connectivity=3`) digital conventions. They can differ sharply when
+features are near the grid scale. Marching cubes is not generally identical
+to either digital convention, and choosing whichever agrees with theory
+is not a convergence test.
 
-Two connectivities are supported via the `connectivity` argument to
-`measure_euler`, which wraps `skimage.measure.euler_number`:
+`measure_percolation` reports opposite-face spanning, with 6 neighbours
+by default or 26 when explicitly requested. Margin per-winner spanning
+tests each label with 6 neighbours and ignores cross-label contacts;
+it is a different statistic from spanning of the binary union.
 
-- `connectivity=1` → 6-connectivity (face-adjacent voxels).
-- `connectivity=3` → 26-connectivity (face + edge + vertex adjacency).
+## Actual experiment policies
 
-These can disagree substantially on morphologies with thin films or
-sub-voxel features. In the coalescing-lobes experiment near contact,
-6-conn produced large negative Euler values that looked like a
-topological transition but were an artifact of thin films being read as
-tunnels in 6-conn; 26-conn gave the correct count.
+| Experiment | Euler / topology | Surface and curvature |
+|---|---|---|
+| 01–03 | Binary phase, default 6 neighbours | Binary marching cubes via `measure_all(compute_l1=True)` |
+| 04 | Sum of per-winner 26-neighbour Euler; per-winner spanning uses 6 neighbours | Sampled margin-field $L_1$; Crofton $L_2$ with scalar-mesh comparison |
+| 05 corrected runner | Binary-union Euler, components, and spanning under both 6 and 26 neighbours | Union scalar-mesh $L_1,L_2$ and union Crofton $L_2$; ball/partition controls stored separately |
+| 06 voxel runner | Binary-union Euler/spanning under both conventions | Numerical $L_1,L_2$ are omitted; their expectations enter the union recursion |
 
-There is no universally "right" convention. Our rule of thumb:
+Experiment 05's historical `results/` mixed nearest-centre partition Euler
+and Crofton with sums of individual-ball mesh measurements. After contact,
+these are not union LKCs. The corrected runner writes `results_union_v2/`.
 
-- **Gaussian / Student-$t$ bulk excursions**: either connectivity gives
-  near-identical results away from $L_0 = 0$. We use 6-conn
-  (`connectivity=1`, the `measure_all` default) because it matches
-  `skimage.marching_cubes` by construction.
-- **Thin-film morphologies** (margin tessellation at high $q$, lobes near
-  contact): use 26-conn for comparison to GKF, since the matrix film is
-  often sub-voxel and 6-conn systematically miscounts handles.
+## Comparing with theory
 
-The GKF predicts a continuum $\chi(A)$ that is agnostic to voxelization.
-Pick whichever estimator matches the morphology's natural scale.
-
-## Percolation
-
-`measure_percolation` reports per-axis spanning: whether any 6-connected
-component touches both opposite domain faces along $x$, $y$, or $z$.
-`measure_percolation_per_winner` is the margin-tessellation refinement —
-spanning of a single winner label, not the union.
-
-Percolation is a *finite-domain* property. It is not predicted by the
-GKF; it is a geometric fact about one realization. The relevant
-GKF-adjacent quantity is the volume fraction $\varphi_c$ where
-$\mathbb{E}[L_0] = 0$, which we call $\varphi_c^+$ throughout. The two
-thresholds ($\mathbb{E}[L_0] = 0$ and $P_{\text{span}} = 1/2$) coincide
-only in the ergodic limit $L/l_c \to \infty$.
-
-## When this matters
-
-For single-realization comparisons to the Adler expectation on $N = 128$
-grids with $L/l_c \geq 8$, every estimator above agrees with theory to
-within a few percent. The failure cases where the choice matters:
-
-- Thin matrix films ($\leq 2$ voxel widths) — pick 26-conn Euler and
-  signed-field marching cubes.
-- Near-tangent isosurfaces (field barely crosses $0$) — Crofton
-  underestimates because the Cauchy isotropy assumption fails;
-  signed-field MC handles it.
-- Reporting mean curvature on a binary field at $N \leq 64$ — don't; use
-  `measure_l1_from_field` with the signed field.
+Report ensemble means, dispersion or standard errors, and discretisation
+effects separately. Avoid relative errors where a theoretical LKC is near
+zero. Check physical domain size, component covariance, units, boundaries,
+and grid resolution before interpreting a discrepancy as a theory failure.
+Neither $N\geq128$ nor selecting 26 neighbours guarantees percent-level
+agreement or continuum connectivity.

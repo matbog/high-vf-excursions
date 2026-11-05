@@ -7,22 +7,22 @@ materials-goal questions:
   Phase A — spanning phase diagram at N = N_A (default 128)
     For each (q, phi) cell, measure the fraction of realizations in
     which any single winner-type cluster spans the domain face-to-face
-    on any axis. Draw a 2D map of "disconnected" vs "spanning" regimes
-    with the matrix-film thickness delta/dx (voxel units) as a side
-    diagnostic.
+    on any axis under 6-connectivity. Plot the value-space margin separately;
+    delta is not a spatial film thickness. This does not test binary-union
+    disconnection. Each realization is reused across the phi sweep.
 
   Phase B — resolution convergence at high q
     Fix a handful of (q, phi) points and sweep N in {64, 128, 256} to
-    see how the spanning fraction and film thickness scale with
+    see how the spanning fraction and measured volume fraction change with
     resolution. Tests whether high-q, high-phi results survive
     refinement.
 
 Primary output:
-  results/ceiling_phase_a.csv       per-realization measurements
-  results/ceiling_phase_a.png       heatmap of spanning + film contours
-  results/ceiling_phase_a_vf.png    measured VF vs target per (q)
-  results/ceiling_phase_b.csv       convergence table
-  results/ceiling_phase_b.png       spanning + film vs N per (q, phi)
+  results_ceiling_v2/ceiling_phase_a.csv     per-realization measurements
+  results_ceiling_v2/ceiling_phase_a.png     spanning + value-space margin
+  results_ceiling_v2/ceiling_phase_a_vf.png  measured VF vs target per q
+  results_ceiling_v2/ceiling_phase_b.csv     resolution table (unpaired seeds)
+  results_ceiling_v2/ceiling_phase_b.png     spanning + measured VF vs N
 
 Run (overnight-safe, ~3-4 h expected):
   mamba run -n rf_explo python run_ceiling.py            # both phases
@@ -44,8 +44,7 @@ sys.path.insert(0, str(Path(__file__).parents[2]))
 from src import adler, excursions, fields, measures  # noqa: E402
 from src.fields import GridSpec  # noqa: E402
 
-RESULTS = Path(__file__).parent / "results"
-RESULTS.mkdir(exist_ok=True)
+RESULTS = Path(__file__).parent / "results_ceiling_v2"
 
 LENGTH = 64.0
 LC     = 5.0
@@ -69,15 +68,15 @@ N_REAL_B   = 5
 # ---------------------------------------------------------------------------
 
 def measure_cell(fs: np.ndarray, delta: float, grid: GridSpec) -> dict:
-    """One realization measurement: phase, winners, spanning, film thickness."""
+    """Per-winner 6-connectivity spanning and volume, with margin/grid metadata."""
     phase, winners = excursions.margin_excursion(fs, delta)
     vf = float(phase.mean())
     spans = measures.measure_percolation_per_winner(phase, winners, fs.shape[0])
     return {
         "vf":              vf,
         "spans_any":       bool(spans),
-        "delta_physical":  float(delta),
-        "delta_voxels":    float(delta / grid.dx),
+        "delta":           float(delta),
+        "dx_over_lc":      float(grid.dx / LC),
     }
 
 
@@ -129,16 +128,16 @@ def write_phase_a_csv(rows: list[dict]) -> None:
     with (RESULTS / "ceiling_phase_a.csv").open("w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["q", "N", "phi_target", "realization", "vf",
-                    "spans_any", "delta_physical", "delta_voxels"])
+                    "spans_any", "delta", "dx_over_lc"])
         for row in rows:
             w.writerow([row["q"], row["N"], row["phi_target"],
                         row["realization"], row["vf"],
                         int(row["spans_any"]),
-                        row["delta_physical"], row["delta_voxels"]])
+                        row["delta"], row["dx_over_lc"]])
 
 
 def summarize_phase_a(rows: list[dict]) -> dict:
-    """Aggregate per (q, phi): mean VF, spanning fraction, mean film thickness."""
+    """Aggregate per (q, phi), without treating thresholds as independent trials."""
     out = {}
     for q in Q_A:
         out[q] = {}
@@ -150,7 +149,7 @@ def summarize_phase_a(rows: list[dict]) -> dict:
                 "vf_mean":     float(np.mean([r["vf"] for r in cell])),
                 "vf_std":      float(np.std([r["vf"] for r in cell], ddof=1)),
                 "spans_frac":  float(np.mean([r["spans_any"] for r in cell])),
-                "delta_vox":   float(np.mean([r["delta_voxels"] for r in cell])),
+                "delta":       float(cell[0]["delta"]),
                 "n_real":      len(cell),
             }
     return out
@@ -167,7 +166,7 @@ def plot_phase_a(summary: dict) -> None:
             cell = summary[q].get(phi)
             if cell:
                 spans[i, j] = cell["spans_frac"]
-                films[i, j] = cell["delta_vox"]
+                films[i, j] = cell["delta"]
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6), constrained_layout=True)
 
@@ -191,21 +190,18 @@ def plot_phase_a(summary: dict) -> None:
                 ax1.text(phi, q, f"{spans[i, j]:.1f}",
                          ha="center", va="center", fontsize=8, color="black")
 
-    # Panel 2: film thickness in voxels
+    # Panel 2: margin in standardized component-value units, not length.
     im2 = ax2.pcolormesh(phi_values, q_values, films, cmap="viridis",
-                          norm=plt.matplotlib.colors.LogNorm(vmin=0.1, vmax=10),
+                          norm=plt.matplotlib.colors.LogNorm(vmin=0.005, vmax=1),
                           shading="auto")
     cbar2 = fig.colorbar(im2, ax=ax2, shrink=0.9)
-    cbar2.set_label("matrix film thickness δ / dx  (voxel units)", fontsize=10)
-    # 1-voxel contour
-    ax2.contour(phi_values, q_values, films, levels=[0.5, 1.0, 2.0],
-                colors="white", linewidths=1.2)
+    cbar2.set_label("margin δ (Gaussian-component value units)", fontsize=10)
     ax2.set_xlabel("target φ", fontsize=11)
     ax2.set_ylabel("q", fontsize=11)
     ax2.set_yscale("log")
     ax2.set_yticks(q_values)
     ax2.set_yticklabels([str(q) for q in q_values])
-    ax2.set_title("Matrix film thickness (contours at 0.5, 1, 2 voxels)",
+    ax2.set_title("Margin threshold — not a spatial film thickness",
                   fontsize=12)
     for i, q in enumerate(q_values):
         for j, phi in enumerate(phi_values):
@@ -273,12 +269,12 @@ def write_phase_b_csv(rows: list[dict]) -> None:
     with (RESULTS / "ceiling_phase_b.csv").open("w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["q", "N", "phi_target", "realization", "vf",
-                    "spans_any", "delta_physical", "delta_voxels"])
+                    "spans_any", "delta", "dx_over_lc"])
         for row in rows:
             w.writerow([row["q"], row["N"], row["phi_target"],
                         row["realization"], row["vf"],
                         int(row["spans_any"]),
-                        row["delta_physical"], row["delta_voxels"]])
+                        row["delta"], row["dx_over_lc"]])
 
 
 def plot_phase_b(rows: list[dict]) -> None:
@@ -300,13 +296,14 @@ def plot_phase_b(rows: list[dict]) -> None:
                         and r["phi_target"] == phi]
                 spans_vs_N.append(np.mean([c["spans_any"] for c in cell])
                                    if cell else np.nan)
-                films_vs_N.append(np.mean([c["delta_voxels"] for c in cell])
+                films_vs_N.append(np.mean([c["vf"] for c in cell])
                                    if cell else np.nan)
             c = cmap(j / max(1, len(PHI_B) - 1))
             ax_span.plot(N_B, spans_vs_N, "o-", color=c, lw=1.8, ms=6,
                           label=f"φ = {phi}")
             ax_film.plot(N_B, films_vs_N, "o-", color=c, lw=1.8, ms=6,
                           label=f"φ = {phi}")
+            ax_film.axhline(phi, color=c, lw=.8, ls=":")
 
         ax_span.set_xscale("log")
         ax_span.set_xticks(N_B)
@@ -320,10 +317,7 @@ def plot_phase_b(rows: list[dict]) -> None:
         ax_film.set_xscale("log")
         ax_film.set_xticks(N_B)
         ax_film.set_xticklabels([str(N) for N in N_B])
-        ax_film.axhline(1, color="gray", lw=0.8, ls="--", alpha=0.7)
-        ax_film.text(N_B[-1] * 0.98, 1.05, "1 voxel",
-                      ha="right", fontsize=8, color="gray")
-        ax_film.set_ylabel("film thickness δ/dx (voxels)")
+        ax_film.set_ylabel("mean VF (dotted: target)")
         ax_film.set_xlabel("N (grid)")
         ax_film.grid(alpha=0.3, which="both")
 
@@ -342,7 +336,12 @@ def plot_phase_b(rows: list[dict]) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--phase", choices=["a", "b", "both"], default="both")
+    parser.add_argument("--output", type=Path, default=RESULTS)
     args = parser.parse_args()
+    RESULTS = args.output
+    if RESULTS.exists() and any(RESULTS.iterdir()):
+        raise SystemExit(f"Output is not empty: {RESULTS}. Choose a new --output.")
+    RESULTS.mkdir(parents=True, exist_ok=True)
 
     if args.phase in ("a", "both"):
         rows_a = run_phase_a()
