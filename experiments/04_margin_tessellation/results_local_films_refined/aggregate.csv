@@ -1,0 +1,5 @@
+target_phi,kind,segments,stable_references,direct_gap_segments,affine_gap_segments,scalar_gap_segments,direct_gap_fraction_p10,direct_gap_fraction_median,direct_gap_fraction_p90,affine_abs_length_error_over_dx_median,affine_abs_length_error_over_dx_max,affine_phase_disagreement_median,affine_phase_disagreement_max,additional_direct_winner_segments
+0.75,cross_label,100,100,100,100,0,0.46001353053365696,0.6302988386639475,0.7993729807912331,0.004206819618010782,0.019719090943405737,0.008313269264948908,0.03894643266093856,0
+0.75,same_label,100,100,0,0,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0
+0.85,cross_label,100,100,100,100,0,0.3174225300541557,0.43898418374035886,0.6723448159713004,0.004454300190379512,0.02714887468104632,0.012193662725146825,0.08770021397268801,0
+0.85,same_label,100,100,0,0,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0

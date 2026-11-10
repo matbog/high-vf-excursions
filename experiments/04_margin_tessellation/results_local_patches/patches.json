@@ -1,0 +1,74 @@
+[
+  {
+    "patch_id": 0,
+    "kind": "interface",
+    "lower": [
+      56,
+      28,
+      6
+    ],
+    "cells_per_axis": 2,
+    "selection": "largest affine/direct disagreement in prior 85% edge sample",
+    "film_segment_id": 247
+  },
+  {
+    "patch_id": 1,
+    "kind": "interface",
+    "lower": [
+      119,
+      35,
+      80
+    ],
+    "cells_per_axis": 2,
+    "selection": "gap nearest the median in prior 85% edge sample",
+    "film_segment_id": 297
+  },
+  {
+    "patch_id": 2,
+    "kind": "junction_candidate",
+    "lower": [
+      8,
+      30,
+      55
+    ],
+    "cells_per_axis": 2,
+    "selection": "most distinct occupied coarse labels at target VF .85",
+    "occupied_coarse_labels_at_85": 6
+  },
+  {
+    "patch_id": 3,
+    "kind": "junction_candidate",
+    "lower": [
+      11,
+      10,
+      26
+    ],
+    "cells_per_axis": 2,
+    "selection": "most distinct occupied coarse labels at target VF .85",
+    "occupied_coarse_labels_at_85": 6
+  },
+  {
+    "patch_id": 4,
+    "kind": "same_label_near_threshold",
+    "lower": [
+      25,
+      113,
+      64
+    ],
+    "cells_per_axis": 2,
+    "selection": "smallest positive coarse margin excess at target VF .85",
+    "minimum_coarse_excess_at_85": 8.453428745269775e-05
+  },
+  {
+    "patch_id": 5,
+    "kind": "same_label_near_threshold",
+    "lower": [
+      96,
+      19,
+      15
+    ],
+    "cells_per_axis": 2,
+    "selection": "smallest positive coarse margin excess at target VF .85",
+    "minimum_coarse_excess_at_85": 0.000226631760597229
+  }
+]

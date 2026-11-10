@@ -1,0 +1,160 @@
+{
+  "schema": "local_margin_films_v1",
+  "status": "complete",
+  "config": {
+    "q": 32,
+    "lc": 5.0,
+    "source_phi": 0.75,
+    "field_seed": 321729,
+    "selection_seed": 119731,
+    "mode_no": 1000,
+    "threads": 1,
+    "contacts": 100,
+    "controls": 100,
+    "validation_nodes": 256,
+    "phis": [
+      0.75,
+      0.85
+    ],
+    "max_points": 1025,
+    "tolerance": 0.0001
+  },
+  "source": "D:\\_RESEARCH\\RF\\experiments\\04_margin_tessellation\\paraview\\q32_phi75",
+  "scene": {
+    "dimensions": [
+      128,
+      128,
+      128
+    ],
+    "spacing": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "domain_length": 64.0,
+    "point_coordinate_span": 63.5,
+    "volume_convention": "N^3 voxel samples of volume dx^3; nominal domain side N*dx",
+    "input_sha256": {
+      "margin.vti": "ba80f49abbca253f491937dfe893e699a58da6754a78b3910573e0184ac13fed",
+      "winners.vti": "26dbb8532b06ee497440873382fbb90d527b30877086ceedb210d0cb75af5f91",
+      "phase.vti": "80e16d0a6027548ff500c298367daeaafc4feab97e8cafe156ce16aa2196ac4e",
+      "field_g1.vti": "d740efe3320b424d2fc7588c3a2c17996a8dc5724cb9443af947558422d31705"
+    },
+    "reference_phi": 0.75,
+    "reference_delta": 0.135616478474938,
+    "reference_measured_phi": 0.7492098808288574,
+    "reference_mask_mismatches": 0
+  },
+  "component_seeds": [
+    55684,
+    59752,
+    12848,
+    9764,
+    60926,
+    28115,
+    13249,
+    15823,
+    2580,
+    7493,
+    20003,
+    22138,
+    236,
+    30987,
+    38640,
+    31744,
+    35193,
+    36973,
+    59064,
+    61704,
+    44849,
+    48520,
+    34978,
+    13504,
+    30209,
+    2692,
+    44398,
+    23153,
+    410,
+    43228,
+    53597,
+    23901
+  ],
+  "seed_validation": {
+    "nodes": 1056,
+    "first_field_max_abs": 0.0,
+    "margin_max_abs": 0.0,
+    "winner_mismatches": 0,
+    "first_field_exact_mismatches": 0,
+    "margin_exact_mismatches": 0
+  },
+  "independent_realizations": 1,
+  "segment_count": 400,
+  "pools": [
+    {
+      "target_phi": 0.75,
+      "kind": "cross_label",
+      "pool_total": 74719,
+      "pool_per_axis": [
+        24949,
+        25041,
+        24729
+      ],
+      "selected": 100
+    },
+    {
+      "target_phi": 0.75,
+      "kind": "same_label",
+      "pool_total": 3898937,
+      "pool_per_axis": [
+        1299879,
+        1300349,
+        1298709
+      ],
+      "selected": 100
+    },
+    {
+      "target_phi": 0.85,
+      "kind": "cross_label",
+      "pool_total": 262866,
+      "pool_per_axis": [
+        87655,
+        87311,
+        87900
+      ],
+      "selected": 100
+    },
+    {
+      "target_phi": 0.85,
+      "kind": "same_label",
+      "pool_total": 4437388,
+      "pool_per_axis": [
+        1479257,
+        1480093,
+        1478038
+      ],
+      "selected": 100
+    }
+  ],
+  "coordinate_convention": "original voxel-index coordinates; physical length = index length * dx",
+  "source_sha256": {
+    "experiments/04_margin_tessellation/run_local_films.py": "a8feba0536e287d8fd2f1b23ec308300f6505e6a04091702a07874a6ef296e3e",
+    "experiments/04_margin_tessellation/run_saved_sweep.py": "9a5f2cbee6d5ab91eee4b9e60e8ec2be636812c69e818c02d7bafa5e31a8411e",
+    "src/fields.py": "78c7a20971a53b9a94bf1131f59e988d05d21eb0886ff4456e97d466ed1cb5aa",
+    "src/adler.py": "322d53326a82209d7f31364e85751f21045e010f861ff7e3249b8bd2c398b05a"
+  },
+  "versions": {
+    "numpy": "2.4.3",
+    "scipy": "1.17.1",
+    "gstools": "1.7.0",
+    "pyvista": "0.48.2",
+    "matplotlib": "3.10.9"
+  },
+  "python": "3.12.13 | packaged by conda-forge | (main, Mar  5 2026, 16:36:12) [MSC v.1944 64 bit (AMD64)]",
+  "stable_references": 400,
+  "elapsed_probe_and_report_seconds": 20.249909200000275
+}

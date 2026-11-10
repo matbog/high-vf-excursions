@@ -1,0 +1,3 @@
+# Duplicate visualization exports; the published patch NPZ archives retain
+# the arrays and metadata retains geometry. Full runs regenerate these VTIs.
+/results_local_patches*/patch_*.vti

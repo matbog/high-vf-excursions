@@ -1,0 +1,58 @@
+{
+  "schema": "local_patch_component_refinement_v1",
+  "status": "complete",
+  "source": "D:\\_RESEARCH\\RF\\experiments\\04_margin_tessellation\\results_local_patches",
+  "input_factors": [
+    1,
+    2,
+    4
+  ],
+  "evaluation_refinement": 16,
+  "config": {
+    "q": 32,
+    "lc": 5.0,
+    "source_phi": 0.75,
+    "field_seed": 321729,
+    "mode_no": 1000,
+    "threads": 1,
+    "selection_seed": 62713,
+    "candidates": 8192,
+    "phis": [
+      0.75,
+      0.85
+    ],
+    "refinements": [
+      4,
+      8,
+      16
+    ],
+    "volume_tolerance": 0.005
+  },
+  "independent_realizations": 1,
+  "completed_patches": 6,
+  "total_patches": 6,
+  "input_sha256": {
+    "D:\\_RESEARCH\\RF\\experiments\\04_margin_tessellation\\results_local_patches\\metadata.json": "2a76f3281274bed79cd69a41f47cfcb7df06e4442537e3ba27884ee006935d8a",
+    "D:\\_RESEARCH\\RF\\experiments\\04_margin_tessellation\\results_local_patches\\measurements.csv": "f5e99a1bf436cb2b7382ee905ec4d94fe6762db333144668999e69ffe04b2791",
+    "D:\\_RESEARCH\\RF\\experiments\\04_margin_tessellation\\results_local_patches\\patches.json": "d07889dd64777a7afccbeba4ed674301ba9e86629fde0133d2bd9043f9657bf5",
+    "D:\\_RESEARCH\\RF\\experiments\\04_margin_tessellation\\results_local_patches\\patch_00.npz": "31701a54a725b97535c05f2b9e8ae9a834904f24c2c68d5882fa725d32966450",
+    "D:\\_RESEARCH\\RF\\experiments\\04_margin_tessellation\\results_local_patches\\patch_01.npz": "fe893046773bcf56ef38ea5c847dab6283bd57f6850f6794c4ab9ff906f721d3",
+    "D:\\_RESEARCH\\RF\\experiments\\04_margin_tessellation\\results_local_patches\\patch_02.npz": "3d030aa96a88491ef69727f4ebd3730f45908293e5938541d75131a9f629cc97",
+    "D:\\_RESEARCH\\RF\\experiments\\04_margin_tessellation\\results_local_patches\\patch_03.npz": "be854a704836b392843eb4dd4e2540cc3f10b4a7136f44e753318f0ad57858ad",
+    "D:\\_RESEARCH\\RF\\experiments\\04_margin_tessellation\\results_local_patches\\patch_04.npz": "66d739c92ec7fa4d8f917e7c5d1422182e6fbd770e23ff80d39e1535ad94fc26",
+    "D:\\_RESEARCH\\RF\\experiments\\04_margin_tessellation\\results_local_patches\\patch_05.npz": "b3b0969b72d26de1abc707459dfc5842da6661c71a56170f9c115640bbb1e27f"
+  },
+  "source_sha256": {
+    "experiments/04_margin_tessellation/refine_patch_components.py": "2bed8e47c14762a4c5126bc3caa6c069c18fc915ce03a752673bdf6e4eee2e98",
+    "experiments/04_margin_tessellation/run_local_patches.py": "ba02dfcd2948bb5c06da50ba52b030115cd3a936350159eb95f5922058a02935",
+    "experiments/04_margin_tessellation/run_local_films.py": "a8feba0536e287d8fd2f1b23ec308300f6505e6a04091702a07874a6ef296e3e"
+  },
+  "versions": {
+    "numpy": "2.4.3",
+    "scipy": "1.17.1",
+    "gstools": "1.7.0",
+    "scikit-image": "0.26.0"
+  },
+  "reference": "unchanged direct samples from source; no additional direct-reference refinement",
+  "elapsed_seconds": 7.493047699997987
+}

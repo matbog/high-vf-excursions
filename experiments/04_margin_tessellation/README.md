@@ -91,6 +91,83 @@ axes under both conventions. Largest-component fractions are about
 The historical images and summary files retain their original 6-neighbour
 statistics. They are not proof of continuum-disconnected grains.
 
+## Completed saved-scene threshold sweep
+
+The later check in [SAVED_SWEEP.md](SAVED_SWEEP.md) reuses the saved
+q=32, N=128, L=64, lc=5 margin and winner arrays at five theoretical target
+VFs. It generates no new random fields. All five thresholds are complete;
+they are correlated observations of **one realization**.
+
+| Target VF | Measured VF | Spanning winner labels, 6 / 26 | Largest separate component / phase, 6 / 26 | Largest union component / phase, 6 / 26 |
+|---|---:|---:|---:|---:|
+| 60% | 59.890% | 0 / 0 | 0.641% / 0.642% | 76.854% / 99.848% |
+| 70% | 69.898% | 0 / 0 | 0.618% / 0.630% | 98.576% / 99.992% |
+| 75% | 74.921% | 0 / 0 | 0.621% / 0.621% | 99.667% / 99.998% |
+| 80% | 79.916% | 0 / 0 | 0.612% / 0.612% | 99.899% / 99.999% |
+| 85% | 84.935% | 0 / 0 | 0.605% / 0.605% | 99.978% / 100.000% |
+
+Every binary union spans all three axes under both connectivities.
+No single winner label spans under either convention. Thus the measured
+union spanning requires cross-label contacts in these masks; it is not
+evidence of within-label spanning. Per-winner topology still depends on
+connectivity: at target VF 85%, Euler sums are 4919 / 3946 against an ensemble
+expectation of 4190.34. This scene alone cannot separate sampling error from
+discretization bias or validate the GMFs.
+
+The largest absolute VF discrepancy is 0.11 percentage points in this one
+scene. At 85%, the 26-neighbour union has just one component, while the
+separate labels have 4063 components. A large positive union Euler in this
+case must not be interpreted as a particle count.
+
+The subsequent [local film audit](LOCAL_FILMS.md) checks unresolved
+inter-label gaps by recovering the original Gaussian streams. Saved
+margin/winner arrays suffice for rethresholding, but cannot in general
+reconstruct all competing Gaussian fields within a cell. Neither study
+establishes continuum-separated aggregates or a validated particle grading
+curve throughout the domain.
+
+## Completed local film audit
+
+For the same q=32, N=128 realization, the audit samples 100 cross-label
+contacts and 100 same-label controls at each of target VF 75% and 85%.
+It compares linear interpolation of the stored margin, interpolation of
+all Gaussian components, and direct evaluations between grid nodes.
+
+All 200 cross-label segments have a detected gap under direct evaluation.
+Component interpolation recovers all of them; margin interpolation misses
+all of them. Median directional gap lengths are 0.6303 dx and 0.4390 dx,
+respectively. Median absolute width errors for component interpolation are
+0.00421 dx and 0.00445 dx. No gaps were detected in the 200 same-label
+controls. All 400 references pass the numerical stability check after the
+additional refinement recorded in results_local_films_refined.
+
+See [LOCAL_FILMS.md](LOCAL_FILMS.md) for methods, figures, reproducible
+commands, and limits. This is a local, conditional sample from one
+realization; it does not remeasure global VF or L0, certify continuum
+topology, or complete the GMF proof. The subsequent 3D check is summarized below.
+
+## Completed local 3D patch study
+
+[LOCAL_PATCHES.md](LOCAL_PATCHES.md) compares six fixed patches at target
+VF 75% and 85%, using direct field evaluations and trilinear/tetrahedral
+component reconstruction. The comparison grids are 9^3, 17^3, and 33^3.
+A follow-up refines the component inputs while retaining the direct 33^3
+reference. All patches come from the same saved q=32 realization.
+
+Across these selected patches and thresholds, the worst phase disagreement
+falls from 7.74% to 0.48% of patch volume for trilinear components, and
+from 9.45% to 0.53% for tetrahedral components, when component input spacing
+is reduced from dx to dx/4. Scalar-margin interpolation can give nearly
+correct volume while severely misplacing the phase: one case has only
+-0.31 percentage points of net VF bias but 42.70% phase disagreement.
+
+At 85%, both refined component methods match the direct samples' recorded
+Euler, components, and patch-face incidence in all six patches under both
+digital adjacencies. At 75%, patches 0 and 2 retain unresolved Euler and
+connectivity differences; their direct reference topology is not converged.
+These local results support component refinement, but do not certify
+continuum topology, global L0/L3 accuracy, or a full-domain implementation.
+
 ## Ceiling study: finite evidence, not a VF guarantee
 
 The historical Phase A CSV has 600 rows: six $q$ values, ten target VFs,
@@ -138,6 +215,11 @@ The corrected ceiling runner writes `delta` and `dx_over_lc` and replaces
 those plots with value-margin and measured-VF diagnostics.
 
 ## Running
+
+For the completed saved-scene diagnostics, see the
+[reproduction and artifact guide](REPRODUCIBILITY.md). It identifies the
+saved evidence, the 23 software controls, the ignored scene dependencies,
+and the remaining research questions.
 
 From the repository root:
 

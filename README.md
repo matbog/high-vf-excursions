@@ -105,6 +105,14 @@ when $\delta>0$, but a single label can have a spanning component.
 The margin is in **field-value units**, not spatial film thickness.
 Thin films and sampled connectivity remain central limitations.
 
+The completed [saved-scene, local-film, and 3D-patch studies](experiments/04_margin_tessellation/README.md#completed-saved-scene-threshold-sweep)
+examine these limitations on one saved q=32 realization. Refining Gaussian
+component values improves local geometry substantially, while difficult
+75% patches retain unresolved digital Euler measurements. These studies
+do not establish global L0 accuracy or continuum connectivity. See the
+[reproduction and artifact guide](experiments/04_margin_tessellation/REPRODUCIBILITY.md)
+for the saved evidence, dependencies, and remaining questions.
+
 ### 05 — Coalescing lobes
 
 ![Coalescing lobes](experiments/05_coalescing_lobes/paraview/rrc0p98/display_coalescing_lobes_RF_thresh.png)
