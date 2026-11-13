@@ -11,7 +11,7 @@ or guarantee nonspanning aggregates.
 | Gaussian half-line | Standard GMFs and GKF |
 | Chi-squared exterior | Standard radial GMFs at positive thresholds |
 | Student-t cone | Standard ratio-field coefficients; supported formula range $\nu\geq3$ |
-| Margin chambers, $\delta>0$ | Implemented stratum-integral formulas; complete proof still needed |
+| Margin chambers, $\delta>0$ | Detailed tube derivation draft and independent value-space checks; mathematical review remains |
 | Disjoint ball union, $r<r_c$ | Additive ball tube coefficients, numerically evaluated |
 | Overlapping ball union | Intersection GMFs not implemented |
 | Independent multiscale union | Conditional-GKF recursion for intersections and unions, subject to the component formulas and regularity assumptions |
@@ -24,6 +24,20 @@ or guarantee nonspanning aggregates.
 - [Margin and ball GMFs](gaussian_minkowski_functionals.md): the margin
   stratum formulas and ball-radius derivatives. Margin $\delta=0$ is a
   separate full-space case, not the positive-margin limit.
+- [Margin tube derivation](margin_tube_derivation.md): chamber separation,
+  normal-cone integration, all four GMFs, a stratum-derivative recurrence,
+  and high-VF asymptotics for expected $L_0$ and $L_3$.
+- [Independent margin checks](margin_tube_checks.md): exact low-dimensional
+  controls, direct-distance tube quadrature, 12 tests, and saved results.
+- [Physical film-width theory](margin_film_widths.md): interface-area sampling,
+  the inverse-chi-four thin-film law, and consistency with the leading
+  Adler matrix volume; [completed spatial pilot](../experiments/04_margin_tessellation/FILM_WIDTHS.md)
+  with 16 controls. Gradient statistics agree well. A subsequent
+  [bounded tail audit](../experiments/04_margin_tessellation/FILM_TAILS.md)
+  with eight new controls identifies additional competitors as the dominant
+  contribution to most large width errors in the sample. All full-field
+  endpoints are found, but 31 of 1,536 profile/margin cases retain numerical
+  stability uncertainty; the thin-film law is not a finite-VF guarantee.
 - [Framework](../docs/framework.md): common normalization and assumptions.
 - [Numerical limits](../docs/limits.md): evidence and measurement qualifications.
 - [Multiscale experiment](../experiments/06_multiscale_margin/README.md):
@@ -38,13 +52,17 @@ experiment. A proof cannot be replaced by either comparison.
 
 Historical coalescing-lobe results have roughly 2–7% pre-contact errors
 depending on descriptor and radius. Their post-contact per-ball and
-partition measurements are not union LKCs. The corrected runner stores
-these statistics separately, and needs a new full run.
+partition measurements are not union LKCs. The corrected full sweep and
+subsequent resolution and geometry checks are now complete; see
+[experiment 05](../experiments/05_coalescing_lobes/README.md).
 
 ## Outstanding mathematical work
 
-1. Complete the margin stratified-tube proof, including orientation,
-   cone constants, regularity, and the singular zero-margin endpoint.
+1. Independently review the new margin tube derivation and its use of the
+   GKF hypotheses. Orientation, cone constants, positive reach, and the
+   singular endpoint are now derived explicitly. The new area-weighted
+   film-width law also needs review and finite-margin validation near
+   junctions and weak gradients.
 2. Derive Gaussian-weighted intersection GMFs for overlapping balls.
 3. Validate the continuum/digital comparison with controlled refinement,
    repeated fields, and explicit connectivity conventions.

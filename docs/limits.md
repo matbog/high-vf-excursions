@@ -13,12 +13,15 @@ nonlinear derived fields need not share its covariance or gradient moments.
 | Gaussian | All four expected LKCs | Standard smooth-field GKF; numerical estimators remain approximate |
 | Chi-squared | All four at positive thresholds | Squared independent components; low-threshold separating films can be unresolved |
 | Student-t | All four for the supported $\nu\geq3$ formula API | Ratio of independent components; generator requires integer $\nu$; common amplitude cancels |
-| Margin | Implemented GMFs through order 3 for $\delta>0$ | Stratified-tube derivation remains an outline; exact $\delta=0$ is a separate full-space case |
+| Margin | GMFs through order 3 with a detailed tube derivation draft and independent value-space checks | Mathematical review and field-model GKF hypotheses remain; exact $\delta=0$ is a separate full-space case |
 | Disjoint balls | All four for strictly disjoint balls | Additivity stops at contact; intersection terms have not been implemented |
 | Independent multiscale union | Conditional intersection-GKF recursion | Requires independent stages and regularity; derived from component GMFs, with their limitations |
 
-The margin higher-order formulas have numerical support, not a completed
-publication-grade proof. The committed sweeps do not establish a uniform
+The [margin derivation](../theory/margin_tube_derivation.md) now states the
+separation radius, normal-cone integrals, and high-VF endpoint explicitly.
+It remains a draft requiring independent mathematical review; the
+[value-space checks](../theory/margin_tube_checks.md) support its coefficients
+without validating a spatial estimator. The committed sweeps do not establish a uniform
 “under 2%” accuracy bound. At $N=256,q=16$, target VF 60%, the five-realisation
 mean errors are approximately $-1.53\%$, $-0.77\%$, $-1.89\%$, and $-0.09\%$
 for $L_0,L_1,L_2,L_3$, respectively. Other settings differ more: at
@@ -54,6 +57,12 @@ be missed by all of them. Meshing a sampled minimum of several scalar
 fields is not exact clipping of the original component fields.
 No universal convergence rate is established by the committed data.
 
+The [physical film-width law](../theory/margin_film_widths.md) predicts
+area-weighted, linearized normal widths near regular two-winner ties.
+It is a small-margin result. Third competitors and weak gradients can
+alter finite-margin widths; an interface-area fraction below a chosen
+width is not a bound on global digital Euler or spanning errors.
+
 GSTools supplies Gaussian-field realisations with a numerical generator.
 Its finite spectral representation and the sampling grid introduce
 approximation beyond the ideal covariance model. Do not estimate an
@@ -68,7 +77,7 @@ and partition columns are not union LKCs.
 ## Remaining work
 
 A new resolution/realisation campaign, consistent interpolated geometry,
-a full margin tube proof, and intersecting-ball GMFs remain separate tasks.
-The present corrections do not claim these are finished. High VF is easy
+independent review of the margin derivation, and intersecting-ball GMFs
+remain separate tasks. High VF is easy
 to prescribe in expectation; high VF with resolved, nonspanning aggregates
 and a measured grading curve still needs demonstration.

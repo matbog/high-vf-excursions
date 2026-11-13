@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "study": "margin value-space tube checks",
+  "study_version": "2026-11-10",
+  "executed_utc": "2026-11-10T17:40:35.715667+00:00",
+  "python": "3.12.13",
+  "numpy": "2.4.3",
+  "scipy": "1.17.1",
+  "angular_order": 128,
+  "refined_angular_order": 256,
+  "cone_order": 48,
+  "cube_L": 64,
+  "cube_lc": 5,
+  "max_gmf_absolute_error": 4.572024536741992e-09,
+  "max_tube_absolute_error": 1.1802643307134986e-09,
+  "max_tube_refinement_change": 1.0348572887508567e-08,
+  "production_absolute_tolerance": 1e-08,
+  "distance_absolute_tolerance": 2e-07,
+  "refinement_absolute_tolerance": 2e-06,
+  "numerical_checks": {
+    "normal_moments": true,
+    "production_agreement": true,
+    "tighter_quadrature": true,
+    "distance_agreement": true,
+    "distance_refinement": true,
+    "maximum_identity": true
+  },
+  "passed": true,
+  "source_sha256": {
+    "theory/check_margin_tubes.py": "f37e055492530de754fed46a968f55b79f38afd1fa983747bdb9006bc86edaf7",
+    "theory/test_margin_tubes.py": "35d84796abe7f82bf8fa1cef8f9b06da8db55cc61f58480e835e27d6e898e8ff",
+    "src/adler.py": "322d53326a82209d7f31364e85751f21045e010f861ff7e3249b8bd2c398b05a",
+    "src/fields.py": "78c7a20971a53b9a94bf1131f59e988d05d21eb0886ff4456e97d466ed1cb5aa"
+  },
+  "output_sha256": {
+    "cubic_remainders.csv": "6780fe550285f07acd8bd296cf7aa8ab1959961f04fb15dbe57bbd4104f40e48",
+    "distance_tubes.csv": "dd49b562fe81b9776285aab2eb2357680c12c347785663e315cff054ffafed82",
+    "gmf_comparison.csv": "e79a65d06c82b9648b656d84ea27f4bdde2f5db479292b7feb1472d56c28efcb",
+    "high_vf_comparison.csv": "f4d893148ee975d98e8fa04ca795c07c1d0255beb3f42f51351d7990ed600b73",
+    "high_vf_limits.csv": "a820d12e1bd5d64e4df95a89180d1099b5c2f1532b7dfe4d8b8b88209a9deb52",
+    "normal_cones.csv": "bb29d8f3620962d0b1c0be31f67512317e374ba9340e09d296f3f65856bac6a5",
+    "quadrature_precision.csv": "8b573c6107cac3fcf773399817fa075bc03079a00899657e9c1479b581d7131c"
+  }
+}

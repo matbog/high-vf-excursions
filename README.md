@@ -62,7 +62,7 @@ quadrature; “analytical” does not always mean an elementary closed form.
 | 01 Gaussian | Finite-cube EC-zero VF ≈21.8% for $L=100,l_c=8$ | All four expected LKCs; bulk EC-zero VF ≈15.9% |
 | 02 $\chi^2$, $k=1$ | EC-zero VF ≈37–51% across the tested correlation lengths | Two Gaussian tails; all four expected LKCs |
 | 03 Student-$t_3$ | Finite-cube EC-zero VF ≈21.1% for $L=100,l_c=8$ | Standard ratio-field formulas; little change in this EC-zero proxy |
-| 04 Margin tessellation | High prescribed VF, including 85–90% | Implemented chamber GMFs for $\delta>0$; proof outline and numerical evidence, with substantial resolution/connectivity qualifications |
+| 04 Margin tessellation | High prescribed VF, including 85–90% | Detailed chamber-tube derivation draft and independent value-space checks; mathematical review and spatial resolution/connectivity questions remain |
 | 05 Coalescing lobes | Pre-contact measured VF reaches 66.84% in the centre-position sweep | Ball additivity only for $r<r_c$; within-lobe spanning persists, and voxel-union topology remains resolution-sensitive |
 | 06 Multiscale margin | Composite target VF 60–85% | Conditional GKF for independent stages; numerical unions span in the saved pilot |
 
@@ -156,6 +156,8 @@ refuses to overwrite a nonempty output directory.
 - [Limits of the analytical claims](docs/limits.md)
 - [Measurement conventions](docs/measurement_conventions.md)
 - [Theory notes and outstanding derivations](theory/README.md)
+- [Margin tube derivation and high-VF limit](theory/margin_tube_derivation.md)
+- [Physical matrix-film widths](theory/margin_film_widths.md)
 
 `src/` contains generation, excursion construction, measurements,
 expectations, and exports. `experiments/01_*` through `06_*` contain the

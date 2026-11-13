@@ -2,6 +2,7 @@
 # Keep their current LF bytes on Windows and Unix checkouts alike.
 src/*.py text eol=lf
 experiments/04_margin_tessellation/*.py text eol=lf
+theory/*.py text eol=lf
 
 # Saved diagnostics hash other saved files, including CSV and JSON inputs.
 # Preserve the original bytes; text diffs still work for CSV/JSON/Markdown.
@@ -11,3 +12,7 @@ experiments/04_margin_tessellation/results_local_films/** -text whitespace=blank
 experiments/04_margin_tessellation/results_local_films_refined/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 experiments/04_margin_tessellation/results_local_patches/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 experiments/04_margin_tessellation/results_local_patch_components_refined/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+theory/results_margin_tubes/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+experiments/04_margin_tessellation/results_film_widths/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+experiments/04_margin_tessellation/results_film_widths_refined/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+experiments/04_margin_tessellation/results_film_tails/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

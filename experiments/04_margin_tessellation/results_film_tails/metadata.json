@@ -1,0 +1,58 @@
+{
+  "schema": "normal_film_tail_audit_v1",
+  "status": "complete",
+  "executed_utc": "2026-11-13T09:58:00.276465+00:00",
+  "source": "D:\\_RESEARCH\\RF\\experiments\\04_margin_tessellation\\results_film_widths_refined",
+  "modes_source": "D:\\_RESEARCH\\RF\\experiments\\04_margin_tessellation\\results_film_widths",
+  "config": {
+    "max_points": 8193,
+    "max_extent_lc": 2.0,
+    "max_refinements": 5,
+    "controls_per_q_realization": 8,
+    "large_error_threshold": 0.1,
+    "selection_seed": 47211
+  },
+  "versions": {
+    "python": "3.12.13",
+    "numpy": "2.4.3",
+    "scipy": "1.17.1",
+    "gstools": "1.7.0"
+  },
+  "selected_profiles": 136,
+  "original_profiles": 256,
+  "source_sha256": {
+    "experiments/04_margin_tessellation/audit_film_tails.py": "86b7b7a78d1a757fab59cb66c0df983b8d5522090d985a553f240c1d6bcfdd7f",
+    "experiments/04_margin_tessellation/test_film_tail_audit.py": "641d76a913607639af026bf96816680c09607429b073cd42eff47f07c649b64c",
+    "experiments/04_margin_tessellation/refine_film_widths.py": "75240028026d95163ae80b87c3c2e73271afded61724a7539cdb5ccf3cf4cebe",
+    "experiments/04_margin_tessellation/run_film_widths.py": "41ff6e7ecc7a4d2415e7cd36c331924f890ff1b9532d7907466dda45cb52bdde",
+    "theory/margin_film_widths.py": "2d4019855467e81293bfd0a6f7720c41de4e8e00bcdae01e7b7f459d0b488b2b",
+    "theory/check_margin_tubes.py": "f37e055492530de754fed46a968f55b79f38afd1fa983747bdb9006bc86edaf7",
+    "src/adler.py": "322d53326a82209d7f31364e85751f21045e010f861ff7e3249b8bd2c398b05a",
+    "src/fields.py": "78c7a20971a53b9a94bf1131f59e988d05d21eb0886ff4456e97d466ed1cb5aa"
+  },
+  "input_sha256": {
+    "experiments/04_margin_tessellation/results_film_widths_refined/metadata.json": "2dd78449ab23cd50855685375103ea783f40050025bd6a6c92c853e56db6780a",
+    "experiments/04_margin_tessellation/results_film_widths/metadata.json": "faeff00a7f11d1f5571cf6cd753a8b510ca5b78a815d3ac07231b8c5f555ec0d",
+    "experiments/04_margin_tessellation/results_film_widths_refined/profiles.csv": "f30bceb05553990a9877bfb955579b2af0c9fa615911cb6aea66591ad0c06264",
+    "experiments/04_margin_tessellation/results_film_widths_refined/crossings.csv": "8141491edc6996829f7a234f82bce878d17dd365297316688e05dd3dac450803",
+    "experiments/04_margin_tessellation/results_film_widths_refined/profiles_q16_r0.npz": "ed60580a1dc9fdffc03d6180a3dc1c9876d93ed096a2c7533585c776afcc4bf0",
+    "experiments/04_margin_tessellation/results_film_widths_refined/profiles_q16_r1.npz": "8ad79f8f4a0044fa9aed8703304588d5dd26e67bf5232524db46112c4b080065",
+    "experiments/04_margin_tessellation/results_film_widths_refined/profiles_q32_r0.npz": "a58f5fc3f287f3eac5cc0075ebec636980486540a0562a0dab8c596cd481cb04",
+    "experiments/04_margin_tessellation/results_film_widths_refined/profiles_q32_r1.npz": "09dac43a295184b71645aea9fc8de8ff189f5919f7be931b03461714355bcbe3",
+    "experiments/04_margin_tessellation/results_film_widths/spectral_modes_0.npz": "37f7bdebb64c913a948f2540edd68cef40452794a4b0882d85164c29c11c2583",
+    "experiments/04_margin_tessellation/results_film_widths/spectral_modes_1.npz": "98f42f870107fc89bcf3a165bbca512eb7e927fa397c94b1f85b788d8d654a4c"
+  },
+  "elapsed_seconds": 391.29304240000056,
+  "output_sha256": {
+    "cdf_bounds.csv": "351661b3c99e21481d9c12a4be5b1a1b86e82563be0f2737cdea949916b6f10c",
+    "profiles.csv": "0fd1a55751a4c2fdb986317879b0a7badc60e3d6443b9d23d2f9ecd6cb31f0f0",
+    "profiles_q16_r0.npz": "1f485d2dbe363ecc81a9763f6510635e607ecd4e16cb75261ec1016877e463c6",
+    "profiles_q16_r1.npz": "30411cd51b37578760e51c64b07fb73c29989f271e90e221f016e95804672676",
+    "profiles_q32_r0.npz": "7597f430ef527d4c6c60ca5b09c2eac7a8b499cf8ae8dd4ca673c29f23f69bd6",
+    "profiles_q32_r1.npz": "1921a7d7bae30e7cb1a219632603ccbcd11a140f1d68f991e3b028b0adc3bb35",
+    "refinement.csv": "b5aab9b826fa4067562595cd78dad8b2de0bc11baab5afcff8694a041699019a",
+    "selection.csv": "c159cf4aa28b71142d85c759c68fb0a3be2c18b433b7ad5ffc58eec6ff042de1",
+    "summary.csv": "1613404b21d453e9db4e09be52157a443919a9eadf4045b3ac0eb5eccfb14f5e",
+    "tail_audit.png": "8542ffa8697d9bf879a66be943940825f1a358b7a45bb78d555da4d088b6f791"
+  }
+}

@@ -42,12 +42,23 @@ $$
 \end{aligned}
 $$
 
-Insert these in the [cube GKF](../../docs/framework.md). These are
-one-dimensional integral formulas with an outlined stratified-tube
-derivation; the complete proof remains outstanding. At exactly
+Insert these in the [cube GKF](../../docs/framework.md). The
+[detailed tube derivation](../../theory/margin_tube_derivation.md) now obtains
+the coefficients from face weights and normal cones, with additive chamber
+tubes valid for $r<\delta/\sqrt2$. It is a draft awaiting independent
+mathematical review. At exactly
 $\delta=0$, the union is all value space, so the correct GMFs are
 $(1,0,0,0)$ and the expected LKCs are those of the domain. Higher GMFs
 need not approach these values as $\delta\downarrow0$.
+
+The [independent value-space checks](../../theory/margin_tube_checks.md)
+include exact low-dimensional controls, direct-distance tube probabilities,
+and high-VF asymptotics. All 12 tests and the saved numerical checks pass;
+no production coefficient correction was indicated. For $q=32,L=64,l_c=5$,
+the positive-margin expected Euler tends to about 4328.55 as VF tends to
+100%, while the zero-margin full cube has Euler 1. This is a singular
+endpoint, not a predicted particle count. These calculations generate no
+spatial fields and do not resolve the digital-geometry questions below.
 
 ## What the committed sweep shows
 
@@ -213,6 +224,32 @@ Historical film-resolution figures derived from those columns are not valid
 spatial-thickness estimates. They are preserved as historical artifacts.
 The corrected ceiling runner writes `delta` and `dx_over_lc` and replaces
 those plots with value-margin and measured-VF diagnostics.
+
+The new [physical film-width theory](../../theory/margin_film_widths.md)
+accounts for interface-area sampling. For regular two-winner interfaces,
+the linearized normal width has law $W=\delta l_c/R$, $R\sim\chi_4$,
+and mean $\sqrt{\pi/8}\,\delta l_c$. Together with the predicted tie area,
+it recovers the leading matrix VF from the GMFs. The
+[normal-profile pilot](FILM_WIDTHS.md) tests the gradient law and finite-margin
+errors at $q=16,32$. Its adaptive follow-up samples 5,629 crossings from two
+vector realizations: all four interface-area estimates are within 1.2% of
+theoretical expectations, with weighted gradient CDF discrepancies below
+0.024. The [bounded tail audit](FILM_TAILS.md) subsequently finds both
+endpoints for all 1,536 profile/margin rows, with 1,505 stable measurements
+and 31 numerically uncertain cases. Resolving the censored profiles exposes
+larger tails: baseline 90th-percentile width errors are 143–352%. Additional
+competitors dominate pair curvature in 152 of 157 resolved large-error
+baseline comparisons. The thin-film law is not a uniform finite-VF guarantee.
+All 16 pilot controls and eight new audit controls pass.
+These normal widths differ from the conditional
+grid-edge lengths in the earlier film audit; neither gives a universal
+grid-resolution or connectivity guarantee.
+
+The next planned direction is to generate random-field realizations within
+experiment 04 for inspection in ParaView, preserving the scalar margin,
+winner labels, spacing, and generation parameters. Grain-size analysis is
+deferred. Visual inspection should distinguish voxel geometry from surfaces
+obtained by interpolating sampled fields.
 
 ## Running
 

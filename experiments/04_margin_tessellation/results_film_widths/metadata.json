@@ -1,0 +1,60 @@
+{
+  "schema": "normal_film_widths_v1",
+  "status": "complete",
+  "config": {
+    "qs": [
+      16,
+      32
+    ],
+    "realizations": 2,
+    "lines_per_axis": 24,
+    "profiles_per_group": 64,
+    "subdivisions": 16,
+    "profile_points": 129,
+    "modes": 1000,
+    "seed": 481703,
+    "lc": 5.0,
+    "length": 64.0,
+    "vfs": [
+      0.75,
+      0.85
+    ],
+    "factors": [
+      1.0,
+      0.5,
+      0.25
+    ]
+  },
+  "executed_utc": "2026-11-12T17:18:50.032258+00:00",
+  "versions": {
+    "python": "3.12.13",
+    "numpy": "2.4.3",
+    "scipy": "1.17.1",
+    "gstools": "1.7.0"
+  },
+  "source_sha256": {
+    "experiments/04_margin_tessellation/run_film_widths.py": "41ff6e7ecc7a4d2415e7cd36c331924f890ff1b9532d7907466dda45cb52bdde",
+    "experiments/04_margin_tessellation/test_film_widths.py": "a904446d19272d706b4e574a4caf0f227462439a224fa2bf1429bb024cfd42e0",
+    "theory/margin_film_widths.py": "2d4019855467e81293bfd0a6f7720c41de4e8e00bcdae01e7b7f459d0b488b2b",
+    "theory/check_margin_tubes.py": "f37e055492530de754fed46a968f55b79f38afd1fa983747bdb9006bc86edaf7",
+    "src/adler.py": "322d53326a82209d7f31364e85751f21045e010f861ff7e3249b8bd2c398b05a",
+    "src/fields.py": "78c7a20971a53b9a94bf1131f59e988d05d21eb0886ff4456e97d466ed1cb5aa"
+  },
+  "elapsed_seconds": 1121.5436855000007,
+  "output_sha256": {
+    "crossing_refinement.csv": "5c5dcd43d4386d553fc7876a4d8cca59f3b2c87570076f2ac4a7c3a108743043",
+    "crossings.csv": "2ff39ad0165cda8776b9f39e295564fde6c5aa67184a012b426f85732e795d4f",
+    "field_diagnostics.csv": "bb53954bd84c4500be342db2eb17f01d1c7bfeca9e004cba7971ea86eb56e451",
+    "film_widths.png": "f4e99c5f69ba57e3fcaee059705bce026c873be531b8f497da36ed79b0c6af68",
+    "gradient_summary.csv": "8846e2cfe4ded40fdff34ced1a6a503f5e58ac713d92751040de80686d0e1d61",
+    "predictions.csv": "ee928a9535bda248bd7f0f986917dc5503f63010222ea3dbcc71ff6d33eeb046",
+    "profiles.csv": "39ed761c53b3fc3f42059c8fc9b83cf067cf24f6cf27a8cddcf4f6ab22a1ba66",
+    "profiles_q16_r0.npz": "94f869959b739b377b659e6c0e2687d209629a3062fbf09ab9514195e00ebbb4",
+    "profiles_q16_r1.npz": "fc57db422a07da63898c68de5e26fb5c240a17e6b57ec91205444cdcbdf36dfa",
+    "profiles_q32_r0.npz": "dcefd1e84c44a9bec388e352e4320256a05879f9617969a58e836e87ea564e6b",
+    "profiles_q32_r1.npz": "2b4c19371537922a7ca4ebafea926a40049f74a261d897f261479fb485347b33",
+    "spectral_modes_0.npz": "37f7bdebb64c913a948f2540edd68cef40452794a4b0882d85164c29c11c2583",
+    "spectral_modes_1.npz": "98f42f870107fc89bcf3a165bbca512eb7e927fa397c94b1f85b788d8d654a4c",
+    "width_summary.csv": "693c42f4467ed9c265e03c2fbb1dc654b2cb32b28029db7af0daece53cec0723"
+  }
+}

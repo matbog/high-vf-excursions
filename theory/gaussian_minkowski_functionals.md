@@ -1,5 +1,12 @@
 # Candidate: Gaussian margin tessellations
 
+The detailed derivation is now in
+[Margin chambers: tube derivation and the high-VF limit](margin_tube_derivation.md),
+with [independent value-space checks](margin_tube_checks.md). It supplies the
+separation-radius argument, normal-cone integration, and endpoint analysis
+outlined here. The new note is a derivation draft awaiting mathematical
+review; the exploratory periodic table below remains historical evidence.
+
 ## Complementary model: coalescing Gaussian-space lobes
 
 For a vector Gaussian field `G:M -> R^q` and centres `c_1,...,c_K`, define
@@ -146,9 +153,9 @@ zero: the chambers meet, so additivity over separated pieces no longer applies.
 
 The formulas have an exact two-half-space control at $q=2$. Periodic-field
 checks described below are historical exploratory evidence, without a
-reproducible periodic runner in the published experiment. A formal proof must still
-state the chamber stratification, reach/tube-radius restriction and normal-cone
-integration carefully.
+reproducible periodic runner in the published experiment. The new detailed
+derivation states the chamber stratification, reach/tube-radius restriction,
+and normal-cone integration explicitly; independent mathematical review remains.
 
 ### Explicit Adler expectation in three spatial dimensions
 
@@ -231,8 +238,9 @@ change in the balance of components, tunnels, and cavities. It does not
 establish a spatial spanning transition or identify component counts.
 
 The closed formulas above supply the required facet, pairwise-edge and
-triple-stratum contributions. Remaining work is formal proof presentation and
-systematic convergence validation, rather than discovery of the coefficients.
+triple-stratum contributions. A detailed proof draft and value-space checks
+are now available. Independent review and systematic spatial convergence
+validation remain separate tasks.
 
 The central hypothesis is that the rejected near-tie set forms a thin matrix
 film along interfaces between the winning labels. Increasing (q) should
@@ -255,11 +263,11 @@ thickness. It links:
 
 ## Required theory before publication
 
-1. Complete the proof of the implemented formulas for
-   $\mathcal M_1,\mathcal M_2,\mathcal M_3$, including normal-cone orientation
-   and integration. The formulas above are an outline, not a finished proof.
-2. Establish whether additivity over the (q) separated chambers applies directly
-   for every (\delta>0), and handle the singular limit (\delta\downarrow0).
+1. Independently review the [detailed derivation](margin_tube_derivation.md)
+   of $\mathcal M_1,\mathcal M_2,\mathcal M_3$ and its GKF hypotheses.
+2. Review the derived radius restriction $r<\delta/\sqrt2$ and the singular
+   $\delta\downarrow0$ expansion. The draft establishes additivity in that
+   radius range for every positive margin; it does not extend it to zero.
 3. Compare the expected-EC zero with direct wrapping probability.
 4. Determine an RVE in both LKC and percolation senses as a function of
    (T/L_c), (q), and (\delta).

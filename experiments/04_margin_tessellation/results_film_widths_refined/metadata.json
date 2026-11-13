@@ -1,0 +1,63 @@
+{
+  "schema": "normal_film_widths_refined_v1",
+  "status": "complete",
+  "config": {
+    "qs": [
+      16,
+      32
+    ],
+    "realizations": 2,
+    "lines_per_axis": 24,
+    "profiles_per_group": 64,
+    "subdivisions": 32,
+    "profile_points": 129,
+    "modes": 1000,
+    "seed": 481703,
+    "lc": 5.0,
+    "length": 64.0,
+    "vfs": [
+      0.75,
+      0.85
+    ],
+    "factors": [
+      1.0,
+      0.5,
+      0.25
+    ]
+  },
+  "executed_utc": "2026-11-12T17:59:16.349844+00:00",
+  "source": "D:\\_RESEARCH\\RF\\experiments\\04_margin_tessellation\\results_film_widths",
+  "versions": {
+    "python": "3.12.13",
+    "numpy": "2.4.3",
+    "scipy": "1.17.1",
+    "gstools": "1.7.0"
+  },
+  "input_sha256": {
+    "metadata.json": "faeff00a7f11d1f5571cf6cd753a8b510ca5b78a815d3ac07231b8c5f555ec0d",
+    "spectral_modes_0.npz": "37f7bdebb64c913a948f2540edd68cef40452794a4b0882d85164c29c11c2583",
+    "spectral_modes_1.npz": "98f42f870107fc89bcf3a165bbca512eb7e927fa397c94b1f85b788d8d654a4c"
+  },
+  "source_sha256": {
+    "experiments/04_margin_tessellation/refine_film_widths.py": "75240028026d95163ae80b87c3c2e73271afded61724a7539cdb5ccf3cf4cebe",
+    "experiments/04_margin_tessellation/test_film_width_refinement.py": "294799710e2ebe0ab64eaa7f8dafcddf220bcace0f30b1df2bfdd35727f6a350",
+    "experiments/04_margin_tessellation/run_film_widths.py": "41ff6e7ecc7a4d2415e7cd36c331924f890ff1b9532d7907466dda45cb52bdde",
+    "theory/margin_film_widths.py": "2d4019855467e81293bfd0a6f7720c41de4e8e00bcdae01e7b7f459d0b488b2b",
+    "theory/check_margin_tubes.py": "f37e055492530de754fed46a968f55b79f38afd1fa983747bdb9006bc86edaf7",
+    "src/adler.py": "322d53326a82209d7f31364e85751f21045e010f861ff7e3249b8bd2c398b05a",
+    "src/fields.py": "78c7a20971a53b9a94bf1131f59e988d05d21eb0886ff4456e97d466ed1cb5aa"
+  },
+  "elapsed_seconds": 98.83205699999962,
+  "output_sha256": {
+    "crossing_refinement.csv": "ec81109b0786699bb87c8dc1bb0e0c4b482273d3129037cf10e2a64987546d12",
+    "crossings.csv": "8141491edc6996829f7a234f82bce878d17dd365297316688e05dd3dac450803",
+    "film_widths.png": "c457c1f7e6501a2004d76fd4de9c42661de014a841a9f9e6190538e63a7b824a",
+    "gradient_summary.csv": "9141ebec811c9e6bd434399126763ffa6c7ecc0caf439cc6ea03ef632a2af04c",
+    "profiles.csv": "f30bceb05553990a9877bfb955579b2af0c9fa615911cb6aea66591ad0c06264",
+    "profiles_q16_r0.npz": "ed60580a1dc9fdffc03d6180a3dc1c9876d93ed096a2c7533585c776afcc4bf0",
+    "profiles_q16_r1.npz": "8ad79f8f4a0044fa9aed8703304588d5dd26e67bf5232524db46112c4b080065",
+    "profiles_q32_r0.npz": "a58f5fc3f287f3eac5cc0075ebec636980486540a0562a0dab8c596cd481cb04",
+    "profiles_q32_r1.npz": "09dac43a295184b71645aea9fc8de8ff189f5919f7be931b03461714355bcbe3",
+    "width_summary.csv": "f1da4b7bc2f72d0b84fb41eca4e9272443696cd58bbddeb3ef5969bb152a70ca"
+  }
+}
